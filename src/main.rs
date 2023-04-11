@@ -37,7 +37,7 @@ fn main() {
             z.read_to_string(&mut s).unwrap();
 
             let chars : Vec<char> = s.chars().collect();
-            let s = chars[8..].iter().collect::<String>();
+            let s = chars[9..].iter().collect::<String>();
 
             print!("{}", s);
         
