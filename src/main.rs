@@ -29,7 +29,7 @@ fn main() {
            let mut new_path = ".git/objects/".to_string();
            new_path.push_str(&format!("{}/{}",sub_dir, sha_num));
 
-            println!("Command: {}", new_path);  
+           // println!("Command: {}", new_path);  
 
             let git_data = fs::read(new_path).unwrap();
             let mut z = ZlibDecoder::new(&git_data[..]);
