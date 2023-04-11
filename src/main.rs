@@ -11,7 +11,7 @@ fn main() {
 
     // Uncomment this block to pass the first stage
      let args: Vec<String> = env::args().collect();
-     println!("{:?}", args);
+    // println!("{:?}", args);
      if args[1] == "init" {
          fs::create_dir(".git").unwrap();
          fs::create_dir(".git/objects").unwrap();
@@ -38,6 +38,7 @@ fn main() {
 
             let chars : Vec<char> = s.chars().collect();
             let s = chars[8..].iter().collect::<String>();
+
             print!("{}", s);
         
      }
