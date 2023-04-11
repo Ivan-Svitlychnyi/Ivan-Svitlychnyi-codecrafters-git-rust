@@ -23,11 +23,11 @@ fn main() {
        else if args[1] =="cat-file" && args[2]=="-p" {
 
            let chars : Vec<char> = args[3].chars().collect();
-           let sub_dir = chars[..1].to_vec().iter().cloned().collect::<String>();
-           let sha_num = chars[1..].to_vec().iter().cloned().collect::<String>();
+           let sub_dir = chars[..2].to_vec().iter().cloned().collect::<String>();
+           let sha_num = chars[2..].to_vec().iter().cloned().collect::<String>();
 
            let mut new_path = "./git/objects/".to_string();
-           new_path.push_str(&format!("./{}/{}",sub_dir, sha_num));
+           new_path.push_str(&format!("{}/{}",sub_dir, sha_num));
 
             println!("Command: {}", new_path);  
 
