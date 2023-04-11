@@ -7,7 +7,7 @@ use std::io::prelude::*;
 use flate2::read::ZlibDecoder;
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
-   // println!("Logs from your program will appear here!");
+    println!("Logs from your program will appear here!");
 
     // Uncomment this block to pass the first stage
      let args: Vec<String> = env::args().collect();
@@ -37,9 +37,9 @@ fn main() {
             z.read_to_string(&mut s).unwrap();
 
             let chars : Vec<char> = s.chars().collect();
-            let s: String = chars[8..].iter().filter(|c| **c != '\n').collect();
+            let s = chars[8..].iter().collect::<String>();
 
-            print!("{:?}", s);
+            print!("{}", s);
         
      }
         else{
