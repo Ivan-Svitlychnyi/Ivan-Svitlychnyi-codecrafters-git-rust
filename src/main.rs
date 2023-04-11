@@ -20,10 +20,10 @@ fn main() {
          println!("Initialized git directory")
 
      } //else if args.contains(&"cat-file".to_string()) && args.contains(&"-p".to_string()) {
-       else if args[2] =="cat-file" && args[3]=="-p" {
+       else if args[1] =="cat-file" && args[2]=="-p" {
 
             let mut new_path = ".git/objects/".to_string();
-            new_path.push_str(&format!("{}", args[4]));
+            new_path.push_str(&format!("{}", args[3]));
          
             let git_data = fs::read(new_path).unwrap();
             let mut z = ZlibDecoder::new(&git_data[..]);
@@ -35,9 +35,5 @@ fn main() {
         else{
          println!("unknown command: {}", args[1])  
         }
-
-      
-     
-  
 
 }
