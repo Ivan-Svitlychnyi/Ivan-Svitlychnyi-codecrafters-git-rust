@@ -24,7 +24,7 @@ fn main() {
 
             let mut new_path = ".git/objects/".to_string();
             new_path.push_str(&format!("{}", args[3]));
-         
+            println!("unknown command: {}", new_path);  
             let git_data = fs::read(new_path).unwrap();
             let mut z = ZlibDecoder::new(&git_data[..]);
             let mut s = String::new();
