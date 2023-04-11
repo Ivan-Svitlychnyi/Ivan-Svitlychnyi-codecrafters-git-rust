@@ -35,6 +35,10 @@ fn main() {
             let mut z = ZlibDecoder::new(&git_data[..]);
             let mut s = String::new();
             z.read_to_string(&mut s).unwrap();
+
+            let chars : Vec<char> = s.chars().collect();
+            let s = chars[8..].to_vec().iter().cloned().collect::<String>();
+
             print!("{}", s);
         
      }
