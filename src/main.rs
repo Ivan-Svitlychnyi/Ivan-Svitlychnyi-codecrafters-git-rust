@@ -23,7 +23,7 @@ fn main() {
        else if args[1] =="cat-file" && args[2]=="-p" {
 
            // let mut new_path = ".git/objects/".to_string();
-           let mut new_path = "/".to_string();
+           let mut new_path = "./your_git/".to_string();
             //let mut new_path = ".git/objects/08/7c856cde0019bc02dd6afa86877da4c25243f7".to_string();
 
             new_path.push_str(&format!("{}", args[3].to_string()));
