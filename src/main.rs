@@ -26,7 +26,7 @@ fn main() {
            let sub_dir = chars[..2].to_vec().iter().cloned().collect::<String>();
            let sha_num = chars[2..].to_vec().iter().cloned().collect::<String>();
 
-           let mut new_path = "./git/objects/".to_string();
+           let mut new_path = ".git/objects/".to_string();
            new_path.push_str(&format!("{}/{}",sub_dir, sha_num));
 
             println!("Command: {}", new_path);  
