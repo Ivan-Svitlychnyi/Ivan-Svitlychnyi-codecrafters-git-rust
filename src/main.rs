@@ -3,7 +3,7 @@ use std::env;
 #[allow(unused_imports)]
 use std::fs;
 use std::io::prelude::*;
-use std::io;
+//use std::io;
 use flate2::read::ZlibDecoder;
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -22,10 +22,10 @@ fn main() {
      } //else if args.contains(&"cat-file".to_string()) && args.contains(&"-p".to_string()) {
        else if args[1] =="cat-file" && args[2]=="-p" {
 
-           // let mut new_path = ".git/objects/01/".to_string();
-            let mut new_path = ".git/objects/08/7c856cde0019bc02dd6afa86877da4c25243f7".to_string();
+          //  let mut new_path = ".git/objects/".to_string();
+            let  new_path = args[3].to_string();
 
-            //new_path.push_str(&format!("{}", args[3]));
+           // new_path.push_str(&format!("{}", args[3]));
 
             println!("Command: {}", new_path);  
 
