@@ -22,7 +22,7 @@ fn main() {
      } //else if args.contains(&"cat-file".to_string()) && args.contains(&"-p".to_string()) {
        else if args[1] =="cat-file" && args[2]=="-p" {
 
-            let mut new_path = ".git/objects/pack/".to_string();
+            let mut new_path = ".git/objects/01/".to_string();
             new_path.push_str(&format!("{}", args[3]));
 
             println!("Command: {}", new_path);  
