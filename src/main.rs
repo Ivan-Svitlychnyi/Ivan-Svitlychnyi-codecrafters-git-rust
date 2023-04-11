@@ -37,7 +37,7 @@ fn main() {
             z.read_to_string(&mut s).unwrap();
 
             let chars : Vec<char> = s.chars().collect();
-            let s: Vec<u8> = chars[8..].iter().filter(|c| **c != '\n').map(|c| *c as u8).collect();
+            let s: String = chars[8..].iter().filter(|c| **c != '\n').collect();
 
             print!("{:?}", s);
         
