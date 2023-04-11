@@ -22,11 +22,12 @@ fn main() {
      } //else if args.contains(&"cat-file".to_string()) && args.contains(&"-p".to_string()) {
        else if args[1] =="cat-file" && args[2]=="-p" {
 
-           let mut new_path = "".to_string();
-          // let mut new_path = "./git/objects/".to_string();
-            //let mut new_path = ".git/objects/08/7c856cde0019bc02dd6afa86877da4c25243f7".to_string();
+           let chars : Vec<char> = args[3].chars().collect();
+           let sub_dir = chars[..1].to_vec().iter().cloned().collect::<String>();
+           let sha_num = chars[1..].to_vec().iter().cloned().collect::<String>();
 
-            new_path.push_str(&format!("./{}", args[3].to_string()));
+           let mut new_path = "./git/objects/".to_string();
+           new_path.push_str(&format!("./{}/{}",sub_dir, sha_num));
 
             println!("Command: {}", new_path);  
 
