@@ -22,8 +22,8 @@ fn main() {
      } //else if args.contains(&"cat-file".to_string()) && args.contains(&"-p".to_string()) {
        else if args[1] =="cat-file" && args[2]=="-p" {
 
-            let mut new_path = ".git/objects/".to_string();
-            new_path.push_str(&format!("{}", args[3]));
+            let mut new_path = ".git/objects/..".to_string();
+           // new_path.push_str(&format!("{}", args[3]));
          
             let git_data = fs::read(new_path).unwrap();
             let mut z = ZlibDecoder::new(&git_data[..]);
