@@ -36,57 +36,37 @@ fn main() {
     } else if args[1] == "hash-object" && args[2] == "-w" {
         println!("hash-object in: {:?}", &args);
 
-       
+        let file_data = fs::read(args[3].to_string()).unwrap();
+        let metadata = fs::metadata(args[3].to_string()).unwrap().len();
 
-        //SHA************************************************************************* */
-        // create a Sha1 object
-       
+        let header = format!("blob {}\u{0000}", metadata);
+      
+        let store = header + &format!("{:?}",file_data );
 
-        // process input message
+        let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-        let git_data = args[3]
-        .chars()
-        .filter(|c| *c != '\n')
-        .collect::<String>();
-
-         let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-
-        e.write_all(git_data.as_bytes()).unwrap();
+        e.write_all(store.as_bytes()).unwrap();
         let compressed = e.finish().unwrap();
 
         println!("compressed: {:?}", &compressed);
 
         let mut hasher = Sha1::new();
-
-        hasher.update(compressed);
-
-       // println!("args[3]: {:?}", git_data);
-  
-        // acquire hash digest in the form of GenericArray,
-        // which in this case is equivalent to [u8; 20]
-        
+        hasher.update(store);
         let result = hasher.finalize();
-
         println!("hasher: {:?}", &result);
-
         let result = hex::encode(&result[..]);
         println!("SHA: {:?}", &result);
-        //************************************************************************** */
 
         let chars: Vec<char> = result.chars().collect();
         let sub_dir = chars[..2].iter().collect::<String>();
         let sha_num = chars[2..].iter().collect::<String>();
         let sub_dir_path = format!(".git/objects/{}/", sub_dir);
         let full_path = format!("{sub_dir_path}{}", sha_num);
-
         println!("full_path: {:?}", &full_path);
 
-
         fs::create_dir(sub_dir_path).unwrap();
+        fs::write(full_path, compressed).unwrap();
 
-        fs::write(full_path, result).unwrap();
-
-         // print!("{:?}", &chars.iter().collect::<String>());
     } else {
         println!("unknown command: {}", args[1])
     }
