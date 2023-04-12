@@ -51,14 +51,14 @@ fn main() {
 
          let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-        e.write_all(git_data).unwrap();
+        e.write_all(git_data.as_bytes()).unwrap();
         let compressed = e.finish().unwrap();
 
         println!("compressed: {:?}", &compressed);
 
         let mut hasher = Sha1::new();
 
-        hasher.update(compressed.as_bytes());
+        hasher.update(compressed);
 
        // println!("args[3]: {:?}", git_data);
   
