@@ -45,12 +45,15 @@ fn main() {
         // process input message
 
         hasher.update(args[3].as_bytes());
+
         println!("args[3]: {:?}", args[3]);
         // acquire hash digest in the form of GenericArray,
         // which in this case is equivalent to [u8; 20]
         let result = hasher.finalize();
+
         println!("hasher: {:?}", &result);
-        let result = hex::encode(result);
+
+        let result = hex::encode(&result[..]);
         println!("SHA: {:?}", &result);
         //************************************************************************** */
 
