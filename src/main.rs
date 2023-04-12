@@ -38,17 +38,16 @@ fn main() {
 
         let file_data = fs::read(args[3].to_string()).unwrap();
         let metadata = fs::metadata(args[3].to_string()).unwrap().len();
-
-        let header = format!("blob {}0000", metadata);
+        println!("metadata: {:?}", &metadata);
+        let header = format!("blob {}00", metadata);
       
         let store = header + &format!("{:?}",file_data );
 
         let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-
         e.write_all(store.as_bytes()).unwrap();
         let compressed = e.finish().unwrap();
 
-        println!("compressed: {:?}", &compressed);
+       // println!("compressed: {:?}", &compressed);
 
         let mut hasher = Sha1::new();
         hasher.update(store);
