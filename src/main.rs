@@ -44,9 +44,15 @@ fn main() {
 
         // process input message
 
-        hasher.update(args[3].as_bytes());
+        let git_data = args[3]
+        .chars()
+        .filter(|c| *c != '\n')
+        .collect::<String>();
 
-        println!("args[3]: {:?}", args[3]);
+        hasher.update(git_data.as_bytes());
+
+        println!("args[3]: {:?}", git_data);
+        
         // acquire hash digest in the form of GenericArray,
         // which in this case is equivalent to [u8; 20]
         let result = hasher.finalize();
