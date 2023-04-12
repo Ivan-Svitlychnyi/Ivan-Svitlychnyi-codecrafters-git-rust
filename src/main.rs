@@ -37,11 +37,12 @@ fn main() {
         println!("hash-object in: {:?}", &args);
 
         let file_data = fs::read(args[3].to_string()).unwrap();
-        let metadata = fs::metadata(args[3].to_string()).unwrap().len();
-        println!("metadata: {:?}", &metadata);
-        let header = format!("blob {}\x00", metadata);
+        //let metadata = fs::metadata(args[3].to_string()).unwrap().len();
+        //println!("metadata: {:?}", &metadata);
+        let header = format!("blob {}\x00", file_data.len());
+
       
-        let store = header + &format!("{:?}",file_data );
+        let store = header + &format!("{}",String::from_utf8(file_data).unwrap());
 
         let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
         e.write_all(store.as_bytes()).unwrap();
