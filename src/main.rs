@@ -39,7 +39,7 @@ fn main() {
         let file_data = fs::read(args[3].to_string()).unwrap();
         let metadata = fs::metadata(args[3].to_string()).unwrap().len();
         println!("metadata: {:?}", &metadata);
-        let header = format!("blob {}", metadata);
+        let header = format!("blob {}\x00", metadata);
       
         let store = header + &format!("{:?}",file_data );
 
