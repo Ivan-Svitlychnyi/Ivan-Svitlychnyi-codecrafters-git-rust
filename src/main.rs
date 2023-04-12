@@ -40,7 +40,7 @@ fn main() {
 
         //SHA************************************************************************* */
         // create a Sha1 object
-        let mut hasher = Sha1::new();
+       
 
         // process input message
 
@@ -49,12 +49,22 @@ fn main() {
         .filter(|c| *c != '\n')
         .collect::<String>();
 
-        hasher.update(git_data.as_bytes());
+         let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-        println!("args[3]: {:?}", git_data);
-        
+        e.write_all(git_data).unwrap();
+        let compressed = e.finish().unwrap();
+
+        println!("compressed: {:?}", &compressed);
+
+        let mut hasher = Sha1::new();
+
+        hasher.update(compressed.as_bytes());
+
+       // println!("args[3]: {:?}", git_data);
+  
         // acquire hash digest in the form of GenericArray,
         // which in this case is equivalent to [u8; 20]
+        
         let result = hasher.finalize();
 
         println!("hasher: {:?}", &result);
@@ -62,8 +72,6 @@ fn main() {
         let result = hex::encode(&result[..]);
         println!("SHA: {:?}", &result);
         //************************************************************************** */
-
-  
 
         let chars: Vec<char> = result.chars().collect();
         let sub_dir = chars[..2].iter().collect::<String>();
@@ -74,16 +82,9 @@ fn main() {
         println!("full_path: {:?}", &full_path);
 
 
-
-        let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-
-        e.write_all(b"").unwrap();
-        let compressed = e.finish().unwrap();
-        println!("compressed: {:?}", &compressed);
-
         fs::create_dir(sub_dir_path).unwrap();
 
-        fs::write(full_path, compressed).unwrap();
+        fs::write(full_path, result).unwrap();
 
          // print!("{:?}", &chars.iter().collect::<String>());
     } else {
