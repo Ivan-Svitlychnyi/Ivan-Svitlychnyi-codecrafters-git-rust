@@ -5,6 +5,10 @@ use std::fs;
 use std::io::prelude::*;
 //use std::io;
 use flate2::read::ZlibDecoder;
+use flate2::Compression;
+use flate2::write::ZlibEncoder;
+
+
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear here!");
@@ -30,7 +34,34 @@ fn main() {
 
         print!("{}", read_git_object(&full_path));
 
-    } else {
+    } else if args[1] == "hash-object" && args[2] == "-w" { 
+
+        let chars: Vec<char> = args[3].chars().collect();
+        let sub_dir = chars[..2].iter().collect::<String>();
+        let sha_num = chars[2..].iter().collect::<String>();
+        let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
+
+        let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+
+
+        let x:&mut [u8] = &mut [];
+      
+        for (place, element) in x.iter_mut().zip(chars.iter()) {
+            *place = *element as u8;
+        }
+        
+        e.write_all(&mut x[..]).unwrap();
+
+        let compressed = e.finish().unwrap();    
+
+        fs::write(&full_path, compressed).unwrap();
+
+        print!("{:?}", &chars.iter().collect::<String>());
+    }
+    
+    
+    
+    else {
         println!("unknown command: {}", args[1])
     }
 }
