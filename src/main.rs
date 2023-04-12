@@ -36,6 +36,8 @@ fn main() {
 
     } else if args[1] == "hash-object" && args[2] == "-w" { 
 
+        println!("hash-object in: {:?}", &args);
+
         let chars: Vec<char> = args[3].chars().collect();
         let sub_dir = chars[..2].iter().collect::<String>();
         let sha_num = chars[2..].iter().collect::<String>();
