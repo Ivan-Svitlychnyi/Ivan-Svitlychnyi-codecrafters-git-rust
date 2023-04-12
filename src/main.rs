@@ -49,20 +49,12 @@ fn main() {
         // acquire hash digest in the form of GenericArray,
         // which in this case is equivalent to [u8; 20]
         let result = hasher.finalize();
+        println!("hasher: {:?}", &result);
         let result = hex::encode(result);
         println!("SHA: {:?}", &result);
         //************************************************************************** */
 
-        // let x:&mut [u8] = &mut [];
-        // let data:&mut [u8] = &mut [];
-
-        // for (place, element) in x.iter_mut().zip(chars.iter()) {
-        //     *place = *element as u8;
-        // }
-
-        // e.write_all(&mut x[..]).unwrap();
-
-        // let compressed = e.finish().unwrap();
+  
 
         let chars: Vec<char> = result.chars().collect();
         let sub_dir = chars[..2].iter().collect::<String>();
