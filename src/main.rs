@@ -5,8 +5,9 @@ use std::fs;
 use std::io::prelude::*;
 //use std::io;
 use flate2::read::ZlibDecoder;
-use flate2::Compression;
 use flate2::write::ZlibEncoder;
+use flate2::Compression;
+use sha1::{Digest, Sha1};
 
 
 fn main() {
@@ -26,51 +27,70 @@ fn main() {
         println!("Initialized git directory")
 
     } else if args[1] == "cat-file" && args[2] == "-p" {
-
         let chars: Vec<char> = args[3].chars().collect();
         let sub_dir = chars[..2].iter().collect::<String>();
         let sha_num = chars[2..].iter().collect::<String>();
         let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
 
         print!("{}", read_git_object(&full_path));
-
-    } else if args[1] == "hash-object" && args[2] == "-w" { 
-
+    } else if args[1] == "hash-object" && args[2] == "-w" {
         println!("hash-object in: {:?}", &args);
 
-        let chars: Vec<char> = args[3].chars().collect();
+       
+
+        //SHA************************************************************************* */
+        // create a Sha1 object
+        let mut hasher = Sha1::new();
+
+        // process input message
+
+        hasher.update(args[3].as_bytes());
+        println!("args[3]: {:?}", args[3]);
+        // acquire hash digest in the form of GenericArray,
+        // which in this case is equivalent to [u8; 20]
+        let result = hasher.finalize();
+        let result = hex::encode(result);
+        println!("SHA: {:?}", &result);
+        //************************************************************************** */
+
+        // let x:&mut [u8] = &mut [];
+        // let data:&mut [u8] = &mut [];
+
+        // for (place, element) in x.iter_mut().zip(chars.iter()) {
+        //     *place = *element as u8;
+        // }
+
+        // e.write_all(&mut x[..]).unwrap();
+
+        // let compressed = e.finish().unwrap();
+
+        let chars: Vec<char> = result.chars().collect();
         let sub_dir = chars[..2].iter().collect::<String>();
         let sha_num = chars[2..].iter().collect::<String>();
-        let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
+        let sub_dir_path = format!(".git/objects/{}/", sub_dir);
+        let full_path = format!("{sub_dir_path}{}", sha_num);
+
+        println!("full_path: {:?}", &full_path);
+
+
 
         let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
+        e.write_all(b"").unwrap();
+        let compressed = e.finish().unwrap();
+        println!("compressed: {:?}", &compressed);
 
-        let x:&mut [u8] = &mut [];
-      
-        for (place, element) in x.iter_mut().zip(chars.iter()) {
-            *place = *element as u8;
-        }
-        
-        e.write_all(&mut x[..]).unwrap();
+        fs::create_dir(sub_dir_path).unwrap();
 
-        let compressed = e.finish().unwrap();    
+        fs::write(full_path, compressed).unwrap();
 
-        fs::write(&full_path, compressed).unwrap();
-
-        print!("{:?}", &chars.iter().collect::<String>());
-    }
-    
-    
-    
-    else {
+         // print!("{:?}", &chars.iter().collect::<String>());
+    } else {
         println!("unknown command: {}", args[1])
     }
 }
 
-
- fn read_git_object(git_path: &String) -> String {
-
+fn read_git_object(git_path: &String) -> String {
     let git_data = fs::read(git_path).unwrap();
     let mut git_data = ZlibDecoder::new(&git_data[..]);
 
@@ -78,9 +98,11 @@ fn main() {
     git_data.read_to_string(&mut s_git_data).unwrap();
 
     let git_data_chars: Vec<char> = s_git_data.chars().collect();
-    
-    let git_data = git_data_chars[8..].iter().filter(|c| **c != '\n').collect::<String>();
+
+    let git_data = git_data_chars[8..]
+        .iter()
+        .filter(|c| **c != '\n')
+        .collect::<String>();
 
     git_data
-
- }
+}
