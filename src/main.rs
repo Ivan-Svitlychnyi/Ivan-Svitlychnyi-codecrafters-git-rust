@@ -29,7 +29,16 @@ fn main() {
     } else if args[1] == "hash-object" && args[2] == "-w" {
 
         println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
-    } else {
+    } 
+    else if args[1] == "ls-tree" && args[2] =="--name-only" {
+      //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
+      //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
+
+
+      print!("{}", read_git_object(&args[3]).unwrap());
+
+    }
+    else {
         println!("unknown command: {:#?}", args)
     }
 }
