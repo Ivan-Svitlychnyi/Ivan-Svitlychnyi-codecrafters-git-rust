@@ -72,6 +72,7 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
     Ok(git_data)
 }
 fn write_hash_object(file_path: &String) -> Result<String, io::Error> {
+
     let file_data = fs::read(file_path.to_string())?;
 
     let store = format!("blob {}\x00{}",file_data.len(), String::from_utf8(file_data).unwrap());
@@ -83,17 +84,13 @@ fn write_hash_object(file_path: &String) -> Result<String, io::Error> {
     let mut hasher = Sha1::new();
     hasher.update(store);
     let result = hasher.finalize();
-   // println!("hasher: {:?}", &result);
     let result = hex::encode(&result[..]);
-   // println!("SHA: {:?}", &result);
 
     let (sub_dir, sha_num) = sha1_parse(&result);
 
     let sub_dir_path = format!(".git/objects/{}/", sub_dir);
 
     let full_path = format!("{sub_dir_path}{}", sha_num);
-
-    //println!("full_path: {:?}", &full_path);
 
     fs::create_dir(sub_dir_path)?;
     fs::write(full_path, compressed)?;
