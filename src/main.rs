@@ -4,7 +4,6 @@ use std::env;
 use std::fs;
 use std::io;
 use std::io::prelude::*;
-//use std::io;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
@@ -20,11 +19,8 @@ fn main() {
         panic!("enter the arguments!");
     }
     if args[1] == "init" {
-        fs::create_dir(".git").unwrap();
-        fs::create_dir(".git/objects").unwrap();
-        fs::create_dir(".git/refs").unwrap();
-        fs::write(".git/HEAD", "ref: refs/heads/master\n").unwrap();
-        println!("Initialized git directory")
+    
+        println!("{}", git_init().unwrap())
 
     } else if args[1] == "cat-file" && args[2] == "-p" {
 
@@ -34,8 +30,18 @@ fn main() {
 
         println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
     } else {
-        println!("unknown command: {}", args[1])
+        println!("unknown command: {:#?}", args)
     }
+}
+fn git_init() ->  Result<String, io::Error>{
+
+    fs::create_dir(".git")?;
+    fs::create_dir(".git/objects")?;
+    fs::create_dir(".git/refs")?;
+    fs::write(".git/HEAD", "ref: refs/heads/master\n")?;
+
+    Ok("Initialized git directory".to_string())
+
 }
 
 fn sha1_parse(sha_1: &String) -> (String, String) {
@@ -77,9 +83,9 @@ fn write_hash_object(file_path: &String) -> Result<String, io::Error> {
     let mut hasher = Sha1::new();
     hasher.update(store);
     let result = hasher.finalize();
-    println!("hasher: {:?}", &result);
+   // println!("hasher: {:?}", &result);
     let result = hex::encode(&result[..]);
-    println!("SHA: {:?}", &result);
+   // println!("SHA: {:?}", &result);
 
     let (sub_dir, sha_num) = sha1_parse(&result);
 
@@ -87,7 +93,7 @@ fn write_hash_object(file_path: &String) -> Result<String, io::Error> {
 
     let full_path = format!("{sub_dir_path}{}", sha_num);
 
-    println!("full_path: {:?}", &full_path);
+    //println!("full_path: {:?}", &full_path);
 
     fs::create_dir(sub_dir_path)?;
     fs::write(full_path, compressed)?;
