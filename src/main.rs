@@ -3,6 +3,7 @@ use std::env;
 #[allow(unused_imports)]
 use std::fs;
 use std::io;
+use std::io::BufReader;
 use std::io::prelude::*;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
@@ -42,18 +43,17 @@ fn main() {
 
 //println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
 
-      let mut git_data = ZlibDecoder::new(&git_data[..]);
+      let git_data = ZlibDecoder::new(&git_data[..]);
 
-      let mut s_git_data = String::new();
-      git_data.read_to_string(&mut s_git_data).unwrap();
+      let f = BufReader::new(git_data);
 
-      let git_data_chars: Vec<char> = s_git_data.chars().collect();
+      for line in f.lines() {
+          println!("{}", line.unwrap());
+      }
 
-      let git_data = git_data_chars
-      .iter()
-      .collect::<String>();
 
-      println!("ls-tree: {:?}", s_git_data.split("\x00"));
+
+      //println!("ls-tree: {:?}", s_git_data.split("\x00"));
 
     }
     else {
