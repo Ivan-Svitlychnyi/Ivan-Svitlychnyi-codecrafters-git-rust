@@ -65,14 +65,17 @@ fn main() {
 
                 for b in &i {
                     if *b as char != ' ' {
-                      println!("ls-tree: {:?}", &i[start..counter -1]);
+                      println!("counter: {:?}", counter);  
+
+                      print!("ls-tree: {:?}", String::from_utf8_lossy(&i[start..counter -1]));
+                      
                       start = counter;   
                     }
                  
                     counter+=1;
                 }
                 
-         
+                counter = 0;
             }
         
     } else {
