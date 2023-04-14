@@ -1,13 +1,13 @@
+use flate2::read::ZlibDecoder;
+use flate2::write::ZlibEncoder;
+use flate2::Compression;
+use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
 #[allow(unused_imports)]
 use std::fs;
 use std::io;
 use std::io::prelude::*;
-use flate2::read::ZlibDecoder;
-use flate2::write::ZlibEncoder;
-use flate2::Compression;
-use sha1::{Digest, Sha1};
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -19,84 +19,52 @@ fn main() {
         panic!("enter the arguments!");
     }
     if args[1] == "init" {
-    
         println!("{}", git_init().unwrap())
-
     } else if args[1] == "cat-file" && args[2] == "-p" {
-
         print!("{}", read_git_object(&args[3]).unwrap());
-
     } else if args[1] == "hash-object" && args[2] == "-w" {
-
         println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
-    } 
-    else if args[1] == "ls-tree" && args[2] =="--name-only" {
-      //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
-      //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
-      println!("sha: {}", args[3]);
-      let chars: Vec<char> = args[3].chars().collect();
-      let sub_dir = chars[..2].iter().collect::<String>();
-      let sha_num = chars[2..].iter().collect::<String>();
-      let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
-      let git_data = fs::read(full_path).unwrap();
+    } else if args[1] == "ls-tree" && args[2] == "--name-only" {
+        //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
+        //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
+        println!("sha: {}", args[3]);
+        let chars: Vec<char> = args[3].chars().collect();
+        let sub_dir = chars[..2].iter().collect::<String>();
+        let sha_num = chars[2..].iter().collect::<String>();
+        let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
 
-//println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
+        let git_data = fs::read(full_path).unwrap();
 
-      let mut git_data = ZlibDecoder::new(&git_data[..]);
+        //println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
 
+        let mut git_data = ZlibDecoder::new(&git_data[1..]);
 
-      let mut file_content = Vec::new();
-      git_data.read_to_end(&mut file_content).unwrap();
+        let mut file_content = Vec::new();
 
-      let cursor = io::Cursor::new(file_content);
+        git_data.read_to_end(&mut file_content).unwrap();
 
-      let mut split_iter = cursor.split(b'\x00').map(|l| l.unwrap());
+        let cursor = io::Cursor::new(file_content);
 
-    //   let _first_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
-    //   let second_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
-    //   let third_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
-     // let mut first_ws = first_w.split_whitespace();     
-     // let (_, second_part1) = (first_ws.next(), first_ws.next());
+        let split_data = cursor.split(b'\x00').map(|l| l.unwrap());
 
-      
-    //   let mut second_ws = second_w.split_whitespace();     
-    //   let (_, second_part2) = (second_ws.next(), second_ws.next());
-
-    //   let mut third_ws = third_w.split_whitespace();     
-    //  let (_, second_part2) = (second_ws.next(), second_ws.next());
-
-      
-      for x in split_iter{
-        
-        let second_w =  String::from_utf8(x).unwrap();
-        let mut second_ws = second_w.split_whitespace();     
-        let (_, second_part2) = (second_ws.next(), second_ws.next());
-
-       // filename = data[i].split(b" ")[-1]
-      //  files.append(filename)
-        println!("{:?}", &second_part2);
-      }
-
-    // println!("ls-tree: {:?}", String::from_utf8(n));
-
-
-      
-
-//
-    }
-    else {
+        let mut all_data: Vec<u8>;
+        for i in split_data {
+            let first_w = String::from_utf8(i).unwrap();
+            let mut first_ws = first_w.split_whitespace();
+            let (_, second_part1) = (first_ws.next(), first_ws.next().unwrap());
+            println!("ls-tree: {:?}", second_part1);
+        }
+    } else {
         println!("unknown command: {:#?}", args)
     }
 }
-fn git_init() ->  Result<String, io::Error>{
-
+fn git_init() -> Result<String, io::Error> {
     fs::create_dir(".git")?;
     fs::create_dir(".git/objects")?;
     fs::create_dir(".git/refs")?;
     fs::write(".git/HEAD", "ref: refs/heads/master\n")?;
 
     Ok("Initialized git directory".to_string())
-
 }
 
 fn sha1_parse(sha_1: &String) -> (String, String) {
@@ -107,7 +75,6 @@ fn sha1_parse(sha_1: &String) -> (String, String) {
 }
 
 fn read_git_object(git_path: &String) -> Result<String, io::Error> {
-
     let (sub_dir, sha_num) = sha1_parse(&git_path);
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
 
@@ -127,10 +94,13 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
     Ok(git_data)
 }
 fn write_hash_object(file_path: &String) -> Result<String, io::Error> {
-
     let file_data = fs::read(file_path.to_string())?;
 
-    let store = format!("blob {}\x00{}",file_data.len(), String::from_utf8(file_data).unwrap());
+    let store = format!(
+        "blob {}\x00{}",
+        file_data.len(),
+        String::from_utf8(file_data).unwrap()
+    );
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
     e.write_all(store.as_bytes())?;
