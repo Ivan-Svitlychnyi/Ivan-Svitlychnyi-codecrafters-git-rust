@@ -39,11 +39,22 @@ fn main() {
       let sha_num = chars[2..].iter().collect::<String>();
       let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
       let git_data = fs::read(full_path).unwrap();
+
+      println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
+
       let mut git_data = ZlibDecoder::new(&git_data[..]);
-  
+
       let mut s_git_data = String::new();
       git_data.read_to_string(&mut s_git_data).unwrap();
-      println!("ls-tree: {}", s_git_data)
+
+      let git_data_chars: Vec<char> = s_git_data.chars().collect();
+
+      let git_data = git_data_chars
+      .iter()
+      .filter(|c| **c != '\n')
+      .collect::<String>();
+
+      println!("ls-tree: {}", git_data)
 
     }
     else {
