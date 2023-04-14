@@ -47,12 +47,15 @@ fn main() {
 
         let split_data = cursor.split(b'\x00').map(|l| l.unwrap());
 
-        let mut all_data: Vec<u8>;
         for i in split_data {
             let first_w = String::from_utf8(i).unwrap();
             let mut first_ws = first_w.split_whitespace();
-            let (_, second_part1) = (first_ws.next(), first_ws.next().unwrap());
-            println!("ls-tree: {:?}", second_part1);
+
+            println!("ls-tree: {:?}", first_ws);
+
+            //filename = data[i].split(b" ")[-1]
+            //let (_, second_part1) = (first_ws.next(), first_ws.next().unwrap());
+           
         }
     } else {
         println!("unknown command: {:#?}", args)
