@@ -52,24 +52,31 @@ fn main() {
 
       let mut split_iter = cursor.split(b'\x00').map(|l| l.unwrap());
 
-      let first_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
-      let second_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
-      
-      let mut first_ws = first_w.split_whitespace();     
-      let (_, second_part1) = (first_ws.next(), first_ws.next());
+    //   let _first_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
+    //   let second_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
+    //   let third_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
+     // let mut first_ws = first_w.split_whitespace();     
+     // let (_, second_part1) = (first_ws.next(), first_ws.next());
 
       
-      let mut second_ws = second_w.split_whitespace();     
-      let (_, second_part2) = (second_ws.next(), second_ws.next());
+    //   let mut second_ws = second_w.split_whitespace();     
+    //   let (_, second_part2) = (second_ws.next(), second_ws.next());
 
-     //for part in first_ws {
+    //   let mut third_ws = third_w.split_whitespace();     
+    //  let (_, second_part2) = (second_ws.next(), second_ws.next());
 
-        println!("{:?}", &second_part1);
+      
+      for x in split_iter{
+        
+        let second_w =  String::from_utf8(x).unwrap();
+        let mut second_ws = second_w.split_whitespace();     
+        let (_, second_part2) = (second_ws.next(), second_ws.next());
+
+       // filename = data[i].split(b" ")[-1]
+      //  files.append(filename)
         println!("{:?}", &second_part2);
+      }
 
-
-
-   // }
     // println!("ls-tree: {:?}", String::from_utf8(n));
 
 
