@@ -34,7 +34,7 @@ fn main() {
       //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
       //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
       println!("sha: {}", args[3]);
-      let chars: Vec<char> = args[2].chars().collect();
+      let chars: Vec<char> = args[3].chars().collect();
       let sub_dir = chars[..2].iter().collect::<String>();
       let sha_num = chars[2..].iter().collect::<String>();
       let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
