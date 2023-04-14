@@ -50,10 +50,12 @@ fn main() {
 
       let cursor = io::Cursor::new(file_content);
 
-      let mut split_iter = cursor.split(b'\x00').map(|l| l.unwrap());
+      let split_iter = cursor.split(b'\x00').map(|l| l.unwrap());
   
-      println!("ls-tree: {:?}", String::from_utf8_lossy(&split_iter.next().unwrap()));
-      println!("ls-tree: {:?}", String::from_utf8_lossy(&split_iter.next().unwrap()));
+for n in  split_iter{
+
+      println!("ls-tree: {:?}", String::from_utf8(n));
+}
 //
     }
     else {
