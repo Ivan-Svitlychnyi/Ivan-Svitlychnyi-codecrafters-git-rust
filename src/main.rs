@@ -3,7 +3,6 @@ use std::env;
 #[allow(unused_imports)]
 use std::fs;
 use std::io;
-use std::io::BufReader;
 use std::io::prelude::*;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
@@ -43,18 +42,16 @@ fn main() {
 
 //println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
 
-      let git_data = ZlibDecoder::new(&git_data[..]);
-
-      let f = BufReader::new(git_data);
-
-      for line in f.lines() {
-          println!("{}", line.unwrap());
-      }
+      let mut git_data = ZlibDecoder::new(&git_data[..]);
 
 
+      let mut file_content = Vec::new();
 
-      //println!("ls-tree: {:?}", s_git_data.split("\x00"));
+     // let mut s_git_data = String::new();
+     git_data.read_to_end(&mut file_content).unwrap();
 
+      println!("ls-tree: {:?}", String::from_utf8(file_content));
+//.split("\x00")
     }
     else {
         println!("unknown command: {:#?}", args)
