@@ -45,17 +45,29 @@ fn main() {
 
         let cursor = io::Cursor::new(file_content);
 
-        let split_data = cursor.split(b'\x00').map(|l| l.unwrap());
+        let mut split_data = cursor.split(b'\x00').map(|l| l.unwrap());
+        
+       
+        // for i in range(1, len(data) - 1):
+        // +            filename = data[i].split(b" ")[-1]
+        // +            files.append(filename)
+        // +        for file in files:
+        // +            print(file.decode())
 
         for i in split_data {
-            let first_w = String::from_utf8(i).unwrap();
-            let mut first_ws = first_w.split_whitespace();
+        
+           let mut counter:usize = 0;
+           //let mut new_vec: Vec<u8>;
 
-            println!("ls-tree: {:?}", first_ws);
+           for b in &i{
+            if *b as char != ' '{
+             counter +=1; 
+            
+            } 
 
-            //filename = data[i].split(b" ")[-1]
-            //let (_, second_part1) = (first_ws.next(), first_ws.next().unwrap());
-           
+           }
+           println!("ls-tree: {:?}",&i[counter -2]); 
+           counter  = 0; 
         }
     } else {
         println!("unknown command: {:#?}", args)
