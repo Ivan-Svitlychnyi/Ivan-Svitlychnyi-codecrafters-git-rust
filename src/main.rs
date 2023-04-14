@@ -50,7 +50,10 @@ fn main() {
      // let mut s_git_data = String::new();
      git_data.read_to_end(&mut file_content).unwrap();
 
-      println!("ls-tree: {:?}", String::from_utf8(file_content));
+
+
+
+     // println!("ls-tree: {:?}", String::from_utf8(file_content));
 //.split("\x00")
     }
     else {
