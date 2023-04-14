@@ -37,38 +37,41 @@ fn main() {
 
         //println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
 
-        let mut git_data = ZlibDecoder::new(&git_data[1..]);
+        let mut git_data = ZlibDecoder::new(&git_data[..]);
 
         let mut file_content = Vec::new();
 
         git_data.read_to_end(&mut file_content).unwrap();
 
+      //  let d_len = file_content.len();
+
         let cursor = io::Cursor::new(file_content);
 
-        let mut split_data = cursor.split(b'\x00').map(|l| l.unwrap());
-        
-       
+        let split_data = cursor.split(b'\x00').map(|l| l.unwrap());
+
         // for i in range(1, len(data) - 1):
         // +            filename = data[i].split(b" ")[-1]
         // +            files.append(filename)
         // +        for file in files:
         // +            print(file.decode())
+       
+     
 
         for i in split_data {
+
+            let mut counter: usize = 0;
+           
+                //let mut new_vec: Vec<u8>;
+
+                for b in &i {
+                    if *b as char != ' ' {
+                        counter += 1;
+                    }
+                }
+                println!("ls-tree: {:?}", &i[counter - 1]);
+         
+            }
         
-           let mut counter:usize = 0;
-           //let mut new_vec: Vec<u8>;
-
-           for b in &i{
-            if *b as char != ' '{
-             counter +=1; 
-            
-            } 
-
-           }
-           println!("ls-tree: {:?}",&i[counter -2]); 
-           counter  = 0; 
-        }
     } else {
         println!("unknown command: {:#?}", args)
     }
