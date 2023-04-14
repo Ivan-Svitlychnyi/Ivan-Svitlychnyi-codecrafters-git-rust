@@ -68,7 +68,7 @@ fn main() {
                         counter += 1;
                     }
                 }
-                println!("ls-tree: {:?}", &i[counter - 1]);
+                println!("ls-tree: {:?}", &i[counter - 2]);
          
             }
         
