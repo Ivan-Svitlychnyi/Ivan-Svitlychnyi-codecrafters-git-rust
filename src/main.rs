@@ -40,7 +40,7 @@ fn main() {
       let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
       let git_data = fs::read(full_path).unwrap();
 
-      println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
+//println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
 
       let mut git_data = ZlibDecoder::new(&git_data[..]);
 
@@ -51,10 +51,9 @@ fn main() {
 
       let git_data = git_data_chars
       .iter()
-      .filter(|c| **c != '\n')
       .collect::<String>();
 
-      println!("ls-tree: {}", git_data)
+      println!("ls-tree: {:?}", s_git_data.split("\x00"));
 
     }
     else {
