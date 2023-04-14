@@ -33,6 +33,7 @@ fn main() {
     else if args[1] == "ls-tree" && args[2] =="--name-only" {
       //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
       //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
+      println!("sha: {}", args[2]);
       let chars: Vec<char> = args[2].chars().collect();
       let sub_dir = chars[..2].iter().collect::<String>();
       let sha_num = chars[2..].iter().collect::<String>();
