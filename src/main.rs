@@ -43,7 +43,7 @@ fn main() {
 
         git_data.read_to_end(&mut file_content).unwrap();
 
-       let d_len = file_content.len();
+      // let d_len = file_content.len();
 
         let cursor = io::Cursor::new(file_content);
 
@@ -55,8 +55,8 @@ fn main() {
         // +        for file in files:
         // +            print(file.decode())
        
-      //  let mut counter: usize = 0;
-
+       let mut start: usize = 0;
+      // let mut chars: Vec<char>;
         for i in split_data {
 
             let mut counter: usize = 0;
@@ -65,9 +65,11 @@ fn main() {
 
                 for b in &i {
                     if *b as char != ' ' {
-                        counter += 1;
+                      println!("ls-tree: {:?}", &i[start..counter -1]);
+                      start = counter;   
                     }
-                   println!("ls-tree: {:?}", &i[counter]); 
+                 
+                    counter+=1;
                 }
                 
          
