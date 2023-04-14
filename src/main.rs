@@ -67,7 +67,7 @@ fn main() {
                     if *b as char != ' ' {
                       println!("counter: {:?}", counter);  
 
-                      print!("ls-tree: {:?}", String::from_utf8_lossy(&i[start..counter -1]));
+                      print!("ls-tree: {}", String::from_utf8_lossy(&i[start..(counter-1)]));
                       
                       start = counter;   
                     }
@@ -75,7 +75,7 @@ fn main() {
                     counter+=1;
                 }
                 
-                counter = 0;
+                
             }
         
     } else {
