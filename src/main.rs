@@ -52,9 +52,8 @@ fn main() {
 
       let mut split_iter = cursor.split(b'\x00').map(|l| l.unwrap());
   
-
-
-      println!("ls-tree: {:?}", String::from_utf8(split_iter.next().unwrap()));
+      println!("ls-tree: {:?}", String::from_utf8_lossy(&split_iter.next().unwrap()));
+      println!("ls-tree: {:?}", String::from_utf8_lossy(&split_iter.next().unwrap()));
 //
     }
     else {
