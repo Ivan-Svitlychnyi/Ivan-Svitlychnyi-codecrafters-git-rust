@@ -33,9 +33,16 @@ fn main() {
     else if args[1] == "ls-tree" && args[2] =="--name-only" {
       //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
       //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
-
-
-      print!("{}", read_git_object(&args[3]).unwrap());
+      let chars: Vec<char> = args[2].chars().collect();
+      let sub_dir = chars[..2].iter().collect::<String>();
+      let sha_num = chars[2..].iter().collect::<String>();
+      let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
+      let git_data = fs::read(full_path).unwrap();
+      let mut git_data = ZlibDecoder::new(&git_data[..]);
+  
+      let mut s_git_data = String::new();
+      git_data.read_to_string(&mut s_git_data).unwrap();
+      println!("ls-tree: {}", s_git_data)
 
     }
     else {
