@@ -53,13 +53,23 @@ fn main() {
       let mut split_iter = cursor.split(b'\x00').map(|l| l.unwrap());
 
       let first_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
+      let second_w =  String::from_utf8(split_iter.next().unwrap()).unwrap();
       
-      let first_ws = first_w.split_whitespace();
+      let mut first_ws = first_w.split_whitespace();     
+      let (_, second_part1) = (first_ws.next(), first_ws.next());
 
-      for part in first_ws {
+      
+      let mut second_ws = second_w.split_whitespace();     
+      let (_, second_part2) = (second_ws.next(), second_ws.next());
 
-        println!("{}", part);
-    }
+     //for part in first_ws {
+
+        println!("{:?}", &second_part1);
+        println!("{:?}", &second_part2);
+
+
+
+   // }
     // println!("ls-tree: {:?}", String::from_utf8(n));
 
 
