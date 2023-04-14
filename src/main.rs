@@ -46,15 +46,16 @@ fn main() {
 
 
       let mut file_content = Vec::new();
+      git_data.read_to_end(&mut file_content).unwrap();
 
-     // let mut s_git_data = String::new();
-     git_data.read_to_end(&mut file_content).unwrap();
+      let cursor = io::Cursor::new(file_content);
+
+      let mut split_iter = cursor.split(b'\x00').map(|l| l.unwrap());
+  
 
 
-
-
-     // println!("ls-tree: {:?}", String::from_utf8(file_content));
-//.split("\x00")
+      println!("ls-tree: {:?}", String::from_utf8(split_iter.next().unwrap()));
+//
     }
     else {
         println!("unknown command: {:#?}", args)
