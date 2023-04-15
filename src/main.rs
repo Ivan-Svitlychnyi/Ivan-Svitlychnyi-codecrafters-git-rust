@@ -55,29 +55,25 @@ fn main() {
         // +        for file in files:
         // +            print(file.decode())
        
-       let mut start: usize = 0;
-      // let mut chars: Vec<char>;
+
+ 
         for i in split_data {
-
-            let mut counter: usize = 0;
            
-                //let mut new_vec: Vec<u8>;
 
-                for b in &i {
-                    if *b as char != ' ' {
-                      println!("counter: {:?}", counter);  
+      let chars = String::from_utf8_lossy(&i);
+      let chars = chars.split_whitespace();
 
-                      print!("ls-tree: {}", String::from_utf8_lossy(&i[start..(counter-1)]));
-                      
-                      start = counter;   
-                    }
-                 
-                    counter+=1;
-                }
-                
-                
-            }
+      for val in chars {
+
+        println!("plit_data: {}", val)
+            
+        };
         
+    }
+
+
+
+
     } else {
         println!("unknown command: {:#?}", args)
     }
