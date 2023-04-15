@@ -64,10 +64,10 @@ fn main() {
 
       let chars = String::from_utf8_lossy(&i);
       let chars = chars.split_whitespace();
-
+      let mut counter:usize = 0;
      
       for val in chars {
-        let mut counter:usize = 0;
+        
         counter+=1;
         
         if counter == 2{
