@@ -57,7 +57,7 @@ fn main() {
         // +            print(file.decode())
        
 
- let mut result = Vec::new();
+// let mut result = Vec::new();
 
         for i in split_data {
            
@@ -71,14 +71,15 @@ fn main() {
         counter+=1;
         
         if counter == 2{
-        result.push(val.to_string());
-        counter = 0;
+       // result.push(val.to_string());
+      //  counter = 0;
         }
+        println!("plit_data: {}, counter: {}", val, counter); 
         };
         
         
     }
-    println!("plit_data: {:?}",result); 
+   // println!("plit_data: {:?}",result); 
     } else {
         println!("unknown command: {:#?}", args)
     }
