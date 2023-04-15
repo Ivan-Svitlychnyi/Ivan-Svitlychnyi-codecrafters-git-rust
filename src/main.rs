@@ -48,7 +48,7 @@ fn main() {
 
         let cursor = io::Cursor::new(file_content);
 
-        let split_data = cursor.split(b'\x00').map(|l| l.unwrap());
+        let split_data = cursor.split(b'\x00').skip(1).map(|l| l.unwrap());
 
         // for i in range(1, len(data) - 1):
         // +            filename = data[i].split(b" ")[-1]
@@ -65,19 +65,12 @@ fn main() {
       let chars = String::from_utf8_lossy(&i);
       let chars = chars.split_whitespace();
       let x = chars.last().unwrap();
-      
-       result.push(x.to_string());
+      result.push(x.to_string());
 
-    //   for val in chars {
-     
-   
-    //      println!("plit_data: {}", val); 
-    //     }
-      
-       
-        
+
         
     }
+   result.pop();
    println!("plit_data: {:?}",result); 
     } else {
         println!("unknown command: {:#?}", args)
