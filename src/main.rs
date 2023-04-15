@@ -57,30 +57,28 @@ fn main() {
         // +            print(file.decode())
        
 
-// let mut result = Vec::new();
+ let mut result = Vec::new();
 
         for i in split_data {
            
 
       let chars = String::from_utf8_lossy(&i);
       let chars = chars.split_whitespace();
-      let mut counter:usize = 0;
+      let x = chars.last().unwrap();
+      
+       result.push(x.to_string());
+
+    //   for val in chars {
      
-      for val in chars {
-        
+   
+    //      println!("plit_data: {}", val); 
+    //     }
+      
        
-        
-        if counter == 2{
-       // result.push(val.to_string());
-      //  counter = 0;
-        }
-        println!("plit_data: {}, counter: {}", val, counter); 
-         counter+=1;
-        };
         
         
     }
-   // println!("plit_data: {:?}",result); 
+   println!("plit_data: {:?}",result); 
     } else {
         println!("unknown command: {:#?}", args)
     }
