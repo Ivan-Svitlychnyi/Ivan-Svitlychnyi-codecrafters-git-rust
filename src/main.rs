@@ -66,7 +66,7 @@ fn main() {
         result.pop();
         let result = result.iter().cloned().collect::<String>();
 
-        println!("plit_data: {}", result);
+        print!("plit_data: {}", result);
 
     } else {
         println!("unknown command: {:#?}", args)
