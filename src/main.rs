@@ -60,13 +60,18 @@ fn main() {
         for i in split_data {
             let chars = String::from_utf8_lossy(&i);
             let chars = chars.split_whitespace();
-            let x = chars.last().unwrap();
-            result.push(x.to_string() /*+ "\n"*/);
+
+            let x = chars.last().unwrap();          
+            result.push(x.to_string() );
         }
         result.pop();
-        let result = result.iter().cloned().collect::<String>();
 
-        print!("plit_data: {}", result);
+        for i in result{
+        print!("{}", i);
+        }
+       
+
+     
 
     } else {
         println!("unknown command: {:#?}", args)
