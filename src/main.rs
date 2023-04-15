@@ -67,7 +67,7 @@ fn main() {
         result.pop();
 
         for i in result{
-        print!("{}", i);
+        println!("{}", i);
         }
        
 
