@@ -64,7 +64,7 @@ fn main() {
 
       let chars = String::from_utf8_lossy(&i);
       let chars = chars.split_whitespace();
-      result += &chars.last().unwrap().to_owned();
+      result += &(chars.last().unwrap().to_owned() + &String::from("\n"));
    
     }
 
