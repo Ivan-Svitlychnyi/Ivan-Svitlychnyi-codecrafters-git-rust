@@ -25,7 +25,6 @@ fn main() {
     } else if args[1] == "hash-object" && args[2] == "-w" {
         println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
-
         //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
         //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
         println!("sha: {}", args[3]);
@@ -44,33 +43,30 @@ fn main() {
 
         git_data.read_to_end(&mut file_content).unwrap();
 
-      // let d_len = file_content.len();
+        // let d_len = file_content.len();
 
         let cursor = io::Cursor::new(file_content);
 
         let split_data = cursor.split(b'\x00').skip(1).map(|l| l.unwrap());
-       
+
         // for i in range(1, len(data) - 1):
         // +            filename = data[i].split(b" ")[-1]
         // +            files.append(filename)
         // +        for file in files:
         // +            print(file.decode())
-       
 
-// let mut result = Vec::new();
-       let mut result = String::new();
+        let mut result = Vec::new();
+
         for i in split_data {
-           
+            let chars = String::from_utf8_lossy(&i);
+            let chars = chars.split_whitespace();
+            let x = chars.last().unwrap();
+            result.push(x.to_string() + "\n");
+        }
+        result.pop();
+        let result = result.iter().cloned().collect::<String>();
 
-      let chars = String::from_utf8_lossy(&i);
-      let chars = chars.split_whitespace();
-      result += &(chars.last().unwrap().to_owned() + &String::from("\n"));
-   
-    }
-
-   //let result =  result.iter().cloned().collect::<String>();
-   println!("plit_data: {}",result); 
-
+        println!("plit_data: {}", result);
 
     } else {
         println!("unknown command: {:#?}", args)
