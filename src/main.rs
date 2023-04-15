@@ -68,13 +68,14 @@ fn main() {
      
       for val in chars {
         
-        counter+=1;
+       
         
         if counter == 2{
        // result.push(val.to_string());
       //  counter = 0;
         }
         println!("plit_data: {}, counter: {}", val, counter); 
+         counter+=1;
         };
         
         
