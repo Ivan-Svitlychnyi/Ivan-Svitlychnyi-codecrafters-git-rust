@@ -61,7 +61,7 @@ fn main() {
             let chars = String::from_utf8_lossy(&i);
             let chars = chars.split_whitespace();
             let x = chars.last().unwrap();
-            result.push(x.to_string() + "\n");
+            result.push(x.to_string() /*+ "\n"*/);
         }
         result.pop();
         let result = result.iter().cloned().collect::<String>();
