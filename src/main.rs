@@ -56,23 +56,23 @@ fn main() {
         // +            print(file.decode())
        
 
- 
+ let mut result = Vec::new();
+
         for i in split_data {
            
 
       let chars = String::from_utf8_lossy(&i);
       let chars = chars.split_whitespace();
 
+      let mut counter:usize = 0;
       for val in chars {
-
-        println!("plit_data: {}", val)
-            
+        counter+=1;
+        println!("plit_data: {}, counter: {}", val, counter); 
+        result.push(val.to_string());
         };
+         
         
     }
-
-
-
 
     } else {
         println!("unknown command: {:#?}", args)
