@@ -25,6 +25,7 @@ fn main() {
     } else if args[1] == "hash-object" && args[2] == "-w" {
         println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
+
         //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
         //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
         println!("sha: {}", args[3]);
@@ -64,16 +65,20 @@ fn main() {
       let chars = String::from_utf8_lossy(&i);
       let chars = chars.split_whitespace();
 
-      let mut counter:usize = 0;
+     
       for val in chars {
+        let mut counter:usize = 0;
         counter+=1;
-        println!("plit_data: {}, counter: {}", val, counter); 
+        
+        if counter == 2{
         result.push(val.to_string());
+        counter = 0;
+        }
         };
-         
+        
         
     }
-
+    println!("plit_data: {:?}",result); 
     } else {
         println!("unknown command: {:#?}", args)
     }
