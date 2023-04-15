@@ -49,7 +49,7 @@ fn main() {
         let cursor = io::Cursor::new(file_content);
 
         let split_data = cursor.split(b'\x00').skip(1).map(|l| l.unwrap());
-
+       
         // for i in range(1, len(data) - 1):
         // +            filename = data[i].split(b" ")[-1]
         // +            files.append(filename)
@@ -57,21 +57,21 @@ fn main() {
         // +            print(file.decode())
        
 
- let mut result = Vec::new();
-
+// let mut result = Vec::new();
+       let mut result = String::new();
         for i in split_data {
            
 
       let chars = String::from_utf8_lossy(&i);
       let chars = chars.split_whitespace();
-      let x = chars.last().unwrap();
-      result.push(x.to_string());
-
-
-        
+      result += &chars.last().unwrap().to_owned();
+   
     }
-   result.pop();
-   println!("plit_data: {:?}",result); 
+
+   //let result =  result.iter().cloned().collect::<String>();
+   println!("plit_data: {}",result); 
+
+
     } else {
         println!("unknown command: {:#?}", args)
     }
