@@ -19,15 +19,14 @@ fn main() {
         panic!("enter the arguments!");
     }
     if args[1] == "init" {
-        println!("{}", git_init().unwrap())
+        git_init().unwrap();
+       // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
         print!("{}", read_git_object(&args[3]).unwrap());
     } else if args[1] == "hash-object" && args[2] == "-w" {
         println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
-        //  -d '{"base_tree":"9fb037999f264ba9a7fc6274d15fa3ae2ab98312",
-        //"tree":[{"path":"file.rb","mode":"100644","type":"blob","sha":"44b4fc6d56897b048c772eb4087f854f46256132"}]}'
-        println!("sha: {}", args[3]);
+
         let chars: Vec<char> = args[3].chars().collect();
         let sub_dir = chars[..2].iter().collect::<String>();
         let sha_num = chars[2..].iter().collect::<String>();
@@ -35,7 +34,7 @@ fn main() {
 
         let git_data = fs::read(full_path).unwrap();
 
-        //println!("ls-tree: {}", String::from_utf8(git_data.clone()).unwrap());
+     
 
         let mut git_data = ZlibDecoder::new(&git_data[..]);
 
@@ -43,17 +42,11 @@ fn main() {
 
         git_data.read_to_end(&mut file_content).unwrap();
 
-        // let d_len = file_content.len();
+      
 
         let cursor = io::Cursor::new(file_content);
 
         let split_data = cursor.split(b'\x00').skip(1).map(|l| l.unwrap());
-
-        // for i in range(1, len(data) - 1):
-        // +            filename = data[i].split(b" ")[-1]
-        // +            files.append(filename)
-        // +        for file in files:
-        // +            print(file.decode())
 
         let mut result = Vec::new();
 
