@@ -37,7 +37,7 @@ fn main() {
             println!("{}", s);
         }
     } else if args[1] == "write-tree" {
-        println!("{}", write_tree(&".".to_string()).unwrap());
+        print!("{}", write_tree(&".".to_string()).unwrap());
     } else {
         println!("unknown command: {:#?}", args)
     }
