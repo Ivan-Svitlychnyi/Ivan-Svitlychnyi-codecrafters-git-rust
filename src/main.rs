@@ -141,8 +141,10 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         .collect::<Result<Vec<_>, io::Error>>()
         .unwrap();
 
-    entries.sort();
+    entries.sort_by(|a, b| b.cmp(a));
+   // entries = sorted(os.scandir(dir_path), key=lambda e: e.name);
     
+
     let mut sha_out: String = "".to_string();
 
     for dir in entries {
@@ -169,7 +171,11 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         }
        // println!("file out: {:?}", &sha_file);
         sha_out = sha_out + (&format!("{mode} {path_name}\x00{}", &sha_file.unwrap()));
-        println!("file out: {:?}", &sha_out);
+        
+       // println!("file out: {:?}", &sha_out);
+
+      
+
     }
 
     let res = write_hash_object(sha_out.into_bytes(), "tree");
