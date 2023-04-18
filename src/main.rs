@@ -141,9 +141,9 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         .collect::<Result<Vec<_>, io::Error>>()
         .unwrap();
 
-    entries.sort_by(|a, b| b.cmp(a));
-   // entries = sorted(os.scandir(dir_path), key=lambda e: e.name);
-    
+    //entries.sort_by(|a, b| b.cmp(a));
+  
+    entries.sort();
 
     let mut sha_out: String = "".to_string();
 
