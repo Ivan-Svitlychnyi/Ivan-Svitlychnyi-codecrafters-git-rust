@@ -162,6 +162,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
            // println!("dir: {}", path_name);
             mode = "40000";
             sha_file = write_tree(&String::from_str(path_name).unwrap());
+
         } else {
            // println!("file: {}", path_name);
             mode = "100644";
@@ -172,7 +173,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
           // println!("file out: {:?}", &sha_file);
         }
         println!("sha_file: {:?}", &sha_file);
-        sha_out = sha_out + (&format!("{mode} {path_name}\x00{}", sha_file.unwrap()));
+        sha_out += &format!("{mode} {path_name}\x00{}", sha_file.unwrap());
         
         println!("sha_out: {:?}", sha_out);
 
