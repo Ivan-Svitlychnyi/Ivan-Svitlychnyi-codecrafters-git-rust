@@ -148,7 +148,9 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
     let mut sha_out: String = "".to_string();
 
     for dir in entries {
-        let path_name = dir.as_path().to_str().unwrap();
+        let path_name = dir.as_os_str().to_str().unwrap();
+       // let path_name = dir.as_path().to_str().unwrap();
+        println!("path_name: {}", path_name);
         let mode;
         let sha_file;
 
@@ -173,8 +175,6 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         sha_out = sha_out + (&format!("{mode} {path_name}\x00{}", &sha_file.unwrap()));
         
        // println!("file out: {:?}", &sha_out);
-
-      
 
     }
 
