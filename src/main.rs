@@ -150,12 +150,12 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
     for dir in entries {
         let path_name = dir.as_os_str().to_str().unwrap();
        // let path_name = dir.as_path().to_str().unwrap();
-        println!("path_name: {}", path_name);
+       // println!("path_name: {}", path_name);
         let mode;
         let sha_file;
 
-        if path_name == ".git" || dir.file_name().unwrap() == ".git" {
-            continue;
+        if path_name == ".git" {
+            continue;      
         }
 
         if dir.is_dir() {
