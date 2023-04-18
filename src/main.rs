@@ -135,13 +135,13 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 
 fn write_tree(file_path: &String) -> Result<String, io::Error> {
   
-    let entries = fs::read_dir(file_path)
+    let mut entries = fs::read_dir(file_path)
         .unwrap()
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, io::Error>>()
         .unwrap();
 
-    //entries.sort();
+    entries.sort();
     
     let mut sha_out: String = "".to_string();
 
@@ -169,7 +169,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         }
        // println!("file out: {:?}", &sha_file);
         sha_out = sha_out + (&format!("{mode} {path_name}\x00{}", &sha_file.unwrap()));
-        println!("file out: {:?}", &sha_out);
+       // println!("file out: {:?}", &sha_out);
     }
 
     let res = write_hash_object(sha_out.into_bytes(), "tree");
