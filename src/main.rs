@@ -144,7 +144,6 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
     //entries.sort();
     
     let mut sha_out: String = "".to_string();
-    
 
     for dir in entries {
         let path_name = dir.as_path().to_str().unwrap();
