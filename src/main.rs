@@ -135,13 +135,13 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 
 fn write_tree(file_path: &String) -> Result<String, io::Error> {
   
-    let mut entries = fs::read_dir(file_path)
+    let entries = fs::read_dir(file_path)
         .unwrap()
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, io::Error>>()
         .unwrap();
 
-    entries.sort();
+    //entries.sort();
     
     let mut sha_out: String = "".to_string();
     
