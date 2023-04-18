@@ -4,10 +4,12 @@ use flate2::Compression;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
+use std::fmt::Error;
 #[allow(unused_imports)]
 use std::fs;
 use std::io;
 use std::io::prelude::*;
+use std::str::FromStr;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -30,28 +32,8 @@ fn main() {
         for s in result {
             println!("{}", s);
         }
-
     } else if args[1] == "write-tree" {
-
-       // let paths = fs::read_dir("./").unwrap();
-        let mut entries = fs::read_dir(".").unwrap()
-        .map(|res| res.map(|e| e.path()))
-        .collect::<Result<Vec<_>, io::Error>>().unwrap();
-
-        entries.sort();
-
-        for dir in entries {
-                println!("Name: {}, {:?}", dir.as_path().to_str().unwrap(), dir.file_name().unwrap());
-                if dir.as_path().to_str().unwrap() == ".git" || dir.file_name().unwrap()  == ".git"{  continue }
-                
-               
-                
-                //else write_hash_object
-
-          
-        }
-        
-
+       
 
     } else {
         println!("unknown command: {:#?}", args)
@@ -149,4 +131,46 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
     result.pop();
 
     Ok(result)
+}
+
+fn write_tree(file_path: &String) ->Result<String, io::Error>{
+
+    let mut hex_digest:String = "".to_string();
+
+        // let paths = fs::read_dir("./").unwrap();
+        let mut entries = fs::read_dir(file_path)
+            .unwrap()
+            .map(|res| res.map(|e| e.path()))
+            .collect::<Result<Vec<_>, io::Error>>()
+            .unwrap();
+
+        entries.sort();
+        let mut mode = "";
+
+        for dir in entries {
+            println!(
+                "Name: {}, {:?}",
+                dir.as_path().to_str().unwrap(),
+                dir.file_name().unwrap()
+            );
+            if dir.as_path().to_str().unwrap() == ".git" || dir.file_name().unwrap() == ".git" {
+                continue;
+            }
+
+            let path = dir.as_path();
+            let dir = path.to_str().unwrap();
+            if path.is_dir() {            
+                println!("dir: {}", dir);
+                    mode = "40000";
+                    println!("dir out: {}", write_tree(&String::from_str(dir).unwrap()).unwrap()); 
+            } else {
+                println!("file: {}",dir); 
+                mode = "100644";
+                println!("file out: {}", write_hash_object(&String::from_str(dir).unwrap()).unwrap());                                      
+            }
+
+           
+}
+
+Ok(hex_digest)
 }
