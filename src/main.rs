@@ -23,15 +23,36 @@ fn main() {
         // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
         print!("{}", read_git_object(&args[3]).unwrap());
-
     } else if args[1] == "hash-object" && args[2] == "-w" {
         println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
-
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
         let result = read_tree(&args[3]).unwrap();
         for s in result {
             println!("{}", s);
         }
+
+    } else if args[1] == "write-tree" {
+
+       // let paths = fs::read_dir("./").unwrap();
+        let mut entries = fs::read_dir(".").unwrap()
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, io::Error>>().unwrap();
+
+        entries.sort();
+
+        for dir in entries {
+                println!("Name: {}, {:?}", dir.as_path().to_str().unwrap(), dir.file_name().unwrap());
+                if dir.as_path().to_str().unwrap() == ".git" || dir.file_name().unwrap()  == ".git"{  continue }
+                
+               
+                
+                //else write_hash_object
+
+          
+        }
+        
+
+
     } else {
         println!("unknown command: {:#?}", args)
     }
@@ -128,5 +149,4 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
     result.pop();
 
     Ok(result)
-
 }
