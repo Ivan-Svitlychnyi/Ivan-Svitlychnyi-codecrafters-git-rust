@@ -20,52 +20,18 @@ fn main() {
     }
     if args[1] == "init" {
         git_init().unwrap();
-       // println!("{}", )
+        // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
         print!("{}", read_git_object(&args[3]).unwrap());
+
     } else if args[1] == "hash-object" && args[2] == "-w" {
         println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
+
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
-
-        let chars: Vec<char> = args[3].chars().collect();
-        let sub_dir = chars[..2].iter().collect::<String>();
-        let sha_num = chars[2..].iter().collect::<String>();
-        let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
-
-        let git_data = fs::read(full_path).unwrap();
-
-     
-
-        let mut git_data = ZlibDecoder::new(&git_data[..]);
-
-        let mut file_content = Vec::new();
-
-        git_data.read_to_end(&mut file_content).unwrap();
-
-      
-
-        let cursor = io::Cursor::new(file_content);
-
-        let split_data = cursor.split(b'\x00').skip(1).map(|l| l.unwrap());
-
-        let mut result = Vec::new();
-
-        for i in split_data {
-            let chars = String::from_utf8_lossy(&i);
-            let chars = chars.split_whitespace();
-
-            let x = chars.last().unwrap();          
-            result.push(x.to_string() );
+        let result = read_tree(&args[3]).unwrap();
+        for s in result {
+            println!("{}", s);
         }
-        result.pop();
-
-        for i in result{
-        println!("{}", i);
-        }
-       
-
-     
-
     } else {
         println!("unknown command: {:#?}", args)
     }
@@ -132,4 +98,35 @@ fn write_hash_object(file_path: &String) -> Result<String, io::Error> {
     fs::create_dir(sub_dir_path)?;
     fs::write(full_path, compressed)?;
     Ok(result)
+}
+
+fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
+    let (sub_dir, sha_num) = sha1_parse(&file_path);
+
+    let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
+
+    let git_data = fs::read(full_path).unwrap();
+
+    let mut git_data = ZlibDecoder::new(&git_data[..]);
+
+    let mut file_content = Vec::new();
+
+    git_data.read_to_end(&mut file_content).unwrap();
+
+    let cursor = io::Cursor::new(file_content);
+
+    let split_data = cursor.split(b'\x00').skip(1).map(|l| l.unwrap());
+
+    let mut result = Vec::new();
+
+    for i in split_data {
+        let chars = String::from_utf8_lossy(&i);
+        let chars = chars.split_whitespace();
+        let x = chars.last().unwrap();
+        result.push(x.to_string());
+    }
+    result.pop();
+
+    Ok(result)
+
 }
