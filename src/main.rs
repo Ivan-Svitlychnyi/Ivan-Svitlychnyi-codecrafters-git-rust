@@ -134,9 +134,7 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 }
 
 fn write_tree(file_path: &String) -> Result<String, io::Error> {
-    // let hex_digest:String = "".to_string();
-
-    // let paths = fs::read_dir("./").unwrap();
+  
     let mut entries = fs::read_dir(file_path)
         .unwrap()
         .map(|res| res.map(|e| e.path()))
@@ -153,23 +151,22 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         let mode;
         let sha_file;
 
-        println!("Name: {}, {:?}", path_name, dir.file_name().unwrap());
         if path_name == ".git" || dir.file_name().unwrap() == ".git" {
             continue;
         }
 
         if dir.is_dir() {
-            println!("dir: {}", path_name);
+          //  println!("dir: {}", path_name);
             mode = "40000";
             sha_file = write_tree(&String::from_str(path_name).unwrap());
         } else {
-            println!("file: {}", path_name);
+           // println!("file: {}", path_name);
             mode = "100644";
             let file_data = fs::read(path_name).unwrap();
 
             sha_file = write_hash_object(file_data, "tree");
 
-            println!("file out: {:?}", &sha_file);
+           //println!("file out: {:?}", &sha_file);
         }
 
         sha_out = sha_out + (&format!("{mode} {path_name}\x00{}", &sha_file.unwrap()));
