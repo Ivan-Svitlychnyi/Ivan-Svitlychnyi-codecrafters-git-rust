@@ -33,6 +33,8 @@ fn main() {
             println!("{}", s);
         }
     } else if args[1] == "write-tree" {
+
+       let res =  write_tree(&".".to_string());
        
 
     } else {
@@ -135,7 +137,7 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 
 fn write_tree(file_path: &String) ->Result<String, io::Error>{
 
-    let mut hex_digest:String = "".to_string();
+    let hex_digest:String = "".to_string();
 
         // let paths = fs::read_dir("./").unwrap();
         let mut entries = fs::read_dir(file_path)
@@ -161,11 +163,11 @@ fn write_tree(file_path: &String) ->Result<String, io::Error>{
             let dir = path.to_str().unwrap();
             if path.is_dir() {            
                 println!("dir: {}", dir);
-                    mode = "40000";
+                  //  mode = "40000";
                     println!("dir out: {}", write_tree(&String::from_str(dir).unwrap()).unwrap()); 
             } else {
                 println!("file: {}",dir); 
-                mode = "100644";
+               // mode = "100644";
                 println!("file out: {}", write_hash_object(&String::from_str(dir).unwrap()).unwrap());                                      
             }
 
