@@ -26,17 +26,18 @@ fn main() {
     } else if args[1] == "cat-file" && args[2] == "-p" {
         print!("{}", read_git_object(&args[3]).unwrap());
     } else if args[1] == "hash-object" && args[2] == "-w" {
-        println!("hash-object in: {:?}", write_hash_object(&args[3]).unwrap());
+        let file_data = fs::read(args[3].to_string()).unwrap();
+        println!(
+            "hash-object in: {:?}",
+            write_hash_object(file_data, "blob").unwrap()
+        );
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
         let result = read_tree(&args[3]).unwrap();
         for s in result {
             println!("{}", s);
         }
     } else if args[1] == "write-tree" {
-
-      write_tree(&".".to_string());
-
-
+        println!("{}", write_tree(&".".to_string()).unwrap());
     } else {
         println!("unknown command: {:#?}", args)
     }
@@ -76,15 +77,12 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
     Ok(git_data)
 }
-fn write_hash_object(file_path: &String) -> Result<String, io::Error> {
-    let file_data = fs::read(file_path.to_string())?;
-
+fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<String, io::Error> {
     let store = format!(
-        "blob {}\x00{}",
+        "{file_type} {}\x00{}",
         file_data.len(),
         String::from_utf8(file_data).unwrap()
     );
-
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
     e.write_all(store.as_bytes())?;
     let compressed = e.finish()?;
@@ -135,43 +133,48 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
     Ok(result)
 }
 
-fn write_tree(file_path: &String) {
+fn write_tree(file_path: &String) -> Result<String, io::Error> {
+    // let hex_digest:String = "".to_string();
 
-   // let hex_digest:String = "".to_string();
+    // let paths = fs::read_dir("./").unwrap();
+    let mut entries = fs::read_dir(file_path)
+        .unwrap()
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, io::Error>>()
+        .unwrap();
 
-        // let paths = fs::read_dir("./").unwrap();
-        let mut entries = fs::read_dir(file_path)
-            .unwrap()
-            .map(|res| res.map(|e| e.path()))
-            .collect::<Result<Vec<_>, io::Error>>()
-            .unwrap();
+    entries.sort();
+    
+    let mut sha_out: String = "".to_string();
+    
 
-        entries.sort();
-       // let mut mode = "";
+    for dir in entries {
+        let path_name = dir.as_path().to_str().unwrap();
+        let mode;
+        let sha_file;
 
-        for dir in entries {
-            println!(
-                "Name: {}, {:?}",
-                dir.as_path().to_str().unwrap(),
-                dir.file_name().unwrap()
-            );
-            if dir.as_path().to_str().unwrap() == ".git" || dir.file_name().unwrap() == ".git" {
-                continue;
-            }
+        println!("Name: {}, {:?}", path_name, dir.file_name().unwrap());
+        if path_name == ".git" || dir.file_name().unwrap() == ".git" {
+            continue;
+        }
 
-            let path = dir.as_path();
-            let dir = path.to_str().unwrap();
-            if path.is_dir() {            
-                println!("dir: {}", dir);
-                  //  mode = "40000";
-                    write_tree(&String::from_str(dir).unwrap()); 
-            } else {
-                println!("file: {}",dir); 
-               // mode = "100644";
-                println!("file out: {}", write_hash_object(&String::from_str(dir).unwrap()).unwrap());                                      
-            }
+        if dir.is_dir() {
+            println!("dir: {}", path_name);
+            mode = "40000";
+            sha_file = write_tree(&String::from_str(path_name).unwrap());
+        } else {
+            println!("file: {}", path_name);
+            mode = "100644";
+            let file_data = fs::read(path_name).unwrap();
 
-           
-}
+            sha_file = write_hash_object(file_data, "tree");
 
+            println!("file out: {:?}", &sha_file);
+        }
+
+        sha_out = sha_out + (&format!("{mode} {path_name}\x00{}", &sha_file.unwrap()));
+    }
+
+    let res = write_hash_object(sha_out.into_bytes(), "tree");
+    res
 }
