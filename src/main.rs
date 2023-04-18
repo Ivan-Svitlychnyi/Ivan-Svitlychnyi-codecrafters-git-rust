@@ -4,7 +4,7 @@ use flate2::Compression;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
-use std::fmt::Error;
+//use std::fmt::Error;
 #[allow(unused_imports)]
 use std::fs;
 use std::io;
@@ -34,8 +34,8 @@ fn main() {
         }
     } else if args[1] == "write-tree" {
 
-       let res =  write_tree(&".".to_string());
-       
+      write_tree(&".".to_string());
+
 
     } else {
         println!("unknown command: {:#?}", args)
@@ -135,9 +135,9 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
     Ok(result)
 }
 
-fn write_tree(file_path: &String) ->Result<String, io::Error>{
+fn write_tree(file_path: &String) {
 
-    let hex_digest:String = "".to_string();
+   // let hex_digest:String = "".to_string();
 
         // let paths = fs::read_dir("./").unwrap();
         let mut entries = fs::read_dir(file_path)
@@ -147,7 +147,7 @@ fn write_tree(file_path: &String) ->Result<String, io::Error>{
             .unwrap();
 
         entries.sort();
-        let mut mode = "";
+       // let mut mode = "";
 
         for dir in entries {
             println!(
@@ -164,7 +164,7 @@ fn write_tree(file_path: &String) ->Result<String, io::Error>{
             if path.is_dir() {            
                 println!("dir: {}", dir);
                   //  mode = "40000";
-                    println!("dir out: {}", write_tree(&String::from_str(dir).unwrap()).unwrap()); 
+                    write_tree(&String::from_str(dir).unwrap()); 
             } else {
                 println!("file: {}",dir); 
                // mode = "100644";
@@ -174,5 +174,4 @@ fn write_tree(file_path: &String) ->Result<String, io::Error>{
            
 }
 
-Ok(hex_digest)
 }
