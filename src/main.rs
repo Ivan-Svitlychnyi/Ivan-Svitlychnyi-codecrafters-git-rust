@@ -1,6 +1,7 @@
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
+use sha1::digest;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
@@ -83,13 +84,16 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<String, io::
         file_data.len(),
         String::from_utf8(file_data).unwrap()
     );
+
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+
     e.write_all(store.as_bytes())?;
     let compressed = e.finish()?;
 
     let mut hasher = Sha1::new();
     hasher.update(store);
     let result = hasher.finalize();
+
     let result = hex::encode(&result[..]);
 
     let (sub_dir, sha_num) = sha1_parse(&result);
@@ -151,7 +155,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
     for dir in entries {
     
         let mut mode ="";
-        let sha_file;
+        
         let path_name = dir.as_path().to_str().unwrap();
      
         
@@ -159,29 +163,31 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         if path_name == "./.git" {
             continue;      
         }
-
+        let mut sha_file;
         if dir.is_dir() {
         // println!("dir: {}", path_name);
             mode = "40000";
-            sha_file = write_tree(&String::from_str(path_name).unwrap());
+            let sha_file1 = write_tree(&String::from_str(path_name).unwrap());
 
-        } else if dir.is_file() {
+            sha_file = hex::decode(sha_file1.unwrap()).unwrap();
+
+        } else /*if dir.is_file()*/ {
            
             mode = "100644";
           //  println!("file: {}",  path_name);
 
             let file_data = fs::read( &path_name).unwrap();
 
-            sha_file = write_hash_object(file_data, "blob");
+            let sha_file1 = write_hash_object(file_data, "blob");
+
+            sha_file = hex::decode(&sha_file1.unwrap()).unwrap();
+            
           // println!("file out: {:?}", &sha_file);
         }
-        else {
-           // println!("else!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            sha_file = Ok("".to_owned());
-        }
+      
        // println!("sha_file: {:?}", &sha_file);
     
-        sha_out += &format!("{mode} {path_name}\x00{}", sha_file.unwrap());
+        sha_out += &format!("{mode} {path_name}\x00{}", String::from_utf8(sha_file).unwrap());
         
        // println!("sha_out: {:?}", sha_out);
 
