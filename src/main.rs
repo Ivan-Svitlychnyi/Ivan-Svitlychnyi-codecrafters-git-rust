@@ -148,9 +148,10 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
 
     for dir in entries {
     
-        let mode;
+        let mut mode ="";
         let sha_file;
-        let path_name = dir.as_path().to_str().unwrap();
+        let mut path_name = dir.as_path().to_str().unwrap();
+        
 
         if path_name == ".git" || dir.file_name().unwrap() == ".git" {
             continue;      
@@ -162,16 +163,23 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
             mode = "40000";
             sha_file = write_tree(&String::from_str(path_name).unwrap());
 
-        } else {
+        } else if dir.is_file() {
            //println!("file: {}", path_name);
             mode = "100644";
+
+            path_name = dir.file_name().unwrap().to_str().unwrap();
+
             let file_data = fs::read(path_name).unwrap();
 
             sha_file = write_hash_object(file_data, "blob");
 
           // println!("file out: {:?}", &sha_file);
         }
+        else {
+            sha_file = Ok("".to_owned());
+        }
        // println!("sha_file: {:?}", &sha_file);
+    
         sha_out += &format!("{mode} {path_name}\x00{}", sha_file.unwrap());
         
         println!("sha_out: {:?}", sha_out);
