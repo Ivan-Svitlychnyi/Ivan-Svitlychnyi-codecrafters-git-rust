@@ -192,10 +192,12 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
        // println!("sha_file: {:?}", &sha_file);
 
 
-        let s = match str::from_utf8(&sha_file) {
-            Ok(v) => v,
-            Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-        };    
+        // let s = match str::from_utf8(&sha_file) {
+        //     Ok(v) => v,
+        //     Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+        // };   
+        #[allow(unsafe_code)]
+        let s = unsafe {String::from_utf8_unchecked(sha_file)};
         sha_out += &format!("{} {path_name}\x00{}",String::from_utf8_lossy(mode), s);
 
        // println!("sha_out: {:?}", sha_out);
