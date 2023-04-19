@@ -171,7 +171,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
             mode = "100644";
             let file_name = dir.file_name().unwrap().to_str().unwrap();
 
-             full_path_name = path_name.to_owned() + file_name;
+             full_path_name = path_name.to_owned() + "/"+ file_name;
 
            println!("file: {}",  full_path_name);
 
