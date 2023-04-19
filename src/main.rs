@@ -134,37 +134,36 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 }
 
 fn write_tree(file_path: &String) -> Result<String, io::Error> {
-  
+
+    let mut sha_out: String = "".to_string();
     let mut entries = fs::read_dir(file_path)
         .unwrap()
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, io::Error>>()
         .unwrap();
-
-    //entries.sort_by(|a, b| b.cmp(a));
   
     entries.sort();
 
-    let mut sha_out: String = "".to_string();
+    
 
     for dir in entries {
-        let path_name = dir.as_os_str().to_str().unwrap();
-       // let path_name = dir.as_path().to_str().unwrap();
-       // println!("path_name: {}", path_name);
+    
         let mode;
         let sha_file;
+        let path_name = dir.as_path().to_str().unwrap();
 
         if path_name == ".git" || dir.file_name().unwrap() == ".git" {
             continue;      
         }
 
+        
         if dir.is_dir() {
         // println!("dir: {}", path_name);
             mode = "40000";
             sha_file = write_tree(&String::from_str(path_name).unwrap());
 
         } else {
-            println!("file: {}", path_name);
+           //println!("file: {}", path_name);
             mode = "100644";
             let file_data = fs::read(path_name).unwrap();
 
