@@ -151,10 +151,10 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
     entries.sort();
 
     
-
-    for dir in entries {
     
-        let mut mode ="";
+    for dir in entries {
+     let mode;
+       
         
         let path_name = dir.as_path().to_str().unwrap();
      
@@ -163,7 +163,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         if path_name == "./.git" {
             continue;      
         }
-        let mut sha_file;
+        let sha_file;
         if dir.is_dir() {
         // println!("dir: {}", path_name);
             mode = "40000";
