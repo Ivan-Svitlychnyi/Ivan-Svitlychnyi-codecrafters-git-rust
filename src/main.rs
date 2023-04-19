@@ -81,10 +81,16 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
     Ok(git_data)
 }
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>,String), io::Error> {
-    let store = format!(
+     #[allow(unsafe_code)]
+    let store = 
+        
+     format!(
         "{file_type} {}\x00{}",
         file_data.len(),
-        String::from_utf8(file_data).unwrap()
+        
+        unsafe {
+         String::from_utf8_unchecked(file_data)
+         }
     );
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
