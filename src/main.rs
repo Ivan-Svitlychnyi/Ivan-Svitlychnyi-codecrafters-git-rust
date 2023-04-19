@@ -156,7 +156,6 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         if path_name == ".git" || dir.file_name().unwrap() == ".git" {
             continue;      
         }
-
         
         if dir.is_dir() {
          println!("dir: {}", path_name);
