@@ -191,7 +191,6 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         sha_out += &format!("{mode} {path_name}\x00{}",s);
         
        // println!("sha_out: {:?}", sha_out);
-
     }
     let res = write_hash_object(sha_out.into_bytes(), "tree");
     res
