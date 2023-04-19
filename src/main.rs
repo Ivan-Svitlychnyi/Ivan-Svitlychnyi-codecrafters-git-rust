@@ -173,7 +173,6 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
             let file_data = fs::read( &path_name).unwrap();
 
             sha_file = write_hash_object(file_data, "blob");
-
           // println!("file out: {:?}", &sha_file);
         }
         else {
