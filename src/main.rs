@@ -1,7 +1,7 @@
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
-//use sha1::digest;
+
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
@@ -26,19 +26,21 @@ fn main() {
         // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
         print!("{}", read_git_object(&args[3]).unwrap());
+
     } else if args[1] == "hash-object" && args[2] == "-w" {
         let file_data = fs::read(args[3].to_string()).unwrap();
-        println!(
-            "hash-object in: {:?}",
-            write_hash_object(file_data, "blob").unwrap()
-        );
+        let (_, sha1_out) = write_hash_object(file_data, "blob").unwrap();
+        println!("hash-object in: {}",sha1_out);
+
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
         let result = read_tree(&args[3]).unwrap();
         for s in result {
             println!("{}", s);
         }
+
     } else if args[1] == "write-tree" {
-        print!("{}", write_tree(&".".to_string()).unwrap());
+        let (_, sha1_out) = write_tree(&".".to_string()).unwrap();
+        print!("{}", sha1_out);
     } else {
         println!("unknown command: {:#?}", args)
     }
@@ -78,7 +80,7 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
     Ok(git_data)
 }
-fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<String, io::Error> {
+fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>,String), io::Error> {
     let store = format!(
         "{file_type} {}\x00{}",
         file_data.len(),
@@ -92,11 +94,12 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<String, io::
 
     let mut hasher = Sha1::new();
     hasher.update(store);
-    let result = hasher.finalize();
+    
+    let result:Vec<u8> = hasher.finalize().to_vec();
 
-    let result = hex::encode(&result[..]);
+    let hex_result = hex::encode(&result[..]);
 
-    let (sub_dir, sha_num) = sha1_parse(&result);
+    let (sub_dir, sha_num) = sha1_parse(&hex_result);
 
     let sub_dir_path = format!(".git/objects/{}/", sub_dir);
 
@@ -104,7 +107,8 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<String, io::
 
     fs::create_dir(sub_dir_path)?;
     fs::write(full_path, compressed)?;
-    Ok(result)
+    Ok((result, hex_result))
+
 }
 
 fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
@@ -137,7 +141,7 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
     Ok(result)
 }
 
-fn write_tree(file_path: &String) -> Result<String, io::Error> {
+fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
 
     let mut sha_out: String = "".to_string();
 
@@ -167,20 +171,20 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         if dir.is_dir() {
         // println!("dir: {}", path_name);
             mode = "40000";
-            let sha_file1 = write_tree(&String::from_str(path_name).unwrap());
+           (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
 
-            sha_file = hex::decode(sha_file1.unwrap()).unwrap();
+        
 
         } else /*if dir.is_file()*/ {
            
             mode = "100644";
           //  println!("file: {}",  path_name);
 
-            let file_data = fs::read( &path_name).unwrap();
+            let file_data = fs::read(&path_name).unwrap();
 
-            let sha_file1 = write_hash_object(file_data, "blob");
+        (sha_file, _) = write_hash_object(file_data, "blob").unwrap();
 
-            sha_file = hex::decode(&sha_file1.unwrap()).unwrap();
+          
             
           // println!("file out: {:?}", &sha_file);
         }
