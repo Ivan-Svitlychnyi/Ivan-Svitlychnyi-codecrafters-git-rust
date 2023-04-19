@@ -136,6 +136,8 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 fn write_tree(file_path: &String) -> Result<String, io::Error> {
 
     let mut sha_out: String = "".to_string();
+
+
     let mut entries = fs::read_dir(file_path)
         .unwrap()
         .map(|res| res.map(|e| e.path()))
@@ -150,10 +152,11 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
     
         let mut mode ="";
         let sha_file;
-        let mut path_name = dir.as_path().to_str().unwrap();
+        let path_name = dir.as_path().to_str().unwrap();
+        let mut full_path_name = "".to_string();
         
 
-        if path_name == ".git" || dir.file_name().unwrap() == ".git" {
+        if path_name == ".git"  {
             continue;      
         }
 
@@ -161,13 +164,18 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
          println!("dir: {}", path_name);
             mode = "40000";
             sha_file = write_tree(&String::from_str(path_name).unwrap());
+            full_path_name = path_name.to_string();
 
         } else if dir.is_file() {
            
             mode = "100644";
-            path_name = dir.file_name().unwrap().to_str().unwrap();
-            println!("file: {}", path_name);
-            let file_data = fs::read(path_name).unwrap();
+            let file_name = dir.file_name().unwrap().to_str().unwrap();
+
+             full_path_name = path_name.to_owned() + file_name;
+
+           println!("file: {}",  full_path_name);
+
+            let file_data = fs::read( &full_path_name).unwrap();
 
             sha_file = write_hash_object(file_data, "blob");
 
@@ -179,7 +187,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         }
        // println!("sha_file: {:?}", &sha_file);
     
-        sha_out += &format!("{mode} {path_name}\x00{}", sha_file.unwrap());
+        sha_out += &format!("{mode} {full_path_name}\x00{}", sha_file.unwrap());
         
         println!("sha_out: {:?}", sha_out);
 
