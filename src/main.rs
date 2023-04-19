@@ -1,7 +1,7 @@
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
-use sha1::digest;
+//use sha1::digest;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
