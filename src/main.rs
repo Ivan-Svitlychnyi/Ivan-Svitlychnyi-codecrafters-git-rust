@@ -156,18 +156,17 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         if path_name == ".git" || dir.file_name().unwrap() == ".git" {
             continue;      
         }
-        
+
         if dir.is_dir() {
          println!("dir: {}", path_name);
             mode = "40000";
             sha_file = write_tree(&String::from_str(path_name).unwrap());
 
         } else if dir.is_file() {
-           println!("file: {}", path_name);
+           
             mode = "100644";
-
             path_name = dir.file_name().unwrap().to_str().unwrap();
-
+            println!("file: {}", path_name);
             let file_data = fs::read(path_name).unwrap();
 
             sha_file = write_hash_object(file_data, "blob");
