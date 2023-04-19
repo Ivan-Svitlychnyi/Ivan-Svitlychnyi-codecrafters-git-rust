@@ -11,7 +11,7 @@ use std::fs;
 use std::io;
 use std::io::prelude::*;
 use std::str::FromStr;
-
+use std::str;
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear here!");
@@ -190,9 +190,12 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
         }
       
        // println!("sha_file: {:?}", &sha_file);
-    
-        sha_out += &format!("{mode} {path_name}\x00{}", String::from_utf8(sha_file).unwrap());
-        
+        let s = match str::from_utf8(&sha_file) {
+            Ok(v) => v,
+            Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
+        };    
+        sha_out += &format!("{mode} {path_name}\x00{}", s);
+
        // println!("sha_out: {:?}", sha_out);
 
     }
