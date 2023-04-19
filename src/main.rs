@@ -190,7 +190,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
        // println!("sha_file: {:?}", &sha_file);
         #[allow(unsafe_code)]
         let s = unsafe {String::from_utf8_unchecked(sha_file)};
-        sha_out += &format!("{mode} {path_name}\x00{}",s);
+        sha_out += &format!("{mode} {}\x00{}",dir.file_name().unwrap().to_str().unwrap(), s);
         
        // println!("sha_out: {:?}", sha_out);
     }
