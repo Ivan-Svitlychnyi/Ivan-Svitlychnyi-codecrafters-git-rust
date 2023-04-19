@@ -156,7 +156,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         let mut full_path_name = "".to_string();
         
 
-        if path_name == ".git"  {
+        if path_name == "./.git" {
             continue;      
         }
 
