@@ -170,14 +170,14 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
         let sha_file;
         if dir.is_dir() {
         // println!("dir: {}", path_name);
-            mode = "40000";
+            mode = "40000".as_bytes();
            (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
 
         
 
         } else /*if dir.is_file()*/ {
            
-            mode = "100644";
+            mode = "100644".as_bytes();
           //  println!("file: {}",  path_name);
 
             let file_data = fs::read(&path_name).unwrap();
@@ -190,11 +190,13 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
         }
       
        // println!("sha_file: {:?}", &sha_file);
+
+
         let s = match str::from_utf8(&sha_file) {
             Ok(v) => v,
             Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
         };    
-        sha_out += &format!("{mode} {path_name}\x00{}", s);
+        sha_out += &format!("{} {path_name}\x00{}",String::from_utf8_lossy(mode), s);
 
        // println!("sha_out: {:?}", sha_out);
 
