@@ -157,8 +157,7 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
     
     for dir in entries {
      let mode;
-       
-        
+         
         let path_name = dir.as_path().to_str().unwrap();
      
         
