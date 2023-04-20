@@ -96,7 +96,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
     let mut hasher = Sha1::new();
     hasher.update(store);
 
-    let result: Vec<u8> = hasher.finalize().to_vec();
+    let result: Vec<u8> = hasher.finalize().as_slice().to_vec();
 
     let hex_result = hex::encode(&result[..]);
 
