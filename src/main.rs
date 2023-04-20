@@ -39,7 +39,11 @@ fn main() {
         }
     } else if args[1] == "write-tree" {
         print!("{}", write_tree(&".".to_string()).unwrap());
-    } else {
+
+    } else if args[1] == "commit-tree" {
+    
+    
+    }else {
         println!("unknown command: {:#?}", args)
     }
 }
@@ -179,12 +183,12 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
         // println!("sha_file: {:?}", &sha_file);
         #[allow(unsafe_code)]
         let s = unsafe { String::from_utf8_unchecked(sha_file) };
+
         sha_out += &format!(
             "{mode} {}\x00{}",
             dir.file_name().unwrap().to_str().unwrap(),
             s
         );
-
         // println!("sha_out: {:?}", sha_out);
     }
     let res = write_hash_object(sha_out.into_bytes(), "tree");
