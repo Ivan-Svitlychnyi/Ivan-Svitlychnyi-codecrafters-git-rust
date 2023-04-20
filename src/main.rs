@@ -204,7 +204,7 @@ let user_metadata = "author Admin <admin@example.com> 1652217488 +0300\ncommitte
 
 let content = format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n");
 
-println!("content: {:?}", &content);
+//println!("content: {:?}", &content);
 let sha = write_hash_object(content.into_bytes(), "commit")?;
 
 Ok(sha)
