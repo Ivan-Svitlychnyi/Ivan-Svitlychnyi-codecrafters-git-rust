@@ -135,7 +135,6 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 
     Ok(result)
 }
-
 fn write_tree(file_path: &String) -> Result<String, io::Error> {
     let mut sha_out: String = "".to_string();
 
