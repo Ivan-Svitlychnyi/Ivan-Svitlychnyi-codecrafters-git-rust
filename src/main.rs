@@ -5,7 +5,7 @@ use flate2::Compression;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
-use std::fmt::format;
+//use std::fmt::format;
 //use std::fmt::Error;
 #[allow(unused_imports)]
 use std::fs;
@@ -181,7 +181,6 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
 
             // println!("file out: {:?}", &sha_file);
         }
-
         // println!("sha_file: {:?}", &sha_file);
         #[allow(unsafe_code)]
         let s = unsafe { String::from_utf8_unchecked(sha_file) };
