@@ -10,8 +10,8 @@ use std::env;
 use std::fs;
 use std::io;
 use std::io::prelude::*;
-use std::str::FromStr;
 use std::str;
+use std::str::FromStr;
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear here!");
@@ -26,22 +26,25 @@ fn main() {
         // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
         print!("{}", read_git_object(&args[3]).unwrap());
-
     } else if args[1] == "hash-object" && args[2] == "-w" {
         let file_data = fs::read(args[3].to_string()).unwrap();
         let (_, sha1_out) = write_hash_object(file_data, "blob").unwrap();
-        println!("hash-object in: {}",sha1_out);
-
+        println!("hash-object in: {}", sha1_out);
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
         let result = read_tree(&args[3]).unwrap();
         for s in result {
             println!("{}", s);
         }
-
     } else if args[1] == "write-tree" {
         let (_, sha1_out) = write_tree(&".".to_string()).unwrap();
         print!("{}", sha1_out);
-    } else {
+    } else if args[1] == "commit-tree"{
+
+
+
+    }
+     
+    else {
         println!("unknown command: {:#?}", args)
     }
 }
@@ -80,17 +83,10 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
     Ok(git_data)
 }
-fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>,String), io::Error> {
-     #[allow(unsafe_code)]
-     let s =  unsafe {
-         String::from_utf8_unchecked(file_data.clone())
-         };
-    let store = 
-        
-     format!(
-        "{file_type} {}\x00{}",
-        file_data.len(),s
-    );
+fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
+    #[allow(unsafe_code)]
+    let s = unsafe { String::from_utf8_unchecked(file_data.clone()) };
+    let store = format!("{file_type} {}\x00{}", file_data.len(), s);
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
@@ -99,8 +95,8 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>,Str
 
     let mut hasher = Sha1::new();
     hasher.update(store);
-    
-    let result:Vec<u8> = hasher.finalize().to_vec();
+
+    let result: Vec<u8> = hasher.finalize().to_vec();
 
     let hex_result = hex::encode(&result[..]);
 
@@ -113,7 +109,6 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>,Str
     fs::create_dir(sub_dir_path)?;
     fs::write(full_path, compressed)?;
     Ok((result, hex_result))
-
 }
 
 fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
@@ -146,64 +141,48 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
     Ok(result)
 }
 
-fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
-
+fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
     let mut sha_out: String = "".to_string();
-
 
     let mut entries = fs::read_dir(file_path)
         .unwrap()
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, io::Error>>()
         .unwrap();
-  
+
     entries.sort();
 
-    
-    
     for dir in entries {
-     let mode;
-       
-        
+        let mode;
+
         let path_name = dir.as_path().to_str().unwrap();
-     
-        
 
         if path_name == "./.git" {
-            continue;      
+            continue;
         }
         let sha_file;
         if dir.is_dir() {
-        // println!("dir: {}", path_name);
+            // println!("dir: {}", path_name);
             mode = "40000".as_bytes();
-           (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
-
-        
-
-        } else /*if dir.is_file()*/ {
-           
+            (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
+        } else
+        /*if dir.is_file()*/
+        {
             mode = "100644".as_bytes();
-          //  println!("file: {}",  path_name);
+            //  println!("file: {}",  path_name);
 
             let file_data = fs::read(&path_name).unwrap();
 
             (sha_file, _) = write_hash_object(file_data, "blob").unwrap();
 
-          
-            
-          // println!("file out: {:?}", &sha_file);
+            // println!("file out: {:?}", &sha_file);
         }
-      
-       // println!("sha_file: {:?}", &sha_file);
 
+        // println!("sha_file: {:?}", &sha_file);
 
-        // let s = match str::from_utf8(&sha_file) {
-        //     Ok(v) => v,
-        //     Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-        // };   
         #[allow(unsafe_code)]
-        let s = unsafe {String::from_utf8_unchecked(sha_file)};
-        sha_out += &format!("{} {path_name}\x00{}",String::from_utf8_lossy(mode), s);
+        let s = unsafe { String::from_utf8_unchecked(sha_file) };
+        sha_out += &format!("{} {path_name}\x00{}", String::from_utf8_lossy(mode), s);
 
         println!("sha_out: {:?}", sha_out)
     }
