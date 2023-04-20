@@ -5,6 +5,7 @@ use flate2::Compression;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
+use std::fmt::format;
 //use std::fmt::Error;
 #[allow(unused_imports)]
 use std::fs;
@@ -42,7 +43,8 @@ fn main() {
 
     } else if args[1] == "commit-tree" {
     
-    
+        print!("{}", create_commit(&args).unwrap());
+
     }else {
         println!("unknown command: {:#?}", args)
     }
@@ -193,4 +195,18 @@ fn write_tree(file_path: &String) -> Result<String, io::Error> {
     }
     let res = write_hash_object(sha_out.into_bytes(), "tree");
     res
+}
+
+fn create_commit(args: &[String]) -> Result<String, io::Error> {
+
+let (tree_sha, parent_commit_sha, data) = (&args[2], &args[4], &args[6]);
+
+let user_metadata = "author Admin <admin@example.com> 1652217488 +0300\ncommitter Name <committer@example.com> 1652224514 +0300".to_string();
+
+let content = format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n");
+
+println!("content: {:?}", &content);
+let sha = write_hash_object(content.into_bytes(), "commit")?;
+
+Ok(sha)
 }
