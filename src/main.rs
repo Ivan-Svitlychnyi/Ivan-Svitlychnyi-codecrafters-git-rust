@@ -80,13 +80,9 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 }
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<String, io::Error> {
     #[allow(unsafe_code)]
-   let s = unsafe { String::from_utf8_unchecked(file_data.clone())};
-   
-    let store = format!(
-        "{file_type} {}\x00{}",
-        file_data.len(),
-        s
-    );
+    let s = unsafe { String::from_utf8_unchecked(file_data.clone()) };
+
+    let store = format!("{file_type} {}\x00{}", file_data.len(), s);
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
@@ -141,58 +137,56 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 }
 
 fn write_tree(file_path: &String) -> Result<String, io::Error> {
-
     let mut sha_out: String = "".to_string();
-
 
     let mut entries = fs::read_dir(file_path)
         .unwrap()
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, io::Error>>()
         .unwrap();
-  
+
     entries.sort();
 
-    
-    
     for dir in entries {
-     let mode;
-         
+        let mode;
+
         let path_name = dir.as_path().to_str().unwrap();
-     
-        
 
         if path_name == "./.git" {
-            continue;      
+            continue;
         }
         let sha_file;
         if dir.is_dir() {
-        // println!("dir: {}", path_name);
+            // println!("dir: {}", path_name);
             mode = "40000";
             let sha_file1 = write_tree(&String::from_str(path_name).unwrap());
 
             sha_file = hex::decode(sha_file1.unwrap()).unwrap();
-
-        } else /*if dir.is_file()*/ {
-           
+        } else
+        /*if dir.is_file()*/
+        {
             mode = "100644";
-          //  println!("file: {}",  path_name);
+            //  println!("file: {}",  path_name);
 
-            let file_data = fs::read( &path_name).unwrap();
+            let file_data = fs::read(&path_name).unwrap();
 
             let sha_file1 = write_hash_object(file_data, "blob");
 
             sha_file = hex::decode(&sha_file1.unwrap()).unwrap();
-            
-          // println!("file out: {:?}", &sha_file);
+
+            // println!("file out: {:?}", &sha_file);
         }
-      
-       // println!("sha_file: {:?}", &sha_file);
+
+        // println!("sha_file: {:?}", &sha_file);
         #[allow(unsafe_code)]
-        let s = unsafe {String::from_utf8_unchecked(sha_file)};
-        sha_out += &format!("{mode} {}\x00{}",dir.file_name().unwrap().to_str().unwrap(), s);
-        
-       // println!("sha_out: {:?}", sha_out);
+        let s = unsafe { String::from_utf8_unchecked(sha_file) };
+        sha_out += &format!(
+            "{mode} {}\x00{}",
+            dir.file_name().unwrap().to_str().unwrap(),
+            s
+        );
+
+        // println!("sha_out: {:?}", sha_out);
     }
     let res = write_hash_object(sha_out.into_bytes(), "tree");
     res
