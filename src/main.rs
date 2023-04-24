@@ -39,7 +39,7 @@ fn main() {
         }
 
     } else if args[1] == "write-tree" {
-        let (_, sha1_out) = write_tree(&".".to_string()).unwrap();
+        let (_, sha1_out) = write_tree(&"".to_string()).unwrap();
         print!("{}", sha1_out);
     } else {
         println!("unknown command: {:#?}", args)
@@ -170,7 +170,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
      
         
 
-        if path_name == "./.git" {
+        if path_name == "/.git" {
             continue;      
         }
         let sha_file;
