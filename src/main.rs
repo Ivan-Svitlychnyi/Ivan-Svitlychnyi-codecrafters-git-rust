@@ -3,7 +3,6 @@ use flate2::write::ZlibEncoder;
 use flate2::Compression;
 
 use reqwest::header;
-use reqwest::Request;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
