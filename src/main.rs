@@ -1,3 +1,4 @@
+
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
@@ -268,16 +269,12 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     if res.status().is_success() {
         println!("success!");
+        let mut buf = Vec::new();
+        let n = res.read_to_end(&mut buf).unwrap();
+        println!("The bytes: {:?}", buf );
 
-        let mut buffer = Vec::new();
+        println!("size: {}", n);
 
-        let n = res.read(&mut buffer)?;
-
-        for c in buffer {
-            println!("The bytes: {:?}", c);
-        }
-
-        //  println!("buffer: {:?} size: {}", &buffer[16..20], n);
     } else if res.status().is_server_error() {
         println!("server error!");
     } else {
