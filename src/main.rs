@@ -179,7 +179,6 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
             mode = "40000".as_bytes();
            (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
 
-        
 
         } else /*if dir.is_file()*/ {
            
