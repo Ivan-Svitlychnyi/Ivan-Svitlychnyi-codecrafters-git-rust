@@ -227,7 +227,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     // .await?
     // .text()
     // .await?;
-
     let body = reqwest::blocking::get(url.clone() + "/info/refs?service=git-upload-pack")
         .unwrap()
         .text()
