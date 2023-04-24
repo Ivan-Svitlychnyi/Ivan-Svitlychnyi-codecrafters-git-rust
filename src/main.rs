@@ -189,7 +189,6 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
             let file_data = fs::read(&path_name).unwrap();
 
         (sha_file, _) = write_hash_object(file_data, "blob").unwrap();
-
         }
          
         #[allow(unsafe_code)]
