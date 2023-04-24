@@ -39,7 +39,7 @@ fn main() {
         }
 
     } else if args[1] == "write-tree" {
-        let (_, sha1_out) = write_tree(&"".to_string()).unwrap();
+        let (_, sha1_out) = write_tree(&".".to_string()).unwrap();
         print!("{}", sha1_out);
     } else {
         println!("unknown command: {:#?}", args)
@@ -167,10 +167,10 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
        
         
         let path_name = dir.as_path().to_str().unwrap();
-     
-        println!("dir: {}", path_name);
+         println!("dir: {}", path_name);
+        
 
-        if path_name == ".git" {
+        if path_name == "./.git" {
             continue;      
         }
         let sha_file;
@@ -179,6 +179,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
             mode = "40000".as_bytes();
            (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
 
+        
 
         } else /*if dir.is_file()*/ {
            
