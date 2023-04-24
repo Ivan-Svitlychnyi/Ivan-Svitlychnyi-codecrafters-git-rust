@@ -269,9 +269,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     if res.status().is_success() {
         println!("success!");
-        let mut buf = Vec::new();
-        let n = res.read_to_end(&mut buf).unwrap();
-        println!("The bytes: {:?}", buf );
+        let mut buf = String::new();
+        let n = res.read_to_string(&mut buf).unwrap();
+        println!("The bytes: {}", buf );
 
         println!("size: {}", n);
 
