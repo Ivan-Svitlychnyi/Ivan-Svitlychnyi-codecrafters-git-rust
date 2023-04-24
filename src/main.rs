@@ -292,7 +292,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     // println!("The bytes: {:?}", &buffer[..n]);
     //println!("res = {:?}", res.bytes());
 
-
     
 //-2-------------------------------------------------------------------------------
 
