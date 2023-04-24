@@ -257,15 +257,28 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     );
 
     let client = reqwest::blocking::Client::new();
+    
+
+
+    let data = format!("0032want {pack_hash}\n00000009done\n");
+
+
     let res = client
         .post(post_url)
         .headers(headers)
+        .form(&data)
         .send()
         .unwrap();
 
-    println!("body = {:?}", res);
-    let data = format!("0032want {pack_hash}\n00000009done\n");
-    println!("body = {:?}", data);
+    println!("res = {:?}", res);
+
+
+    
+//-2-------------------------------------------------------------------------------
+
+
+
+
     Ok("_".to_owned())
 }
 
