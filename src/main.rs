@@ -168,7 +168,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
        
         
         let path_name = dir.to_str().unwrap();
-        println!("dir: {}", path_name);
+      //  println!("dir: {}", path_name);
         
 
         if path_name == "./.git" {
