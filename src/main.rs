@@ -265,7 +265,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     let mut res = client
         .post(post_url)
         .headers(headers)
-        .body(format!("0032want {pack_hash}\n00000009done\n"))
+        //.body(format!("0032want {pack_hash}\n00000009done\n"))
         .send()
         .unwrap();
 
