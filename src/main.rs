@@ -265,24 +265,20 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         .headers(headers)
         .body(data)
         .send()
-        .unwrap();
+        .unwrap()
+        .text();
 
-    if res.status().is_success() {
+   // if res.status().is_success() {
         println!("success!");
 
-        let mut buf: Vec<u8> = vec![];
-        res.copy_to(&mut buf).unwrap();
-    
-       // let n = res.text_with_charset("utf-8");
-
-        println!("The bytes: {:#?}", buf.as_slice());
+        println!("The bytes: {}", res.unwrap());
 
 
-    } else if res.status().is_server_error() {
-        println!("server error!");
-    } else {
-        println!("Something else happened. Status: {:?}", res.status());
-    }
+   // } else if res.status().is_server_error() {
+       // println!("server error!");
+ //  } else {
+        //println!("Something else happened. Status: {:?}", res.status());
+   // }
 
     // let mut buffer = [0; 10];
 
