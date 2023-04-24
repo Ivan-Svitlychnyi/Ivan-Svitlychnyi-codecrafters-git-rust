@@ -109,6 +109,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>,Str
 
     let sub_dir_path = format!(".git/objects/{}/", sub_dir);
 
+
     let full_path = format!("{sub_dir_path}{}", sha_num);
 
     fs::create_dir(sub_dir_path)?;
@@ -166,8 +167,8 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
      let mode;
        
         
-        let path_name = dir.as_path().to_str().unwrap();
-         println!("dir: {}", path_name);
+        let path_name = dir.to_str().unwrap();
+        println!("dir: {}", path_name);
         
 
         if path_name == "./.git" {
