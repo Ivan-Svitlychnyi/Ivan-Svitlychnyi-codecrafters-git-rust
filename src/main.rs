@@ -3,6 +3,7 @@ use flate2::write::ZlibEncoder;
 use flate2::Compression;
 
 use reqwest::header;
+use reqwest::header::CONTENT_TYPE;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
@@ -255,19 +256,20 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     let mut headers = header::HeaderMap::new();
     headers.insert(
-        "Content-Type",
+        CONTENT_TYPE,
         header::HeaderValue::from_static("application/x-git-upload-pack-request"),
     );
 
     let client = reqwest::blocking::Client::new();
-   // let data = format!("0032want {pack_hash}\n00000009done\n");
+    //let data = format!("0032want {pack_hash}\n00000009done\n");
 
     let mut res = client
-        .post(post_url)
+        .get(post_url)
         .headers(headers)
-        //.body(format!("0032want {pack_hash}\n00000009done\n"))
+        .body(format!("0032want {pack_hash}\n00000009done\n"))
         .send()
         .unwrap();
+    
 
     let mut buffer = [0; 10];
 
@@ -275,8 +277,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         if res.status().is_success() {
             println!("success!");
-            println!("The bytes: {:?}", &buffer[..n]);
-            
+            println!("The bytes: {:?}", &buffer[..n]);    
             
         } else if res.status().is_server_error() {
             println!("server error!");
