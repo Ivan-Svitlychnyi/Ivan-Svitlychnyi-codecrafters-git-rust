@@ -269,11 +269,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     if res.status().is_success() {
         println!("success!");
-        let mut buf = String::new();
-        let n = res.read_to_string(&mut buf).unwrap();
-        println!("The bytes: {}", buf );
+      
+        let n = res.text_with_charset("utf-8");
+        println!("The bytes: {}", n.unwrap());
 
-        println!("size: {}", n);
 
     } else if res.status().is_server_error() {
         println!("server error!");
