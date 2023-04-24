@@ -264,7 +264,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     let res = client
         .post(post_url)
         .headers(headers)
-        .form(&data)
+        //.form(&data)
         .send()
         .unwrap();
 
