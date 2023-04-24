@@ -272,7 +272,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
       
        // let n = res.text_with_charset("utf-8");
 
-        println!("The bytes: {:#?}", res);
+        println!("The bytes: {:#?}", res.extensions());
 
 
     } else if res.status().is_server_error() {
