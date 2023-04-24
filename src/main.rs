@@ -261,23 +261,22 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     );
 
     let client = reqwest::blocking::Client::new();
-    //let data = format!("0032want {pack_hash}\n00000009done\n");
+    let data = "0032want {pack_hash}\n00000009done\n";
+    let data = data.as_bytes();
 
-    let mut res = client
-        .get(post_url)
+    let res = client
+        .post(post_url)
         .headers(headers)
-        .body(format!("0032want {pack_hash}\n00000009done\n"))
+        .body(data)
         .send()
         .unwrap();
-    
 
-    let mut buffer = [0; 10];
 
-    let n = res.read(&mut buffer[..])?;
+
 
         if res.status().is_success() {
             println!("success!");
-            println!("The bytes: {:?}", &buffer[..n]);    
+            println!("The bytes: {:?}", &res);    
             
         } else if res.status().is_server_error() {
             println!("server error!");
@@ -286,12 +285,16 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         }
 
     // let mut buffer = [0; 10];
+
     // let n = res.read(&mut buffer[..])?;
 
     // println!("The bytes: {:?}", &buffer[..n]);
     //println!("res = {:?}", res.bytes());
 
 //-2-------------------------------------------------------------------------------
+
+
+
 
     Ok("_".to_owned())
 }
