@@ -42,11 +42,8 @@ fn main() {
         print!("{}", sha1_out);
     } else if args[1] == "commit-tree" {
         print!("{}", create_commit(&args).unwrap());
-
-    }else if args[1] == "clone" {
-
-        print!("{}",clone_repo(&args).unwrap());
-
+    } else if args[1] == "clone" {
+        print!("{}", clone_repo(&args).unwrap());
     } else {
         println!("unknown command: {:#?}", args)
     }
@@ -248,9 +245,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             }
         }
     }
-    println!("pack_hash = {:?}",  pack_hash);
-
-    
+    println!("pack_hash = {:?}", pack_hash);
 
     let post_url = url.to_owned() + "/git-upload-pack";
 
@@ -271,25 +266,23 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         .send()
         .unwrap();
 
+    if res.status().is_success() {
+        println!("success!");
 
+        let mut buffer = Vec::new();
 
+        let n = res.read(&mut buffer)?;
 
-        if res.status().is_success() {
-            println!("success!");
-            println!("The bytes: {:?}", &res);   
-            let mut buffer = Vec::new();
-
-            let n = res.read(&mut buffer[..])?; 
-
-            println!("buffer: {:?} size: {}", &buffer[16..20], n); 
-
-        } else if res.status().is_server_error() {
-            println!("server error!");
-        } else {
-            println!("Something else happened. Status: {:?}", res.status());
+        for c in buffer {
+            println!("The bytes: {:?}", c);
         }
 
-
+        //  println!("buffer: {:?} size: {}", &buffer[16..20], n);
+    } else if res.status().is_server_error() {
+        println!("server error!");
+    } else {
+        println!("Something else happened. Status: {:?}", res.status());
+    }
 
     // let mut buffer = [0; 10];
 
@@ -298,9 +291,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     // println!("The bytes: {:?}", &buffer[..n]);
     //println!("res = {:?}", res.bytes());
 
-//-2-------------------------------------------------------------------------------
-
+    //-2-------------------------------------------------------------------------------
 
     Ok("_".to_owned())
 }
-
