@@ -260,18 +260,19 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     let data = "0032want {pack_hash}\n00000009done\n";
     let data = data.as_bytes();
 
-    let mut res = client
+    let res = client
         .post(post_url)
         .headers(headers)
         .body(data)
         .send()
         .unwrap()
-        .text();
+        .text()
+        .unwrap();
 
    // if res.status().is_success() {
         println!("success!");
 
-        println!("The bytes: {}", res.unwrap());
+        println!("The bytes: {}", res);
 
 
    // } else if res.status().is_server_error() {
