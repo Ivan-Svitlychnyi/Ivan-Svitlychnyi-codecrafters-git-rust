@@ -196,7 +196,6 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>,String), io::Error>{
         let s = unsafe {String::from_utf8_unchecked(sha_file)};
         sha_out += &format!("{} {path_name}\x00{}",String::from_utf8_lossy(mode), s);
 
-
     }
     let res = write_hash_object(sha_out.into_bytes(), "tree");
     res
