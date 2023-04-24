@@ -286,7 +286,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         }
 
     // let mut buffer = [0; 10];
-
     // let n = res.read(&mut buffer[..])?;
 
     // println!("The bytes: {:?}", &buffer[..n]);
