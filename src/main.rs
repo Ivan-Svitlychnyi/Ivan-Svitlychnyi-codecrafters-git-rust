@@ -269,10 +269,13 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     if res.status().is_success() {
         println!("success!");
-      
+
+        let mut buf: Vec<u8> = vec![];
+        res.copy_to(&mut buf).unwrap();
+    
        // let n = res.text_with_charset("utf-8");
 
-        println!("The bytes: {:#?}", res.extensions());
+        println!("The bytes: {:#?}", buf.as_slice());
 
 
     } else if res.status().is_server_error() {
