@@ -264,7 +264,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     let data = "0032want {pack_hash}\n00000009done\n";
     let data = data.as_bytes();
 
-    let res = client
+    let mut res = client
         .post(post_url)
         .headers(headers)
         .body(data)
@@ -276,13 +276,22 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         if res.status().is_success() {
             println!("success!");
-            println!("The bytes: {:?}", &res);    
-            
+            println!("The bytes: {:?}", &res);   
+            let mut buffer = [0; 10];
+
+            let n = res.read(&mut buffer[..])?; 
+
+            println!("buffer: {:?} size: {}", &buffer[16..20], n); 
+
         } else if res.status().is_server_error() {
             println!("server error!");
         } else {
             println!("Something else happened. Status: {:?}", res.status());
         }
+
+
+
+
 
     // let mut buffer = [0; 10];
 
