@@ -2,6 +2,8 @@ use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 
+use reqwest::header;
+use reqwest::Request;
 use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
@@ -40,6 +42,11 @@ fn main() {
         print!("{}", sha1_out);
     } else if args[1] == "commit-tree" {
         print!("{}", create_commit(&args).unwrap());
+
+    }else if args[1] == "clone" {
+
+        print!("{}",clone_repo(&args).unwrap());
+
     } else {
         println!("unknown command: {:#?}", args)
     }
@@ -197,3 +204,70 @@ fn create_commit(args: &[String]) -> Result<String, io::Error> {
 
     Ok(sha)
 }
+
+fn clone_repo(args: &[String]) -> Result<String, io::Error> {
+    // ["/tmp/codecrafters-git-target/release/git-starter-rust",
+    // "clone",
+    // "https://github.com/codecrafters-io/git-sample-2",
+    // "test_dir",]
+
+    let (url, target_dir) = (&args[2], &args[3]);
+
+    fs::create_dir(&target_dir).unwrap();
+
+    fs::create_dir(target_dir.clone() + "/.git").unwrap();
+
+    fs::create_dir(target_dir.clone() + "/.git/objects/")?;
+
+    fs::write(
+        target_dir.to_owned() + "/.git/HEAD",
+        "ref: refs/heads/master\n",
+    )?;
+
+    // let body = reqwest::get(url + "/info/refs?service=git-upload-pack")
+    // .await?
+    // .text()
+    // .await?;
+
+    let body = reqwest::blocking::get(url.clone() + "/info/refs?service=git-upload-pack")
+        .unwrap()
+        .text()
+        .unwrap();
+
+    println!("body = {:?}", body);
+
+    let content = body.split("\n");
+
+    let mut pack_hash: String = "".to_string();
+    for c in content {
+        if c.contains("refs/heads/master") && c.contains("003f") {
+            let tup = c.split(" ").enumerate();
+            for (num, value) in tup {
+                if num == 0 || num >= 4 {
+                    pack_hash += value;
+                }
+            }
+        }
+    }
+
+    let post_url = url.to_owned() + "/git-upload-pack";
+
+    let mut headers = header::HeaderMap::new();
+    headers.insert(
+        "Content-Type",
+        header::HeaderValue::from_static("application/x-git-upload-pack-request"),
+    );
+
+    let client = reqwest::blocking::Client::new();
+    let res = client
+        .post(post_url)
+        .headers(headers)
+        .send()
+        .unwrap();
+
+    println!("body = {:?}", res);
+    let data = format!("0032want {pack_hash}\n00000009done\n");
+    println!("body = {:?}", data);
+    Ok("_".to_owned())
+}
+
