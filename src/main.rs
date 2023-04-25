@@ -276,7 +276,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let mut buf: Vec<u8> = vec![];
         res.copy_to(&mut buf).unwrap();
     
-       // let n = res.text_with_charset("utf-8");
+     // let n = res.text_with_charset("utf-8");
 
        println!("res: {:#?}", res);
        println!("The bytes: {:#?}", buf.as_slice());
