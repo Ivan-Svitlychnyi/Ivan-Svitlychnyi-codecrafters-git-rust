@@ -271,7 +271,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         .send()
         .unwrap();
     
-
     if res.status().is_success() {
         println!("success!");
 
