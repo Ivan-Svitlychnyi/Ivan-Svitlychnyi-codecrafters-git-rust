@@ -260,7 +260,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     );
 
     let data = "0032want {pack_hash}\n00000009done\n";
-    headers.insert(data, header::HeaderValue::from_static(data));
+    headers.insert(data, header::HeaderValue::from_bytes(data.as_bytes()).unwrap());
 
     let client = reqwest::blocking::Client::new();
 
