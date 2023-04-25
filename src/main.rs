@@ -231,22 +231,26 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         .text()
         .unwrap();
 
-    println!("body = {:?}", body);
+    println!("body = {:#?}", body);
 
     let content = body.split("\n");
 
-    let mut pack_hash: String = "".to_string();
+    let mut pack_hash = String::new();
+
     for c in content {
         if c.contains("refs/heads/master") && c.contains("003f") {
             let tup = c.split(" ").enumerate();
+          
             for (num, value) in tup {
                 if num == 0 || num >= 4 {
+
                     pack_hash += value;
+
                 }
             }
         }
     }
-    println!("pack_hash = {:?}", pack_hash);
+    println!("pack_hash = {}", pack_hash);
 
     let post_url = url.to_owned() + "/git-upload-pack";
 
@@ -257,6 +261,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     );
 
     let client = reqwest::blocking::Client::new();
+
     let data = "0032want {pack_hash}\n00000009done\n";
     //let data = data.as_bytes();
 
@@ -275,7 +280,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         res.copy_to(&mut buf).unwrap();
     
        // let n = res.text_with_charset("utf-8");
-       
+
        println!("res: {:#?}", res);
        println!("The bytes: {:#?}", buf.as_slice());
 
