@@ -261,12 +261,12 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     let client = reqwest::blocking::Client::new();
 
-    let data = "0032want {pack_hash}\n00000009done\n";
+    //let data = "0032want {pack_hash}\n00000009done\n";
     //let data = data.as_bytes();
 
     let mut res = client.post(post_url)
         .headers(headers)
-        .form(data.as_bytes())
+       // .form(data.as_bytes())
         .send()
         .unwrap();
     
