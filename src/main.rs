@@ -260,35 +260,36 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     );
 
     let data = "0032want {pack_hash}\n00000009done\n";
-    headers.insert(data, header::HeaderValue::from_bytes(data.as_bytes()).unwrap());
-
-    let client = reqwest::blocking::Client::new();
-
-    
+    let client = reqwest::blocking::Client::new(); 
     //let data = data.as_bytes();
-
     let mut res = client.post(post_url)
         .headers(headers)
-       // .body(data.as_bytes())
-        .send()
-        .unwrap();
-    
-    if res.status().is_success() {
-        println!("success!");
+        .body(data.as_bytes());
+       
+    let res_send = res.send().unwrap();
 
-        let mut buf: Vec<u8> = vec![];
-        res.copy_to(&mut buf).unwrap();
+    if res_send.status().is_success() {
+        println!("res: {:#?}", res_send);
+        println!("success!");
+        let body = res_send.bytes().unwrap();
+
+        let v = body.to_vec();
+
+        let s = String::from_utf8_lossy(&v);
+        println!("response: {} ", s);
+
+    
     
        // let n = res.text_with_charset("utf-8");
 
-       println!("res: {:#?}", res);
-       println!("The bytes: {:#?}", buf.as_slice());
+       
+ 
 
 
-    } else if res.status().is_server_error() {
+    } else if res_send.status().is_server_error() {
         println!("server error!");
     } else {
-        println!("Something else happened. Status: {:?}", res.status());
+        println!("Something else happened. Status: {:?}", res_send.status());
     }
     // let mut buffer = [0; 10];
 
