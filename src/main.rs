@@ -264,9 +264,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     let data = "0032want {pack_hash}\n00000009done\n";
     //let data = data.as_bytes();
 
-    let mut res = client.get(post_url)
+    let mut res = client.post(post_url)
         .headers(headers)
-        .body(data.as_bytes())
+        .form(data.as_bytes())
         .send()
         .unwrap();
     
@@ -276,7 +276,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let mut buf: Vec<u8> = vec![];
         res.copy_to(&mut buf).unwrap();
     
-     // let n = res.text_with_charset("utf-8");
+       // let n = res.text_with_charset("utf-8");
 
        println!("res: {:#?}", res);
        println!("The bytes: {:#?}", buf.as_slice());
