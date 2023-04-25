@@ -251,7 +251,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         }
     }
     println!("pack_hash = {}", pack_hash);
-
     let post_url = url.to_owned() + "/git-upload-pack";
 
     let mut headers = header::HeaderMap::new();
