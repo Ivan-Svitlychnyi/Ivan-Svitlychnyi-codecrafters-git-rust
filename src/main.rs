@@ -260,12 +260,15 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         header::HeaderValue::from_static("application/x-git-upload-pack-request"),
     );
     let data = "0032want {pack_hash}\n00000009done\n";
+
+
+
     println!("0032 = {}", data);
     let client = reqwest::blocking::Client::new(); 
     //let data = data.as_bytes();
     let  res = client.post(post_url)
         .headers(headers)
-        .body(data.as_bytes());
+        .body(data);
        
     let res_send = res.send().unwrap();
 
