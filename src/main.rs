@@ -333,9 +333,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
            e.write_all(obj_write_data.as_bytes())?;
            let compressed = e.finish()?;
          
-          // if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
+          if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
            fs::create_dir(f_path).unwrap();
-          // }
+          }
 
            fs::write(
             target_dir.to_owned() + &format!("/.git/objects/{}/{}", &hex_result[..2], &hex_result[2..]),
@@ -348,8 +348,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
           println!("objs: {:#?}",    objs);
 
            let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-           e.write_all(s_git_data.as_bytes())?;
-           let compressed = e.finish()?;   
+           e.write_all(s_git_data.as_bytes()).unwrap();
+
+           let compressed = e.finish().unwrap();  
+            
             seek += compressed.len();
 
            
