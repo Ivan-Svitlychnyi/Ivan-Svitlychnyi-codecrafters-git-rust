@@ -284,10 +284,11 @@ else{
     let entries_bytes = &res_data[16..20];
     println!("entries_bytes: {:?}", entries_bytes); 
 
-
-
-
-       
+    println!("entries_bytes 0: {:?}", res_data[16]); 
+    println!("entries_bytes 1: {:?}", res_data[17]); 
+    println!("entries_bytes 2: {:?}", res_data[18]); 
+    println!("entries_bytes 3: {:?}", res_data[19]); 
+    println!("entries_bytes 4: {:?}", res_data[20]); 
     }
 
 
