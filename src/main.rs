@@ -276,6 +276,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         let data_bytes: [u8; 4] = res_data[20..res_data_size].try_into().unwrap();
         println!("entries_bytes: {:#?}", entries_bytes);
+        
         let num = u32::from_be_bytes(entries_bytes);
         println!("num: {:?}", num);
 
