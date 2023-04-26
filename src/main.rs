@@ -241,7 +241,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             let tup = c.split(" ").enumerate();
           
             for (num, value) in tup {
-                if num == 0 || num >= 4 {
+                if num == 0/*  || num >= 4*/ {
 
                     pack_hash += value;
 
@@ -272,35 +272,30 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
        
     let res_send = res.send().unwrap();
 
-    if res_send.status().is_success() {
-        println!("res: {:#?}", res_send);
-        println!("success!");
-        let body = res_send.bytes().unwrap();
 
-        let v = body.to_vec();
-
-        let s = String::from_utf8_lossy(&v);
-        println!("response: {} ", s);
-
-    
-    
-       // let n = res.text_with_charset("utf-8");
-
-       
  
 
-
-    } else if res_send.status().is_server_error() {
-        println!("server error!");
-    } else {
-        println!("Something else happened. Status: {:?}", res_send.status());
+    if !res_send.status().is_success() {
+       
+       println!("Something else happened. Status: {:?}", res_send.status()); 
     }
-    // let mut buffer = [0; 10];
 
-    // let n = res.read(&mut buffer[..])?;
+else{ 
 
-    // println!("The bytes: {:?}", &buffer[..n]);
-    //println!("res = {:?}", res.bytes());
+       let body = res_send.bytes().unwrap();
+
+       let res_data = body.to_vec();
+
+
+
+
+
+
+
+
+       
+    }
+
 
     //-2-------------------------------------------------------------------------------
     Ok("_".to_owned())
