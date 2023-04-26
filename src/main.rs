@@ -241,16 +241,15 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             let tup = c.split(" ").enumerate();
           
             for (num, value) in tup {
-                if num == 0/*  || num >= 4*/ {
+                if num == 0 {
 
-                    pack_hash += value;
+                    pack_hash = value[4..].to_string();
 
                 }
             }
         }
     }
-    pack_hash = String::from(&pack_hash[4..]);
-
+    
     println!("pack_hash = {}", pack_hash);
     let post_url = url.to_owned() + "/git-upload-pack";
 
