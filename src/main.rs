@@ -1,4 +1,3 @@
-
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
@@ -239,12 +238,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     for c in content {
         if c.contains("refs/heads/master") && c.contains("003f") {
             let tup = c.split(" ").enumerate();
-          
+
             for (num, value) in tup {
                 if num == 0 {
-
                     pack_hash = value[4..].to_string();
-
                 }
             }
         }
@@ -260,48 +257,33 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     );
     let data = format!("0032want {pack_hash}\n00000009done\n");
 
-
-
     println!("0032 = {}", data);
-    let client = reqwest::blocking::Client::new(); 
+    let client = reqwest::blocking::Client::new();
     //let data = data.as_bytes();
-    let  res = client.post(post_url)
-        .headers(headers)
-        .body(data);
-       
+    let res = client.post(post_url).headers(headers).body(data);
+
     let res_send = res.send().unwrap();
 
     if !res_send.status().is_success() {
-       
-       println!("Something else happened. Status: {:?}", res_send.status()); 
+        println!("Something else happened. Status: {:?}", res_send.status());
+    } else {
+        println!("success!");
+        let body = res_send.bytes().unwrap();
+        let res_data = body.to_vec();
+        let res_data_size = res_data.len() - 20;
+
+        let entries_bytes = res_data[16..20].try_into().unwrap();
+
+        let data_bytes: [u8; 4] = res_data[20..res_data_size].try_into().unwrap();
+
+        println!("entries_bytes: {:#?}", entries_bytes);
+        let num = u32::from_be_bytes(entries_bytes);
+        println!("num: {:?}", num);
+
+        println!("data_bytes: {:#?}", data_bytes);
+
+        //  unsafe { std::mem::transmute::<u32, [u8; 4]>(42u32.to_be()) };
     }
-
-else{ 
-    println!("success!");
-    let body = res_send.bytes().unwrap();
-    let res_data = body.to_vec();
-
-  
-
-    let entries_bytes= 
-    res_data[16..20].try_into()
-    .unwrap();
-
-
-    println!("entries_bytes: {:?}", entries_bytes);
-
-    let num = u32::from_be_bytes(entries_bytes);
-    println!("num: {:?}", num);
-
-  //  unsafe { std::mem::transmute::<u32, [u8; 4]>(42u32.to_be()) };
-
-   
-
-
-
-
-    }
-
 
     //-2-------------------------------------------------------------------------------
     Ok("_".to_owned())
