@@ -281,14 +281,25 @@ else{
     let body = res_send.bytes().unwrap();
     let res_data = body.to_vec();
 
-    let entries_bytes = &res_data[16..20];
-    println!("entries_bytes: {:?}", entries_bytes); 
+  
 
-    println!("entries_bytes 0: {:?}", res_data[16]); 
-    println!("entries_bytes 1: {:?}", res_data[17]); 
-    println!("entries_bytes 2: {:?}", res_data[18]); 
-    println!("entries_bytes 3: {:?}", res_data[19]); 
-    println!("entries_bytes 4: {:?}", res_data[20]); 
+    let entries_bytes= 
+    res_data[16..20].try_into()
+    .unwrap();
+
+
+    println!("entries_bytes: {:?}", entries_bytes);
+
+    let num = u32::from_be_bytes(entries_bytes);
+    println!("num: {:?}", num);
+
+  //  unsafe { std::mem::transmute::<u32, [u8; 4]>(42u32.to_be()) };
+
+   
+
+
+
+
     }
 
 
