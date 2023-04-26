@@ -249,7 +249,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             }
         }
     }
-    
+
     println!("pack_hash = {}", pack_hash);
     let post_url = url.to_owned() + "/git-upload-pack";
 
@@ -271,24 +271,28 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
        
     let res_send = res.send().unwrap();
 
-
- 
-
     if !res_send.status().is_success() {
        
        println!("Something else happened. Status: {:?}", res_send.status()); 
     }
 
 else{ 
+    println!("success!");
+    let body = res_send.bytes().unwrap();
+    let res_data = body.to_vec();
 
-       let body = res_send.bytes().unwrap();
-
-       let res_data = body.to_vec();
-
+    let entries_bytes = &res_data[16..20];
+    println!("entries_bytes: {:?}", entries_bytes); 
 
 
-
-
+    // +        
+    // +        num_entries = int.from_bytes(entries_bytes, byteorder="big")
+    // +        print("entries count", num_entries)
+    // +        data = pack_resp[20:-20]
+    // +
+    // +        objs = {}
+    // +        seek = 0
+    // +        objs_count = 0
 
 
 
