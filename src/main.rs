@@ -242,7 +242,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             let tup = c.split(" ").enumerate();
           
             for (num, value) in tup {
-                if num == 0 || num >= 4 {
+                if /*num == 0 ||*/ num >= 4 {
 
                     pack_hash += value;
 
@@ -262,7 +262,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     let data = "0032want {pack_hash}\n00000009done\n";
     let client = reqwest::blocking::Client::new(); 
     //let data = data.as_bytes();
-    let mut res = client.post(post_url)
+    let  res = client.post(post_url)
         .headers(headers)
         .body(data.as_bytes());
        
