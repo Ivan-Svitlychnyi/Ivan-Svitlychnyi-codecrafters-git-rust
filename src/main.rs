@@ -232,7 +232,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         .unwrap();
 
     println!("body = {:#?}", body);
-
     let content = body.split("\n");
 
     let mut pack_hash = String::new();
