@@ -278,10 +278,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let num = u32::from_be_bytes(entries_bytes);
         println!("num: {:?}", num);
 
-        let data_bytes: [u8; 4] = res_data[20..res_data_size].try_into().unwrap();
-        println!("data_bytes: {:#?}", data_bytes);
+        let data_bytes: Vec<u8> = res_data[20..res_data_size].try_into().unwrap();
 
-       
+        println!("data_bytes: {:#?}", data_bytes);
+     
         //  unsafe { std::mem::transmute::<u32, [u8; 4]>(42u32.to_be()) };
     }
 
