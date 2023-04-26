@@ -282,7 +282,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         let data_bytes: Vec<u8> = res_data[20..res_data_size].try_into().unwrap();
 
-        println!("data_bytes: {:?}", data_bytes);
+       // println!("data_bytes: {:?}", data_bytes);
 
       let mut objs= HashMap::new();
       
