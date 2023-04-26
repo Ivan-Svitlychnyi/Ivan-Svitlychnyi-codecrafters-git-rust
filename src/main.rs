@@ -285,14 +285,6 @@ else{
     println!("entries_bytes: {:?}", entries_bytes); 
 
 
-    // +        
-    // +        num_entries = int.from_bytes(entries_bytes, byteorder="big")
-    // +        print("entries count", num_entries)
-    // +        data = pack_resp[20:-20]
-    // +
-    // +        objs = {}
-    // +        seek = 0
-    // +        objs_count = 0
 
 
 
