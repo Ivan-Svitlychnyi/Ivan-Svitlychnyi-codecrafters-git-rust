@@ -14,6 +14,7 @@ use std::io;
 use std::io::prelude::*;
 use std::str;
 use std::str::FromStr;
+use std::collections::HashMap;
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear here!");
@@ -235,7 +236,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     let mut pack_hash = String::new();
 
-    for c in content {
+    for c in content.clone() {
         if c.contains("refs/heads/master") && c.contains("003f") {
             let tup = c.split(" ").enumerate();
 
@@ -266,6 +267,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     if !res_send.status().is_success() {
         println!("Something else happened. Status: {:?}", res_send.status());
+
     } else {
         println!("success!");
         let body = res_send.bytes().unwrap();
@@ -281,10 +283,94 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let data_bytes: Vec<u8> = res_data[20..res_data_size].try_into().unwrap();
 
         println!("data_bytes: {:?}", data_bytes);
-     
-        //  unsafe { std::mem::transmute::<u32, [u8; 4]>(42u32.to_be()) };
+
+      let mut objs= HashMap::new();
+      
+      let mut seek = 0;
+      let mut objs_count = 0;
+
+      while objs_count != num{
+         objs_count += 1;
+         let first = data_bytes[seek];
+         let obj_type:usize = ((first & 112) >> 4).into();
+         println!("obj_type: {:?}", obj_type);
+        while data_bytes[seek] > 128{
+               seek += 1;
+           }
+        seek += 1;
+        println!("seek : {:?}", seek );
+        if obj_type < 7 {
+
+
+            let mut git_data= ZlibDecoder::new(&data_bytes[seek..]);
+
+            let mut s_git_data = String::new();
+
+            git_data.read_to_string(&mut s_git_data)?;
+
+
+            let data_type = ["commit","tree","blob"];
+         
+            let mut obj_write_data = format!("{} {}\0",data_type[obj_type], s_git_data.len());
+            println!("obj_write_data : {:?}", obj_write_data);
+           
+            obj_write_data += &s_git_data;
+
+            println!("obj_write_data & git_data: {:?}", obj_write_data);
+            let mut hasher = Sha1::new();
+            hasher.update(obj_write_data.as_bytes());
+        
+            let result = hasher.finalize();
+        
+           let hex_result = hex::encode(&result[..]);
+           println!("hex_result: {:?}",  hex_result);
+
+           let  f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[2..]);
+           println!(" f_path: {:?}",   &f_path);
+
+           let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+
+           e.write_all(obj_write_data.as_bytes())?;
+           let compressed = e.finish()?;
+         
+           if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
+           fs::create_dir(f_path).unwrap();
+           }
+
+           fs::write(
+            target_dir.to_owned() + &format!("/.git/objects/{}/{}", &hex_result[..2], &hex_result[2..]),
+
+            compressed,
+           )?;
+           
+
+          objs.insert(hex_result,(content.clone(), obj_type));
+          println!("objs: {:#?}",    objs);
+
+           let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+           e.write_all(s_git_data.as_bytes())?;
+           let compressed = e.finish()?;   
+            seek += compressed.len();
+
+           
+        }
+
+
+      }
+
+
+       
     }
 
     //-2-------------------------------------------------------------------------------
+
     Ok("_".to_owned())
+}
+
+fn does_folder_exist_in_current_directory(cur_dir:String) -> Result<bool, io::Error> {
+
+    Ok(fs::read_dir(cur_dir)?.any(|x| {
+        let x = x.unwrap();
+        x.file_type().unwrap().is_dir() 
+    }))
 }
