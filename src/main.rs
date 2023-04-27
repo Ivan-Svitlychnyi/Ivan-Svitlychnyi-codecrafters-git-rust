@@ -310,6 +310,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
             git_data.read_to_string(&mut s_git_data)?;
 
+       
 
             let data_type = ["commit","tree","blob"];
          
@@ -336,12 +337,11 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
            let compressed = e.finish()?;
          
           if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
-           fs::create_dir(f_path).unwrap();
+           fs::create_dir(&f_path).unwrap();
           }
-
-           fs::write(
-            target_dir.to_owned() + &format!("/.git/objects/{}/{}", &hex_result[..2], &hex_result[2..]),
-
+          let f_path = f_path +"/"+ &hex_result[2..];
+          println!(" f_path: {:?}",   &f_path);
+           fs::write(f_path,
             compressed,
            )?;
            
