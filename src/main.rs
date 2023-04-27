@@ -340,7 +340,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
            fs::create_dir(&f_path).unwrap();
           }
           let f_path = f_path +"/"+ &hex_result[2..];
-          println!(" f_path: {:?}",   &f_path);
+          println!("f_path: {:?}",   &f_path);
            fs::write(f_path,
             compressed,
            )?;
@@ -400,7 +400,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
            let hex_result = hex::encode(&result[..]);
            println!("hex_result: {:?}",  hex_result);
 
-           let  f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
+           let  f_path = "./".to_owned() +& target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
            println!(" f_path: {:?}",   &f_path);
 
            let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
