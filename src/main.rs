@@ -2,7 +2,6 @@ use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 
-use hex::ToHex;
 use reqwest::header;
 use reqwest::header::CONTENT_TYPE;
 use sha1::{Digest, Sha1};
