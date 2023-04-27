@@ -361,8 +361,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         let k = (data_bytes[seek..seek+20]).to_vec();
         let k = hex::encode(k);
-       // println!("k: {:#?}", k);
-        
+       // println!("k: {:#?}", k);       
         let (base, elem_num) = objs[&k].to_owned();
 
         seek +=20;
