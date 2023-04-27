@@ -345,7 +345,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             compressed,
            )?;
            
-
           objs.insert(hex_result,(s_git_data.clone(), obj_type));
           println!("objs: {:#?}",    objs);
 
