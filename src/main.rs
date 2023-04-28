@@ -311,7 +311,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 #[allow(unsafe_code)]
                 let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
 
-                let data_type = ["", "commit", "tree", "blob","", "",""];
+                let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta"];
 
       
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
@@ -333,7 +333,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-                e.write_all(obj_write_data.as_bytes())?;
+                e.write_all(obj_write_data.as_bytes()).unwrap();
                 let compressed = e.finish().unwrap();
 
                 //  if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
@@ -341,7 +341,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 //}
                 let f_path = f_path + "/" + &hex_result[2..];
                 println!("f_path if: {:?}", &f_path);
-                fs::write(f_path, compressed.to_vec())?;
+                fs::write(f_path, compressed.to_vec()).unwrap();
                 
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
