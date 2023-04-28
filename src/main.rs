@@ -306,7 +306,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 git_data.read_to_string(&mut s_git_data)?;
 
-                let data_type = ["", "commit", "tree", "blob", "tag","ofs_delta","refs_delta"];
+                let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta"];
       
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
                 println!("obj_write_data if: {:?}", obj_write_data);
@@ -326,7 +326,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 println!("f_path: {:?}", &f_path);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-                
+
                 e.write_all(obj_write_data.as_bytes())?;
                 let compressed = e.finish().unwrap();
 
@@ -369,7 +369,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 println!("content else: {:#?}", &content);
                 println!("obj_type else: {:#?}", &obj_type);
 
-                let data_type = ["", "commit", "tree", "blob", "tag","ofs_delta","refs_delta"];
+                let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta","refs_delta"];
 
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], content.len());
 
