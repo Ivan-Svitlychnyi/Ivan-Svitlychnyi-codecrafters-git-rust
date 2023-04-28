@@ -481,9 +481,8 @@ fn identify(delta: &[u8], base: String) -> String {
 
             let length = offset_key.count_ones() + offset_key.count_zeros();
             println!("length: {:?}", &length);
-
+            let offset_key =  offset_key.reverse_bits();
             let mut offset_bytes = String::new();
-           let offset_key =  offset_key.reverse_bits();
             for n in 2..length {
                 
                 let b = offset_key >> n & 1;
@@ -507,21 +506,23 @@ fn identify(delta: &[u8], base: String) -> String {
             let length = len_key.count_ones() + len_key.count_zeros();
             println!("  length key: {:?}", &length);
 
-            let mut len_bytes = Vec::new();
+            let len_key = len_key.reverse_bits();
+            let mut len_bytes = String::new();
             for n in 2..length {
                 let b = len_key >> n & 1;
 
                 println!("b len_key:{}", b);
 
                 if b == 1 {
-                    len_bytes.push(delta[seek]);
+                    len_bytes.push(delta[seek] as char);
                     seek += 1
                 } else {
-                    len_bytes.push(0);
+                    len_bytes.push('0');
                 }
             }
-            let len_int = usize::from_le_bytes(len_bytes.try_into().unwrap());
-
+    
+            let len_int = usize::from_str(&len_bytes).unwrap();
+            
             content += &base[offset..offset + len_int];
         } else {
             println!("instr_byte:{}", instr_byte);
