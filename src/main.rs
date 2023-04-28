@@ -309,7 +309,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 git_data.read_to_end(&mut v_git_data).unwrap();
 
                 #[allow(unsafe_code)]
-                let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
+                let s_git_data = unsafe {String::from_utf8_unchecked(v_git_data) };
 
                 let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta"];
 
@@ -320,8 +320,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 obj_write_data += &s_git_data;
 
                 println!("obj_write_data & git_data if: {:?}", obj_write_data);
+
                 let mut hasher = Sha1::new();
-                hasher.update(obj_write_data.as_bytes());
+                hasher.update(obj_write_data.as_bytes().to_vec());
 
                 let result = hasher.finalize();
 
@@ -340,7 +341,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 fs::create_dir(&f_path).unwrap();
                 //}
                 let f_path = f_path + "/" + &hex_result[2..];
-                println!("f_path if: {:?}", &f_path);
+                println!("f_path if: {:?}", &f_path if);
                 fs::write(f_path, compressed.to_vec()).unwrap();
                 
 
