@@ -276,7 +276,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         println!("res_data_size: {:?}", res_data_size);
 
         let entries_bytes = res_data[16..20].try_into().unwrap();
-        println!("entries_bytes: {:#?}", entries_bytes);
+      //  println!("entries_bytes: {:#?}", entries_bytes);
         let num = u32::from_be_bytes(entries_bytes);
         println!("num: {:?}", num);
         let data_bytes: Vec<u8> = res_data[20..res_data_size].try_into().unwrap();
@@ -345,7 +345,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
-                println!("objs if: {:#?}", objs);
+               // println!("objs if: {:#?}", objs);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 e.write_all(s_git_data.as_bytes()).unwrap();
