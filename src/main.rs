@@ -431,7 +431,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let (_, sha1_out) = write_tree(&path_f).unwrap();
         print!("{}", sha1_out);
     }
-
     //-2-------------------------------------------------------------------------------
 
     Ok("_".to_owned())
