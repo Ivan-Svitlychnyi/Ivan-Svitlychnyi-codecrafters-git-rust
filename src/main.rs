@@ -358,6 +358,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let k = &data_bytes[seek..seek + 20];
                 let k = hex::encode(k);
                 println!("k: {:#?}", k);
+
                 let (base, elem_num) = objs[&k].to_owned();
 
                 seek += 20;
@@ -455,6 +456,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 fn identify(delta: &[u8], base: String) -> String {
     println!("fidentify !!!!!!!!!!!");
     let mut seek: usize = 0;
+    println!("delta: {:#?}", delta);
     while delta[seek] > 128 {
         seek += 1;
     }
