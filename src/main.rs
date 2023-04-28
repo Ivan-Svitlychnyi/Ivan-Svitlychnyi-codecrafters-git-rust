@@ -486,7 +486,6 @@ fn identify(delta: &[u8], base: String) -> String {
                 let b = offset_key >> n & 1;
 
                 println!("b offset_key: {}", b);
-
                 if b == 1 {
                    // offset_bytes += &delta[seek].to_string();
                     offset_bytes[n] = delta[seek];
