@@ -483,7 +483,7 @@ fn identify(delta: &[u8], base: String) -> String {
          
             for n in 0..length{
              
-                let b = offset_key << n & 1;
+                let b = offset_key >> n & 1;
 
                 println!("b offset_key: {}", b);
                 if b == 1 {
@@ -510,7 +510,7 @@ fn identify(delta: &[u8], base: String) -> String {
           // let mut len_bytes:[u8; 8] = [0;8];
             for n in 0..length{
             
-                let b = len_key << n & 1;
+                let b = len_key >> n & 1;
 
                 println!("b len_key:{}", b);
                 if b == 1 {
