@@ -329,7 +329,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 println!("hex_result if: {:?}", hex_result);
 
                 let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
-                println!("f_path: {:?}", &f_path);
+                println!("f_path if: {:?}", &f_path);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
@@ -340,7 +340,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 fs::create_dir(&f_path).unwrap();
                 //}
                 let f_path = f_path + "/" + &hex_result[2..];
-                println!("f_path: {:?}", &f_path);
+                println!("f_path if: {:?}", &f_path);
                 fs::write(f_path, compressed)?;
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
@@ -433,9 +433,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         println!("tree_sha: {}", &tree_sha);
 
-        let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
-        let (_, sha1_out) = write_tree(&path_f).unwrap();
-        print!("{}", sha1_out);
+        //let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
+       // let (_, sha1_out) = write_tree(&path_f).unwrap();
+       // print!("{}", sha1_out);
     }
     //-2-------------------------------------------------------------------------------
 
