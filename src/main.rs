@@ -442,6 +442,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
        // print!("{}", sha1_out);
     }
     //-2-------------------------------------------------------------------------------
+
     Ok(" ".to_owned())
 }
 
@@ -474,14 +475,15 @@ fn identify(delta: &[u8], base: String) -> String {
        println!(" instr_byte: {:?}", &instr_byte);
 
         if instr_byte >= 128 {
-            let offset_key = instr_byte & 15;
+            let offset_key = instr_byte & 0b00001111;
             println!("offset_key: {:?}", & offset_key);
             //let offset_key_bin_str = offset_key;
 
             let length = offset_key.count_ones() + offset_key.count_zeros();
             println!("length: {:?}", &length);
 
-            let mut offset_bytes = Vec::new();
+            let mut offset_bytes = String::new();
+            offset_key.reverse_bits();
             for n in 2..length {
                 
                 let b = offset_key >> n & 1;
@@ -489,16 +491,15 @@ fn identify(delta: &[u8], base: String) -> String {
                 println!("b offset_key: {}", b);
 
                 if b == 1 {
-                    offset_bytes.push(delta[seek]);
+                    offset_bytes.push(delta[seek] as char);
                     seek += 1
                 } else {
-                    offset_bytes.push(0);
+                    offset_bytes.push('0');
                 }
             }
             println!("offset_bytes: {:?}", &offset_bytes);
-            offset_bytes.reverse();
-
-            let offset = usize::from_le_bytes(offset_bytes.try_into().unwrap());
+           // offset_bytes.reverse();
+            let offset = usize::from_str(&offset_bytes).unwrap();
 
             println!("offset: {:?}", &offset);
 
