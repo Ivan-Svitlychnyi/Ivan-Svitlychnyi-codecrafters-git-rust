@@ -428,9 +428,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         data.read_to_string(&mut v_delta)?;
 
         
-
-
-
         let data = v_delta.split("/");
         let data = data.clone().nth(0).unwrap().split(" ");
         let tree_sha = data.clone().nth(data.count() -1).unwrap();
