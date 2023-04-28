@@ -522,7 +522,6 @@ fn identify(delta: &[u8], base: String) -> String {
                     len_bytes.push('0');
                 }
             }
-
             println!("len_bytes: {:?}", &len_bytes);
             let len_int = usize::from_str(&len_bytes).unwrap();
 
