@@ -509,7 +509,7 @@ fn identify(delta: &[u8], base: String) -> String {
 
             let mut len_bytes = String::new();
           // let mut len_bytes:[u8; 8] = [0;8];
-            for n in 0..length{
+            for n in 2..length{
             
                 let b = len_key << n & 1;
 
