@@ -8,14 +8,13 @@ use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
 //use std::fmt::Error;
+use std::collections::HashMap;
 #[allow(unused_imports)]
 use std::fs;
 use std::io;
 use std::io::prelude::*;
 use std::str;
 use std::str::FromStr;
-use std::collections::HashMap;
-
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -249,7 +248,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             }
         }
     }
-   
+
     println!("pack_hash = {}", pack_hash);
     let post_url = url.to_owned() + "/git-upload-pack";
 
@@ -269,7 +268,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     if !res_send.status().is_success() {
         println!("Something else happened. Status: {:?}", res_send.status());
-
     } else {
         println!("success!");
         let body = res_send.bytes().unwrap();
@@ -284,162 +282,154 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         let data_bytes: Vec<u8> = res_data[20..res_data_size].try_into().unwrap();
 
-       // println!("data_bytes: {:?}", data_bytes);
+        // println!("data_bytes: {:?}", data_bytes);
 
-      let mut objs= HashMap::new();
-      
-      let mut seek = 0;
-      let mut objs_count = 0;
+        let mut objs = HashMap::new();
 
-      while objs_count != num {
-         objs_count += 1;
-         let first = data_bytes[seek];
-         let mut obj_type:usize = ((first & 112) >> 4).into();
-         println!("obj_type: {:?}", obj_type);
-        while data_bytes[seek] > 128{
-               seek += 1;
-           }
-        seek += 1;
-        println!("seek : {:?}", seek );
-        if obj_type < 7 {
+        let mut seek = 0;
+        let mut objs_count = 0;
 
+        while objs_count != num {
+            objs_count += 1;
+            let first = data_bytes[seek];
+            let mut obj_type: usize = ((first & 112) >> 4).into();
+            println!("obj_type: {:?}", obj_type);
+            while data_bytes[seek] > 128 {
+                seek += 1;
+            }
+            seek += 1;
+            println!("seek : {:?}", seek);
+            if obj_type < 7 {
+                let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
 
-            let mut git_data= ZlibDecoder::new(&data_bytes[seek..]);
+                let mut s_git_data = String::new();
 
-            let mut s_git_data = String::new();
+                git_data.read_to_string(&mut s_git_data)?;
 
-            git_data.read_to_string(&mut s_git_data)?;
+                let data_type = ["commit", "tree", "blob"];
 
-       
+                let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
+                println!("obj_write_data : {:?}", obj_write_data);
 
-            let data_type = ["commit","tree","blob"];
-         
-            let mut obj_write_data = format!("{} {}\0",data_type[obj_type], &s_git_data.len());
-            println!("obj_write_data : {:?}", obj_write_data);
-           
-            obj_write_data += &s_git_data;
+                obj_write_data += &s_git_data;
 
-            println!("obj_write_data & git_data: {:?}", obj_write_data);
-            let mut hasher = Sha1::new();
-            hasher.update(obj_write_data.as_bytes());
-        
-            let result = hasher.finalize();
-        
-           let hex_result = hex::encode(&result[..]);
-           println!("hex_result: {:?}",  hex_result);
+                println!("obj_write_data & git_data: {:?}", obj_write_data);
+                let mut hasher = Sha1::new();
+                hasher.update(obj_write_data.as_bytes());
 
-           let  f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
-           println!(" f_path: {:?}",   &f_path);
+                let result = hasher.finalize();
 
-           let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+                let hex_result = hex::encode(&result[..]);
+                println!("hex_result: {:?}", hex_result);
 
-           e.write_all(obj_write_data.as_bytes())?;
-           let compressed = e.finish()?;
-         
-        //  if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
-           fs::create_dir(&f_path).unwrap();
-          //}
-          let f_path = f_path +"/"+ &hex_result[2..];
-          println!("f_path: {:?}",   &f_path);
-           fs::write(f_path,
-            compressed,
-           )?;
-           
-          objs.insert(hex_result,(s_git_data.clone(), obj_type));
-          println!("objs: {:#?}",    objs);
+                let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
+                println!(" f_path: {:?}", &f_path);
 
-           let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-           e.write_all(s_git_data.as_bytes()).unwrap();
+                let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-           let compressed = e.finish().unwrap();  
+                e.write_all(obj_write_data.as_bytes())?;
+                let compressed = e.finish()?;
 
-            seek += compressed.len();
+                //  if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
+                fs::create_dir(&f_path).unwrap();
+                //}
+                let f_path = f_path + "/" + &hex_result[2..];
+                println!("f_path: {:?}", &f_path);
+                fs::write(f_path, compressed)?;
 
-           
+                objs.insert(hex_result, (s_git_data.clone(), obj_type));
+                println!("objs: {:#?}", objs);
+
+                let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+                e.write_all(s_git_data.as_bytes()).unwrap();
+
+                let compressed = e.finish().unwrap();
+
+                seek += compressed.len();
+            } else {
+                let k = (data_bytes[seek..seek + 20]).to_vec();
+                let k = hex::encode(k);
+                // println!("k: {:#?}", k);
+                let (base, elem_num) = objs[&k].to_owned();
+
+                seek += 20;
+
+                let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
+                let mut v_delta = Vec::new();
+                delta.read(&mut v_delta)?;
+
+                let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+                e.write_all(&v_delta).unwrap();
+
+                let compressed_data = e.finish().unwrap();
+
+                let content = identify(&v_delta, base);
+                obj_type = elem_num;
+
+                println!("content: {:#?}", &content);
+
+                let data_type = ["commit", "tree", "blob"];
+
+                let mut obj_write_data = format!("{} {}\0", data_type[obj_type], content.len());
+
+                println!("obj_write_data : {:?}", obj_write_data);
+
+                obj_write_data += &content;
+
+                //-----------------------
+                let mut hasher = Sha1::new();
+                hasher.update(obj_write_data.as_bytes());
+
+                let result = hasher.finalize();
+
+                let hex_result = hex::encode(&result[..]);
+                println!("hex_result: {:?}", hex_result);
+
+                let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
+                println!(" f_path: {:?}", &f_path);
+
+                let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+
+                e.write_all(obj_write_data.as_bytes())?;
+                let compressed = e.finish()?;
+
+                if !does_folder_exist_in_current_directory(f_path.clone()).unwrap() {
+                    fs::create_dir(f_path).unwrap();
+                }
+
+                fs::write(
+                    target_dir.to_owned()
+                        + &format!("/.git/objects/{}/{}", &hex_result[..2], &hex_result[2..]),
+                    &compressed,
+                )?;
+
+                objs.insert(hex_result, (content.clone(), obj_type));
+                println!("objs: {:#?}", objs);
+                seek += compressed_data.len();
+            }
         }
-        else {
+        let git_path = format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
+        let git_data = fs::read(git_path)?;
 
-        let k = (data_bytes[seek..seek+20]).to_vec();
-        let k = hex::encode(k);
-       // println!("k: {:#?}", k);       
-        let (base, elem_num) = objs[&k].to_owned();
+        let mut data = ZlibDecoder::new(&git_data[..]);
 
-        seek +=20;
+        let mut v_delta = String::new();
 
+        data.read_to_string(&mut v_delta)?;
 
-        let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
-        let mut v_delta = Vec::new();
-        delta.read(&mut v_delta)?;
-
-        let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-        e.write_all(&v_delta).unwrap();
-
-        let compressed_data = e.finish().unwrap(); 
-
-
-        let content = identify(&v_delta, base);
-        obj_type = elem_num;
         
-        println!("content: {:#?}",   &content);
 
 
-        let data_type = ["commit","tree","blob"];
 
-        let mut obj_write_data = format!("{} {}\0",data_type[obj_type], content.len());
+        let data = v_delta.split("/");
+        let data = data.clone().nth(0).unwrap().split(" ");
+        let tree_sha = data.clone().nth(data.count() -1).unwrap();
 
-        println!("obj_write_data : {:?}", obj_write_data);
+        println!("tree_sha: {}", &tree_sha);
 
-        obj_write_data += &content;
-
-//-----------------------
-            let mut hasher = Sha1::new();
-            hasher.update(obj_write_data.as_bytes());
-        
-            let result = hasher.finalize();
-        
-           let hex_result = hex::encode(&result[..]);
-           println!("hex_result: {:?}",  hex_result);
-
-           let  f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
-           println!(" f_path: {:?}",   &f_path);
-
-           let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-
-           e.write_all(obj_write_data.as_bytes())?;
-           let compressed = e.finish()?;
-         
-          if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
-           fs::create_dir(f_path).unwrap();
-          }
-
-           fs::write(
-            target_dir.to_owned() + &format!("/.git/objects/{}/{}", &hex_result[..2], &hex_result[2..]),
-
-            &compressed,
-           )?;
-           
-
-          objs.insert(hex_result,(content.clone(), obj_type));
-          println!("objs: {:#?}",    objs); 
-          seek += compressed_data.len();
-
-        }
-
-
-      }
- let git_path = format!("/.git/objects/{}/{}",&pack_hash[..2], &pack_hash[2..]);
- let git_data = fs::read(git_path)?;
-
- let mut data = ZlibDecoder::new(&git_data[..]);
-
- let mut v_delta = String::new();
-
- data.read_to_string(&mut v_delta)?;
-
- println!("final data: {}", &v_delta);
-
-    
-       
+        let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
+        let (_, sha1_out) = write_tree(&path_f).unwrap();
+        print!("{}", sha1_out);
     }
 
     //-2-------------------------------------------------------------------------------
@@ -447,104 +437,88 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     Ok("_".to_owned())
 }
 
-fn does_folder_exist_in_current_directory(cur_dir:String) -> Result<bool, io::Error> {
-
+fn does_folder_exist_in_current_directory(cur_dir: String) -> Result<bool, io::Error> {
     Ok(fs::read_dir(cur_dir)?.any(|x| {
         let x = x.unwrap();
-        x.file_type().unwrap().is_dir() 
+        x.file_type().unwrap().is_dir()
     }))
 }
 
 //***************************************************************************************************** */
-fn  identify(delta: &[u8], base: String) -> String{
-
-let mut seek: usize = 0;
-while delta[seek] >128{
-
-    seek +=1;
-}
-seek +=1;
-while delta[seek] > 128{
-
-    seek +=1;
-}
-seek +=1;
-let mut content =String::new();
-
-let delta_len = delta.len();
-println!(" delta_len: {:?}",   &delta_len);
-
-while seek < delta_len{
-    let instr_byte = delta[seek];
-    seek+=1;
-println!(" instr_byte: {:?}",   &instr_byte);
-
-if instr_byte >= 128{
-
-
-let offset_key = instr_byte& 0b00001111;
-//let offset_key_bin_str = offset_key;
-
-let length = offset_key.count_ones() + offset_key.count_zeros();
-println!("  length: {:?}",   &length);
-
-let mut offset_bytes =Vec::new();
-for n in 2..length {
-    let b = offset_key >> n & 1;
-
-    println!("b offset_key: {}", b);
-
-    if b == 1{
-        offset_bytes.push(delta[seek]);
-        seek += 1
+fn identify(delta: &[u8], base: String) -> String {
+    let mut seek: usize = 0;
+    while delta[seek] > 128 {
+        seek += 1;
     }
-    else{
-        offset_bytes.push(0);
+    seek += 1;
+    while delta[seek] > 128 {
+        seek += 1;
     }
-    
-}
-println!("offset_bytes: {:?}",   &offset_bytes);
-offset_bytes.reverse();
-let offset= usize::from_le_bytes(offset_bytes.try_into().unwrap());
+    seek += 1;
+    let mut content = String::new();
 
-println!("offset: {:?}",   &offset);
+    let delta_len = delta.len();
+    println!(" delta_len: {:?}", &delta_len);
 
+    while seek < delta_len {
+        let instr_byte = delta[seek];
+        seek += 1;
+        println!(" instr_byte: {:?}", &instr_byte);
 
-let len_key = (instr_byte & 0b01110000) >> 4;
-let length = len_key.count_ones() + len_key.count_zeros();
-println!("  length key: {:?}",   &length);
+        if instr_byte >= 128 {
+            let offset_key = instr_byte & 0b00001111;
+            //let offset_key_bin_str = offset_key;
 
-let mut len_bytes =Vec::new();
-for n in 2..length {
-    let b = len_key >> n & 1;
+            let length = offset_key.count_ones() + offset_key.count_zeros();
+            println!("  length: {:?}", &length);
 
-    println!("b len_key:{}", b);
+            let mut offset_bytes = Vec::new();
+            for n in 2..length {
+                let b = offset_key >> n & 1;
 
-    if b == 1{
-        len_bytes.push(delta[seek]);
-        seek += 1
+                println!("b offset_key: {}", b);
+
+                if b == 1 {
+                    offset_bytes.push(delta[seek]);
+                    seek += 1
+                } else {
+                    offset_bytes.push(0);
+                }
+            }
+            println!("offset_bytes: {:?}", &offset_bytes);
+            offset_bytes.reverse();
+            let offset = usize::from_le_bytes(offset_bytes.try_into().unwrap());
+
+            println!("offset: {:?}", &offset);
+
+            let len_key = (instr_byte & 0b01110000) >> 4;
+            let length = len_key.count_ones() + len_key.count_zeros();
+            println!("  length key: {:?}", &length);
+
+            let mut len_bytes = Vec::new();
+            for n in 2..length {
+                let b = len_key >> n & 1;
+
+                println!("b len_key:{}", b);
+
+                if b == 1 {
+                    len_bytes.push(delta[seek]);
+                    seek += 1
+                } else {
+                    len_bytes.push(0);
+                }
+            }
+            let len_int = usize::from_le_bytes(len_bytes.try_into().unwrap());
+
+            content += &base[offset..offset + len_int];
+        } else {
+            println!("instr_byte:{}", instr_byte);
+            let num_bytes = instr_byte & 0b01111111;
+            let num_bytes = usize::from(num_bytes);
+
+            content += &String::from_utf8_lossy(&delta[seek..seek + num_bytes]);
+            seek += num_bytes
+        }
     }
-    else{
-        len_bytes.push(0);
-    }
-    
+    content
 }
-let len_int = usize::from_le_bytes(len_bytes.try_into().unwrap());
-
-content += &base[offset..offset + len_int];
-}
-else{
-println!("instr_byte:{}", instr_byte);
-let num_bytes = instr_byte & 0b01111111;
-let num_bytes = usize::from(num_bytes);
-
-
-content += &String::from_utf8_lossy(&delta[seek..seek + num_bytes]);
- seek += num_bytes
-
-    
-}
-}
-content
-}
-
