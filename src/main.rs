@@ -521,8 +521,7 @@ fn identify(delta: &[u8], base: String) -> String {
                     println!("len_bytes delta[seek]{}", delta[seek]);
                     seek += 1
                // } else {
-                 //   len_bytes  += &"0";
-                  
+                 //   len_bytes  += &"0";     
                 }
             }
             println!("len_bytes: {:?}", &len_bytes);
