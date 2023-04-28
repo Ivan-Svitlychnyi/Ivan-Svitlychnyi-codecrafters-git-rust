@@ -296,12 +296,12 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 seek += 1;
             }
             seek += 1;
-            println!("seek : {:?}", seek);
+           // println!("seek : {:?}", seek);
             if obj_type < 7 {
 
                 let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
 
-                println!("git_data");
+                //println!("git_data");
 
                 let mut v_git_data = Vec::new();
                
@@ -327,10 +327,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let result = hasher.finalize();
 
                 let hex_result = hex::encode(&result[..]);
-                println!("hex_result if: {:?}", hex_result);
+               // println!("hex_result if: {:?}", hex_result);
 
                 let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
-                println!("f_path if: {:?}", &f_path);
+              //  println!("f_path if: {:?}", &f_path);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
@@ -340,12 +340,12 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 fs::create_dir_all(&f_path)?;
                 //}
                 let f_path = f_path + "/" + &hex_result[2..];
-                println!("f_path if: {:?}", &f_path);
+              //  println!("f_path if: {:?}", &f_path);
                 fs::write(f_path, compressed.to_vec())?;
                 
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
-                println!("objs if: {:#?}", objs);
+                //println!("objs if: {:#?}", objs);
 
                 // let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 // e.write_all(s_git_data.as_bytes()).unwrap();
@@ -369,18 +369,18 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 e.write_all(&v_delta).unwrap();
 
-                let compressed_data = e.finish().unwrap();
+              //  let compressed_data = e.finish().unwrap();
 
                 let content = identify(&v_delta, base);
                 obj_type = elem_num;
-                println!("content else: {:#?}", &content);
-                println!("obj_type else: {:#?}", &obj_type);
+                //println!("content else: {:#?}", &content);
+                //println!("obj_type else: {:#?}", &obj_type);
 
                 let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta","refs_delta"];
 
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], content.len());
 
-                println!("obj_write_data : {:?}", obj_write_data);
+              //  println!("obj_write_data : {:?}", obj_write_data);
 
                 obj_write_data += &content;
 
@@ -391,10 +391,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let result = hasher.finalize();
 
                 let hex_result = hex::encode(&result[..]);
-                println!("hex_result: {:?}", hex_result);
+              //  println!("hex_result: {:?}", hex_result);
 
                 let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
-                println!(" f_path: {:?}", &f_path);
+              //  println!(" f_path: {:?}", &f_path);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
@@ -411,7 +411,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 )?;
 
                 objs.insert(hex_result, (content.clone(), obj_type));
-                println!("objs: {:#?}", objs);
+               // println!("objs: {:#?}", objs);
                 seek += delta.total_in() as usize;
             }
         }
@@ -432,7 +432,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let data = data.clone().nth(0).unwrap().split(" ");
         let tree_sha = data.clone().nth(data.count() -1).unwrap();
 
-        println!("tree_sha: {}", &tree_sha);
+        //println!("tree_sha: {}", &tree_sha);
 
         //let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
        // let (_, sha1_out) = write_tree(&path_f).unwrap();
