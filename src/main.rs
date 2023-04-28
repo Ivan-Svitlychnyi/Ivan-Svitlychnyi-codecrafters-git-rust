@@ -439,7 +439,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
        // print!("{}", sha1_out);
     }
     //-2-------------------------------------------------------------------------------
-
     Ok(" ".to_owned())
 }
 
