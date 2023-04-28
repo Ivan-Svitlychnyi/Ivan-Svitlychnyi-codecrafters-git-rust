@@ -507,8 +507,10 @@ fn identify(delta: &[u8], base: String) -> String {
             println!("  length key: {:?}", &length);
 
             let len_key = len_key.reverse_bits();
+
             let mut len_bytes = String::new();
             for n in 2..length {
+
                 let b = len_key >> n & 1;
 
                 println!("b len_key:{}", b);
@@ -520,9 +522,10 @@ fn identify(delta: &[u8], base: String) -> String {
                     len_bytes.push('0');
                 }
             }
-    
+
+            println!("len_bytes: {:?}", &len_bytes);
             let len_int = usize::from_str(&len_bytes).unwrap();
-            
+
             content += &base[offset..offset + len_int];
         } else {
             println!("instr_byte:{}", instr_byte);
