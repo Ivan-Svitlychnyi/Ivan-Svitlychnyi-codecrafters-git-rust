@@ -306,9 +306,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 git_data.read_to_string(&mut s_git_data)?;
 
-                let data_type = ["commit", "tree", "blob", "tag","ofs_delta","refs_delta"];
+                let data_type = ["", "commit", "tree", "blob", "tag","ofs_delta","refs_delta"];
       
-                let mut obj_write_data = format!("{} {}\0", data_type[obj_type -1], &s_git_data.len());
+                let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
                 println!("obj_write_data if: {:?}", obj_write_data);
 
                 obj_write_data += &s_git_data;
@@ -347,6 +347,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 seek += compressed.len();
             } else {
+                println!("else !!!!!!!!!!!!!!!!");
                 let k = (data_bytes[seek..seek + 20]).to_vec();
                 let k = hex::encode(k);
                 // println!("k: {:#?}", k);
@@ -368,9 +369,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 println!("content else: {:#?}", &content);
                 println!("obj_type else: {:#?}", &obj_type);
 
-                let data_type = ["commit", "tree", "blob", "tag","ofs_delta","refs_delta"];
+                let data_type = ["", "commit", "tree", "blob", "tag","ofs_delta","refs_delta"];
 
-                let mut obj_write_data = format!("{} {}\0", data_type[obj_type -1], content.len());
+                let mut obj_write_data = format!("{} {}\0", data_type[obj_type], content.len());
 
                 println!("obj_write_data : {:?}", obj_write_data);
 
@@ -444,6 +445,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 // }
 //***************************************************************************************************** */
 fn identify(delta: &[u8], base: String) -> String {
+    println!("fidentify !!!!!!!!!!!");
     let mut seek: usize = 0;
     while delta[seek] > 128 {
         seek += 1;
