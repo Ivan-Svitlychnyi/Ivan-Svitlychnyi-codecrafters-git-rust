@@ -378,7 +378,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 obj_write_data += &content;
 
                 //-----------------------
-                
+
                 let mut hasher = Sha1::new();
                 hasher.update(obj_write_data.as_bytes());
                 let result = hasher.finalize();
@@ -397,7 +397,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                // if !does_folder_exist_in_current_directory(f_path.clone()).unwrap() {
                     fs::create_dir(f_path).unwrap();
                 //}
-
                 fs::write(
                     target_dir.to_owned()
                         + &format!("/.git/objects/{}/{}", &hex_result[..2], &hex_result[2..]),
