@@ -297,7 +297,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             }
             seek += 1;
             println!("seek : {:?}", seek);
-            if obj_type <7 {
+            if obj_type < 7 {
                 let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
 
                 println!("git_data");
@@ -333,15 +333,15 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-                e.write_all(obj_write_data.as_bytes()).unwrap();
-                let compressed = e.finish().unwrap();
+                e.write_all(obj_write_data.as_bytes())?;
+                let compressed = e.finish()?;
 
                 //  if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
-                fs::create_dir(&f_path).unwrap();
+                fs::create_dir_all(&f_path)?;
                 //}
                 let f_path = f_path + "/" + &hex_result[2..];
                 println!("f_path if: {:?}", &f_path);
-                fs::write(f_path, compressed.to_vec()).unwrap();
+                fs::write(f_path, compressed.to_vec())?;
                 
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
