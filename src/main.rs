@@ -479,56 +479,63 @@ fn identify(delta: &[u8], base: String) -> String {
             println!("offset_key: {:?}", & offset_key);
             //let offset_key_bin_str = offset_key;
 
-            let length = offset_key.count_ones() + offset_key.count_zeros();
+            let length = (offset_key.count_ones() + offset_key.count_zeros()) as usize;
             println!("length: {:?}", &length);
-            let offset_key =  offset_key.reverse_bits();
-            let mut offset_bytes = String::new();
-            for n in 2..length {
+
+            let offset_key =  offset_key.reverse_bits()>>2;
+
+            //let mut offset_bytes = String::new();
+            let mut offset_bytes:[u8; 8] = [0;8];
+            for n in 0..length  {
                 
                 let b = offset_key >> n & 1;
 
                 println!("b offset_key: {}", b);
 
                 if b == 1 {
-                    offset_bytes += &delta[seek].to_string();
+                   // offset_bytes += &delta[seek].to_string();
+                    offset_bytes[n] = delta[seek];
                     println!("offset_bytes delta[seek]:{}", delta[seek]);
                     seek += 1
-                } else {
-                    offset_bytes += &"0";
+               // } else {
+                   // offset_bytes[n] = 0;
+                   //offset_bytes += &"0";
                    
                 }
             }
             println!("offset_bytes: {:?}", &offset_bytes);
            // offset_bytes.reverse();
-            let offset = usize::from_str(&offset_bytes).unwrap();
+            let offset = usize::from_be_bytes(offset_bytes);
 
             println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & 0b01110000) >> 4;
-            let length = len_key.count_ones() + len_key.count_zeros();
+            let length = (len_key.count_ones() + len_key.count_zeros()) as usize;
             println!("  length key: {:?}", &length);
 
-            let len_key = len_key.reverse_bits();
+            let len_key = len_key.reverse_bits()>>2;
 
-            let mut len_bytes = String::new();
-            for n in 2..length {
+          //  let mut len_bytes = String::new();
+           let mut len_bytes:[u8; 8] = [0;8];
+            for n in 0..length {
 
                 let b = len_key >> n & 1;
 
                 println!("b len_key:{}", b);
 
                 if b == 1 {
-                    len_bytes += &delta[seek].to_string();
+                   // len_bytes += &delta[seek].to_string();
+                   len_bytes[n] = delta[seek];
                     println!("len_bytes delta[seek]{}", delta[seek]);
                     seek += 1
-                } else {
-                    len_bytes  += &"0";
+               // } else {
+                 //   len_bytes  += &"0";
                    
                 }
             }
             println!("len_bytes: {:?}", &len_bytes);
 
-            let len_int = usize::from_str(&len_bytes).unwrap();
+            let len_int = usize::from_le_bytes(len_bytes);
 
             content += &base[offset..offset + len_int];
             println!("content : {:?}", &content );
@@ -538,7 +545,7 @@ fn identify(delta: &[u8], base: String) -> String {
             
             let num_bytes = usize::from(num_bytes);
             println!("num_bytes:{}", num_bytes);
-            
+
             content += &String::from_utf8_lossy(&delta[seek..seek + num_bytes]);
             seek += num_bytes
         }
