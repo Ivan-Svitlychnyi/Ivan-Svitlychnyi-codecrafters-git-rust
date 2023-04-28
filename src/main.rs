@@ -499,7 +499,7 @@ fn identify(delta: &[u8], base: String) -> String {
             }
             println!("offset_bytes: {:?}", &offset_bytes);
            // offset_bytes.reverse();
-            let offset = usize::from_be_bytes(offset_bytes);
+            let offset = usize::from_le_bytes(offset_bytes);
 
             println!("offset: {:?}", &offset);
 
