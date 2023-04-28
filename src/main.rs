@@ -328,7 +328,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
                 e.write_all(obj_write_data.as_bytes())?;
-                let compressed = e.finish()?;
+                let compressed = e.finish().unwrap();
 
                 //  if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
                 fs::create_dir(&f_path).unwrap();
@@ -356,7 +356,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
                 let mut v_delta = Vec::new();
-                delta.read(&mut v_delta)?;
+                delta.read(&mut v_delta).unwrap();
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 e.write_all(&v_delta).unwrap();
@@ -391,7 +391,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
                 e.write_all(obj_write_data.as_bytes())?;
-                let compressed = e.finish()?;
+                let compressed = e.finish().unwrap();
 
                // if !does_folder_exist_in_current_directory(f_path.clone()).unwrap() {
                     fs::create_dir(f_path).unwrap();
@@ -409,7 +409,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             }
         }
         let git_path = format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
-        let git_data = fs::read(git_path)?;
+        let git_data = fs::read(git_path).unwrap();
 
         let mut data = ZlibDecoder::new(&git_data[..]);
 
@@ -436,12 +436,12 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     Ok("_".to_owned())
 }
 
-fn does_folder_exist_in_current_directory(cur_dir: String) -> Result<bool, io::Error> {
-    Ok(fs::read_dir(cur_dir)?.any(|x| {
-        let x = x.unwrap();
-        x.file_type().unwrap().is_dir()
-    }))
-}
+// fn does_folder_exist_in_current_directory(cur_dir: String) -> Result<bool, io::Error> {
+//     Ok(fs::read_dir(cur_dir)?.any(|x| {
+//         let x = x.unwrap();
+//         x.file_type().unwrap().is_dir()
+//     }))
+// }
 //***************************************************************************************************** */
 fn identify(delta: &[u8], base: String) -> String {
     let mut seek: usize = 0;
