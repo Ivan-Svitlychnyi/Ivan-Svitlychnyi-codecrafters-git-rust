@@ -517,6 +517,7 @@ fn identify(delta: &[u8], base: String) -> String {
 
                 if b == 1 {
                     len_bytes.push(delta[seek] as char);
+                    println!("len_bytes.push:{}", delta[seek]);
                     seek += 1
                 } else {
                     len_bytes.push('0');
