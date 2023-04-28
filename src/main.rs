@@ -456,7 +456,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 fn identify(delta: &[u8], base: String) -> String {
     println!("fidentify !!!!!!!!!!!");
     let mut seek: usize = 0;
-    println!("delta: {:#?}", delta);
+   // println!("delta: {:#?}", delta);
     while delta[seek] > 128 {
         seek += 1;
     }
