@@ -483,12 +483,8 @@ fn identify(delta: &[u8], base: String) -> String {
             println!("length: {:?}", &length);
 
             let mut offset_bytes = Vec::new();
-
-
-
-
             for n in 2..length {
-
+                
                 let b = offset_key >> n & 1;
 
                 println!("b offset_key: {}", b);
@@ -502,7 +498,7 @@ fn identify(delta: &[u8], base: String) -> String {
             }
             println!("offset_bytes: {:?}", &offset_bytes);
             offset_bytes.reverse();
-            let offset = usize::from(offset_bytes);
+            let offset = usize::from_le_bytes(offset_bytes.try_into().unwrap());
 
             println!("offset: {:?}", &offset);
 
