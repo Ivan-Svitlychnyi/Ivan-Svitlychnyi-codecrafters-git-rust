@@ -468,21 +468,22 @@ fn identify(delta: &[u8], base: String) -> String {
     let mut content = String::new();
 
     let delta_len = delta.len();
-   // println!(" delta_len: {:?}", &delta_len);
+    println!(" delta_len: {:?}", &delta_len);
     while seek < delta_len {
         let instr_byte = delta[seek];
         seek += 1;
-       // println!(" instr_byte: {:?}", &instr_byte);
+       println!(" instr_byte: {:?}", &instr_byte);
 
         if instr_byte >= 128 {
             let offset_key = instr_byte & 0b00001111;
             //let offset_key_bin_str = offset_key;
 
             let length = offset_key.count_ones() + offset_key.count_zeros();
-            println!("  length: {:?}", &length);
+            println!("length: {:?}", &length);
 
             let mut offset_bytes = Vec::new();
             for n in 2..length {
+                
                 let b = offset_key >> n & 1;
 
                 println!("b offset_key: {}", b);
