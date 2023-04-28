@@ -476,14 +476,19 @@ fn identify(delta: &[u8], base: String) -> String {
 
         if instr_byte >= 128 {
             let offset_key = instr_byte & 0b00001111;
+            println!("offset_key: {:?}", & offset_key);
             //let offset_key_bin_str = offset_key;
 
             let length = offset_key.count_ones() + offset_key.count_zeros();
             println!("length: {:?}", &length);
 
             let mut offset_bytes = Vec::new();
+
+
+
+
             for n in 2..length {
-                
+
                 let b = offset_key >> n & 1;
 
                 println!("b offset_key: {}", b);
@@ -497,7 +502,7 @@ fn identify(delta: &[u8], base: String) -> String {
             }
             println!("offset_bytes: {:?}", &offset_bytes);
             offset_bytes.reverse();
-            let offset = usize::from_le_bytes(offset_bytes.try_into().unwrap());
+            let offset = usize::from(offset_bytes);
 
             println!("offset: {:?}", &offset);
 
