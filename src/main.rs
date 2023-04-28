@@ -475,7 +475,7 @@ fn identify(delta: &[u8], base: String) -> String {
        println!(" instr_byte: {:?}", &instr_byte);
 
         if instr_byte >= 128 {
-            let offset_key = instr_byte & 0b00001111;
+            let offset_key = instr_byte & 15;
             println!("offset_key: {:?}", & offset_key);
             //let offset_key_bin_str = offset_key;
 
