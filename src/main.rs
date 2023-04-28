@@ -469,7 +469,6 @@ fn identify(delta: &[u8], base: String) -> String {
 
     let delta_len = delta.len();
    // println!(" delta_len: {:?}", &delta_len);
-
     while seek < delta_len {
         let instr_byte = delta[seek];
         seek += 1;
