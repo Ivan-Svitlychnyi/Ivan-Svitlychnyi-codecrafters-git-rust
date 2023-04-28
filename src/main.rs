@@ -304,9 +304,13 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 println!("git_data");
 
-                let mut s_git_data = String::new();
+                let mut v_git_data = Vec::new();
+               
 
-                git_data.read_to_string(&mut s_git_data).unwrap();
+                git_data.read_to_end(&mut v_git_data).unwrap();
+
+                #[allow(unsafe_code)]
+                let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
 
                 let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta"];
 
