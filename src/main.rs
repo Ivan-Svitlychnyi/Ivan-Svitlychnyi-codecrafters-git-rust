@@ -491,10 +491,11 @@ fn identify(delta: &[u8], base: String) -> String {
 
                 if b == 1 {
                     offset_bytes += &delta[seek].to_string();
-                    println!("offset_bytes:{}", delta[seek]);
+                    println!("offset_bytes delta[seek]:{}", delta[seek]);
                     seek += 1
                 } else {
-                    offset_bytes.push('0');
+                    offset_bytes += &"0";
+                   
                 }
             }
             println!("offset_bytes: {:?}", &offset_bytes);
@@ -518,25 +519,30 @@ fn identify(delta: &[u8], base: String) -> String {
 
                 if b == 1 {
                     len_bytes += &delta[seek].to_string();
-                    println!("len_bytes.push:{}", delta[seek]);
+                    println!("len_bytes delta[seek]{}", delta[seek]);
                     seek += 1
                 } else {
-                    len_bytes.push('0');
+                    len_bytes  += &"0";
+                   
                 }
             }
             println!("len_bytes: {:?}", &len_bytes);
+
             let len_int = usize::from_str(&len_bytes).unwrap();
 
             content += &base[offset..offset + len_int];
+            println!("content : {:?}", &content );
         } else {
             println!("instr_byte:{}", instr_byte);
             let num_bytes = instr_byte & 0b01111111;
+            
             let num_bytes = usize::from(num_bytes);
-
+            println!("num_bytes:{}", num_bytes);
+            
             content += &String::from_utf8_lossy(&delta[seek..seek + num_bytes]);
             seek += num_bytes
         }
     }
-    
+
     content
 }
