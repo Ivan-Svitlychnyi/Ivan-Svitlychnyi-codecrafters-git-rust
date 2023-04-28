@@ -498,7 +498,7 @@ fn identify(delta: &[u8], base: String) -> String {
             }
             println!("offset_bytes: {:?}", &offset_bytes);
            // offset_bytes.reverse();
-            let offset = usize::from_be_bytes(offset_bytes);
+            let offset = usize::from_le_bytes(offset_bytes);
             println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & 0b01110000) >> 4;
@@ -527,7 +527,7 @@ fn identify(delta: &[u8], base: String) -> String {
             }
             println!("len_bytes: {:?}", &len_bytes);
 
-            let len_int = usize::from_be_bytes(len_bytes);
+            let len_int = usize::from_le_bytes(len_bytes);
             println!("len_int: {:?}", &len_int);
 
             content += &base[offset..offset + len_int];
