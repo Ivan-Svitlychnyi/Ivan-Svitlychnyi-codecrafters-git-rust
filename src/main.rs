@@ -539,7 +539,6 @@ fn identify(delta: &[u8], base: String) -> String {
             
             let num_bytes = usize::from(num_bytes);
             println!("num_bytes:{}", num_bytes);
-
             content += &String::from_utf8_lossy(&delta[seek..seek + num_bytes]);
             seek += num_bytes;
         }
