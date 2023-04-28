@@ -537,5 +537,6 @@ fn identify(delta: &[u8], base: String) -> String {
             seek += num_bytes
         }
     }
+    
     content
 }
