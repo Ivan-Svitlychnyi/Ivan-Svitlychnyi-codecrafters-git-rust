@@ -483,7 +483,7 @@ fn identify(delta: &[u8], base: String) -> String {
             println!("length: {:?}", &length);
 
             let mut offset_bytes = String::new();
-            offset_key.reverse_bits();
+           let offset_key =  offset_key.reverse_bits();
             for n in 2..length {
                 
                 let b = offset_key >> n & 1;
