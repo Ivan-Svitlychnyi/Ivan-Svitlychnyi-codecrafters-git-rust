@@ -299,15 +299,15 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             }
             seek += 1;
             println!("seek : {:?}", seek);
-            if obj_type < 7 {
+            if obj_type <7 {
                 let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
 
                 let mut s_git_data = String::new();
 
                 git_data.read_to_string(&mut s_git_data)?;
 
-                let data_type = ["commit", "tree", "blob"];
-
+                let data_type = ["", "commit", "tree", "blob", "tag","ofs_delta","refs_delta"];
+      
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
                 println!("obj_write_data if: {:?}", obj_write_data);
 
@@ -368,7 +368,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 println!("content: {:#?}", &content);
 
-                let data_type = ["commit", "tree", "blob"];
+                let data_type = ["", "commit", "tree", "blob", "tag","ofs_delta","refs_delta"];
 
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], content.len());
 
