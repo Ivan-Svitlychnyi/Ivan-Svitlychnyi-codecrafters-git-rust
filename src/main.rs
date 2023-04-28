@@ -373,7 +373,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             //     e.write_all(&v_delta).unwrap();
 
             //    let compressed_data = e.finish().unwrap();
-                 println!("v_delta: {:#?}", &v_delta);
+                // println!("v_delta: {:#?}", &v_delta);
                 let content = identify(&v_delta, base);
                 obj_type = elem_num;
                 //println!("content else: {:#?}", &content);
