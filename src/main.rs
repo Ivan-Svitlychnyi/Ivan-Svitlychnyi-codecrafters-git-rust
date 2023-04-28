@@ -363,13 +363,15 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 seek += 20;
 
                 let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
+
                 let mut v_delta = Vec::new();
                 delta.read(&mut v_delta).unwrap();
 
-                let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-                e.write_all(&v_delta).unwrap();
+            //     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-              //  let compressed_data = e.finish().unwrap();
+            //     e.write_all(&v_delta).unwrap();
+
+            //    let compressed_data = e.finish().unwrap();
 
                 let content = identify(&v_delta, base);
                 obj_type = elem_num;
@@ -464,12 +466,12 @@ fn identify(delta: &[u8], base: String) -> String {
     let mut content = String::new();
 
     let delta_len = delta.len();
-    println!(" delta_len: {:?}", &delta_len);
+   // println!(" delta_len: {:?}", &delta_len);
 
     while seek < delta_len {
         let instr_byte = delta[seek];
         seek += 1;
-        println!(" instr_byte: {:?}", &instr_byte);
+       // println!(" instr_byte: {:?}", &instr_byte);
 
         if instr_byte >= 128 {
             let offset_key = instr_byte & 0b00001111;
