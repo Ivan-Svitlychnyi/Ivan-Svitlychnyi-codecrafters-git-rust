@@ -306,7 +306,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut v_git_data = Vec::new();
                
 
-                git_data.read_to_end(&mut v_git_data).unwrap();
+                git_data.read(&mut v_git_data).unwrap();
 
                 #[allow(unsafe_code)]
                 let s_git_data = unsafe {String::from_utf8_unchecked(v_git_data) };
