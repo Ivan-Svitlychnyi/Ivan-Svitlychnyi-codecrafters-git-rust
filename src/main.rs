@@ -490,8 +490,8 @@ fn identify(delta: &[u8], base: String) -> String {
                 println!("b offset_key: {}", b);
 
                 if b == 1 {
-                    offset_bytes.push(delta[seek] as char);
-                    println!(" offset_bytes:{}", delta[seek]);
+                    offset_bytes += &delta[seek].to_string();
+                    println!("offset_bytes:{}", delta[seek]);
                     seek += 1
                 } else {
                     offset_bytes.push('0');
@@ -517,7 +517,7 @@ fn identify(delta: &[u8], base: String) -> String {
                 println!("b len_key:{}", b);
 
                 if b == 1 {
-                    len_bytes.push(delta[seek] as char);
+                    len_bytes += &delta[seek].to_string();
                     println!("len_bytes.push:{}", delta[seek]);
                     seek += 1
                 } else {
