@@ -505,7 +505,7 @@ fn identify(delta: &[u8], base: String) -> String {
             let len_key = (instr_byte & 0b01110000) >> 4;
             let length = (len_key.count_ones() + len_key.count_zeros()) as usize;
             println!("  length key: {:?}", &length);
-          //  let len_key = len_key.reverse_bits();
+           let len_key = len_key.reverse_bits();
 
             let mut len_bytes = String::new();
           // let mut len_bytes:[u8; 8] = [0;8];
