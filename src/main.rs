@@ -442,7 +442,6 @@ fn does_folder_exist_in_current_directory(cur_dir: String) -> Result<bool, io::E
         x.file_type().unwrap().is_dir()
     }))
 }
-
 //***************************************************************************************************** */
 fn identify(delta: &[u8], base: String) -> String {
     let mut seek: usize = 0;
