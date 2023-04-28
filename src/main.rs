@@ -491,6 +491,7 @@ fn identify(delta: &[u8], base: String) -> String {
 
                 if b == 1 {
                     offset_bytes.push(delta[seek] as char);
+                    println!(" offset_bytes:{}", delta[seek]);
                     seek += 1
                 } else {
                     offset_bytes.push('0');
