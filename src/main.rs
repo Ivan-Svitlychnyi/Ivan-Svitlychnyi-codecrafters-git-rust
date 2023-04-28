@@ -478,26 +478,27 @@ fn identify(delta: &[u8], base: String) -> String {
 
             //let offset_key =  offset_key.reverse_bits();
 
-            //let mut offset_bytes = String::new();
-            let mut offset_bytes:[u8; 8] = [0;8];
+            let mut offset_bytes = String::new();
+           // let mut offset_bytes:[u8; 8] = [0;8];
             for n in 0..length -2{
                 
                 let b = offset_key >> n & 1;
 
                 println!("b offset_key: {}", b);
                 if b == 1 {
-                   // offset_bytes += &delta[seek].to_string();
-                    offset_bytes[n] = delta[seek];
+                    offset_bytes += &delta[seek].to_string();
+                   // offset_bytes[n] = delta[seek];
                     println!("offset_bytes delta[seek]:{}", delta[seek]);
                     seek += 1
-               // } else {
-                   // offset_bytes[n] = 0;
-                   //offset_bytes += &"0";          
+                } else {
+                  
+                   offset_bytes += &"0";          
                 }
             }
             println!("offset_bytes: {:?}", &offset_bytes);
            // offset_bytes.reverse();
-            let offset = usize::from_le_bytes(offset_bytes);
+           // let offset = usize::from_le_bytes(offset_bytes);
+             let offset = usize::from_str(&offset_bytes).unwrap();
             println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & 0b01110000) >> 4;
@@ -506,29 +507,31 @@ fn identify(delta: &[u8], base: String) -> String {
 
            // let len_key = len_key.reverse_bits();
 
-          //  let mut len_bytes = String::new();
-           let mut len_bytes:[u8; 8] = [0;8];
+            let mut len_bytes = String::new();
+          // let mut len_bytes:[u8; 8] = [0;8];
             for n in 0..length -2{
 
                 let b = len_key >> n & 1;
 
                 println!("b len_key:{}", b);
                 if b == 1 {
-                   // len_bytes += &delta[seek].to_string();
-                   len_bytes[n] = delta[seek];
+                    len_bytes += &delta[seek].to_string();
+                  // len_bytes[n] = delta[seek];
 
                     println!("len_bytes delta[seek]{}", delta[seek]);
                     seek += 1
-               // } else {
-                 //   len_bytes  += &"0";     
+               } else {
+                    len_bytes  += &"0";     
                 }
             }
             println!("len_bytes: {:?}", &len_bytes);
+           // let len_int = usize::from_le_bytes(len_bytes);
+            let len_int = usize::from_str(&len_bytes).unwrap();
 
-            let len_int = usize::from_le_bytes(len_bytes);
             println!("len_int: {:?}", &len_int);
 
             content += &base[offset..offset + len_int];
+
             println!("content : {:?}", &content );
         } else {
             println!("instr_byte:{}", instr_byte);
