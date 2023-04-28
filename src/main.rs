@@ -306,7 +306,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut v_git_data = Vec::new();
                
 
-                git_data.read(&mut v_git_data).unwrap();
+                git_data.read_to_end(&mut v_git_data).unwrap();
 
                 #[allow(unsafe_code)]
                 let s_git_data = unsafe {String::from_utf8_unchecked(v_git_data) };
@@ -345,14 +345,14 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
-               // println!("objs if: {:#?}", objs);
+                println!("objs if: {:#?}", objs);
 
-                let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-                e.write_all(s_git_data.as_bytes()).unwrap();
+                // let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+                // e.write_all(s_git_data.as_bytes()).unwrap();
 
-                let compressed = e.finish().unwrap();
+                // let compressed = e.finish().unwrap();
 
-                seek += compressed.len();
+                seek += git_data.total_in() as usize;
             } else {
                 println!("else !!!!!!!!!!!!!!!!");
                 let k = (data_bytes[seek..seek + 20]).to_vec();
@@ -412,7 +412,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 objs.insert(hex_result, (content.clone(), obj_type));
                 println!("objs: {:#?}", objs);
-                seek += compressed_data.len();
+                seek += delta.total_in() as usize;
             }
         }
         let git_path = format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
