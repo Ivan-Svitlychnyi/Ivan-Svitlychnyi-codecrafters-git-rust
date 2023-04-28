@@ -298,6 +298,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             seek += 1;
             println!("seek : {:?}", seek);
             if obj_type < 7 {
+
                 let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
 
                 println!("git_data");
@@ -314,11 +315,11 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
       
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
-                println!("obj_write_data if: {:?}", obj_write_data);
+               // println!("obj_write_data if: {:?}", obj_write_data);
 
                 obj_write_data += &s_git_data;
 
-                println!("obj_write_data & git_data if: {:?}", obj_write_data);
+               // println!("obj_write_data & git_data if: {:?}", obj_write_data);
 
                 let mut hasher = Sha1::new();
                 hasher.update(obj_write_data.as_bytes().to_vec());
