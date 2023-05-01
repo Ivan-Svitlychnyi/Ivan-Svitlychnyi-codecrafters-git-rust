@@ -379,7 +379,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let content = identify(&v_delta, base);
                 obj_type = elem_num;
                 //println!("content else: {:#?}", &content);
-                //println!("obj_type else: {:#?}", &obj_type);
+                println!("obj_type else: {:#?}", &obj_type);
 
                 let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta","refs_delta"];
 
@@ -412,10 +412,11 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 fs::write(
                     f_path + &hex_result[2..],
                     &compressed,
-                )?;
+                ).unwrap();
 
+                println!("objs k else: {:#?}", hex_result);
                 objs.insert(hex_result, (content.clone(), obj_type));
-               // println!("objs: {:#?}", objs);
+                
                 seek += delta.total_in() as usize;
             }
         }
@@ -530,7 +531,7 @@ fn identify(delta: &[u8], base: String) -> String {
             println!("len_int: {:?}", &len_int);
             content += &base[offset..offset + len_int];
 
-            println!("content : {:?}", &content );
+           // println!("content : {:?}", &content );
         } else {
             println!("instr_byte:{}", instr_byte);
             let num_bytes = instr_byte & 0b01111111;
@@ -540,7 +541,6 @@ fn identify(delta: &[u8], base: String) -> String {
             println!("seek usize:{}", seek);
             content += &String::from_utf8_lossy(&delta[seek..(seek + num_bytes)]);
 
-            content += &String::from_utf8_lossy(&delta[seek..(seek + num_bytes)]);
             seek += num_bytes;
         }
     }
