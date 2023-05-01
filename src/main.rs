@@ -185,6 +185,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
     });
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+    
     e.write_all(store.as_bytes())?;
     let compressed = e.finish()?;
 
