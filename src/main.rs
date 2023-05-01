@@ -475,7 +475,7 @@ fn identify(delta: &[u8], base: String) -> String {
 
     
 
-           let offset_key =  offset_key.reverse_bits();
+          // let offset_key =  offset_key.reverse_bits();
 
             let mut offset_bytes = String::new();
            // let mut offset_bytes:[u8; 8] = [0;8];
@@ -498,11 +498,12 @@ fn identify(delta: &[u8], base: String) -> String {
           
            // let offset = usize::from_le_bytes(offset_bytes);
              let offset = usize::from_str(&offset_bytes).unwrap();
+             
             println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & 0b01110000) >> 4;
          
-           let len_key = len_key.reverse_bits();
+          // let len_key = len_key.reverse_bits();
 
             let mut len_bytes = String::new();
           // let mut len_bytes:[u8; 8] = [0;8];
