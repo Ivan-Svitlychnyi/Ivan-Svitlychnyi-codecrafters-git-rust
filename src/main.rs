@@ -134,8 +134,8 @@ while tree.len() > 0 {
 
     tree = &tree[pos + "\x00".len()..];
     let sha = &tree[..20];
-    tree = &tree[20..];
-
+    tree = &tretreee[20..];
+    println!("tree: {:#?}", &tree);
     let mut hasher = Sha1::new();
     hasher.update(sha);
 
