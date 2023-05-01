@@ -168,8 +168,11 @@ else {
     
     let blob_sha = entry.2;
     println!("blob_sha: {:#?}", &blob_sha);
+    let curr_dir = target_dir.clone() + &format!("/.git/objects/{}/{}",&blob_sha[..2], &blob_sha[2..]);
+    println!("curr_dir: {:#?}", &curr_dir);
 
-    let git_data = fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}",&blob_sha[..2], &blob_sha[2..])).unwrap();
+    let git_data = fs::read(curr_dir).unwrap();
+
 
     let mut git_data = ZlibDecoder::new(&git_data[..]);
 
