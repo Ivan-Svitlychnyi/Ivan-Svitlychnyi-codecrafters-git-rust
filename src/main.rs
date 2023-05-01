@@ -110,13 +110,14 @@ fn checkout_tree(sha:String,  target_dir:String) {
 //let tree = tree.split("\x00").skip(0);
 
 
-let pos = v_git_data.iter().position(|&r| r.to_string() == "\x00").unwrap();
+let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
+
 let mut tree = &v_git_data[pos + "\x00".len()..];
 
 
 for _ in tree{
 
-    let pos = tree.iter().position(|&r| r.to_string() == "\x00").unwrap();
+    let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
    //  println!("position: {:#?}", &pos);
 
      let  mode_name = &v_git_data[..pos];
