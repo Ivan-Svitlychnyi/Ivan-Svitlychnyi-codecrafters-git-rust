@@ -130,7 +130,7 @@ while tree.len() > 0 {
      let  mut mode_name = mode_name.split(|&num| num  == ' ' as u8);
 
 
-    println!("mode_name: {:#?}", &mode_name);
+    //println!("mode_name: {:#?}", &mode_name);
 
      let mode = mode_name.next().unwrap();
      let name = mode_name.next().unwrap();
@@ -140,7 +140,7 @@ while tree.len() > 0 {
     let sha = &tree[..20];
     tree = &tree[20..];
 
-    println!("tree: {:#?}", &tree);
+    //println!("tree: {:#?}", &tree);
     let mut hasher = Sha1::new();
     hasher.update(sha);
 
