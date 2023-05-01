@@ -185,7 +185,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
     });
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-    
+
     e.write_all(store.as_bytes())?;
     let compressed = e.finish()?;
 
@@ -205,6 +205,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
     fs::create_dir(sub_dir_path)?;
     fs::write(full_path, compressed)?;
     Ok((result.to_vec(), hex_result))
+    
 }
 
 fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
