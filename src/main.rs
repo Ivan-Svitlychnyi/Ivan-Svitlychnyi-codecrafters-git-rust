@@ -98,23 +98,56 @@ fn checkout_tree(sha:String,  target_dir:String) {
     let mut v_git_data = Vec::new();
     git_data.read_to_end(&mut v_git_data).unwrap();
 
-    #[allow(unsafe_code)]
-    let tree = unsafe {
-        String::from_utf8_unchecked(v_git_data)
-    };
+    // #[allow(unsafe_code)]
+    // let tree = unsafe {
+    //     String::from_utf8_unchecked(v_git_data)
+    // };
 
-    //let enteries= String::new();
+    let mut enteries= String::new();
 //println!("enteries: {:#?}", &s_git_data);
 
 //let tree = s_git_data.split(|x| [*x] == "\x00".as_bytes());
-let tree = tree.split("\x00").skip(0);
+//let tree = tree.split("\x00").skip(0);
 
-for s in tree{
 
-    println!("enteries: {:#?}", &s);
+let pos = v_git_data.iter().position(|&r| r.to_string() == "\x00").unwrap();
+let mut tree = &v_git_data[pos + "\x00".len()..];
 
+
+for _ in tree{
+
+    let pos = tree.iter().position(|&r| r.to_string() == "\x00").unwrap();
+   //  println!("position: {:#?}", &pos);
+
+     let  mode_name = &v_git_data[..pos];
+    // println!("mode_name: {:#?}", &mode_name);
+
+     let  mut mode_name = mode_name.split(|num| num.to_string()  == " ");
+     let (mode, name) = (&mode_name.nth(0).unwrap(), &mode_name.nth(1).unwrap());
+
+    tree = &tree[pos + "\x00".len()..];
+    let sha = &tree[..20];
+    tree = &tree[20..];
+
+    let mut hasher = Sha1::new();
+    hasher.update(sha);
+
+    let sha  = hasher.finalize();
+
+    let sha = hex::encode(&sha[..]);
+    let mode = String::from_utf8_lossy(mode);
+    let name = String::from_utf8_lossy(name);
+
+    enteries.push_str(&mode);
+    println!("mode: {:#?}", &mode);
+    enteries.push_str(&name);
+    println!("name: {:#?}", &name);
+    enteries.push_str(&sha);
+    println!("sha: {:#?}", &sha);
+    
 }
 
+  
 
 
 
