@@ -374,7 +374,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
 
                 //println!("git_data");
-
                 let mut v_git_data = Vec::new();
                
 
