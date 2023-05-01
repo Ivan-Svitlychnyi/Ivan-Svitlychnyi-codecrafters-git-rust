@@ -9,6 +9,7 @@ use sha1::{Digest, Sha1};
 use std::env;
 //use std::fmt::Error;
 use std::collections::HashMap;
+use std::fmt::format;
 #[allow(unused_imports)]
 use std::fs;
 use std::io;
@@ -85,6 +86,27 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
     Ok(git_data)
 }
+
+
+fn checkout_tree(sha:String,  target_dir:String) {
+    fs::create_dir_all(target_dir).unwrap();
+
+    let git_data = fs::read(target_dir + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..])).unwrap();
+    let mut git_data = ZlibDecoder::new(&git_data[..]);
+
+    let mut s_git_data = String::new();
+    git_data.read_to_string(&mut s_git_data).unwrap();
+
+    let enteries = String::new();
+    let tree = s_git_data.split("\x00");
+for a in tree{
+  println!("enteries: {:?}", &a);
+
+}
+
+
+
+}                       
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
     #[allow(unsafe_code)]
     let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
@@ -439,9 +461,13 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let tree_sha = data.clone().nth(data.count() -1).unwrap();
 
         println!("tree_sha: {}", &tree_sha);
-        let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
-        let (_, sha1_out) = write_tree(&path_f).unwrap();
-        print!("sha1_out: {}", sha1_out);
+        
+        checkout_tree(tree_sha.to_owned(),  target_dir.to_string());
+
+
+        //let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
+       // let (_, sha1_out) = write_tree(&path_f).unwrap();
+       // print!("sha1_out: {}", sha1_out);
     }
     //-2-------------------------------------------------------------------------------
     Ok(" ".to_owned())
@@ -505,7 +531,7 @@ fn identify(delta: &[u8], base: String) -> String {
             println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & 0b01110000) >> 4;
-            
+
            //let len_key = len_key.reverse_bits();
           // let len_key = len_key;
            // let mut len_bytes = String::new();
