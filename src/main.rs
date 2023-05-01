@@ -9,7 +9,7 @@ use sha1::{Digest, Sha1};
 use std::env;
 //use std::fmt::Error;
 use std::collections::HashMap;
-use std::fmt::format;
+//use std::fmt::format;
 //use std::fmt::format;
 #[allow(unused_imports)]
 use std::fs;
