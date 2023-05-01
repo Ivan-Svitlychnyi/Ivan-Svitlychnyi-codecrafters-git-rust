@@ -405,7 +405,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let compressed = e.finish().unwrap();
 
                // if !does_folder_exist_in_current_directory(f_path.clone()).unwrap() {
-                    fs::create_dir_all(&f_path).unwrap();
+                    fs::create_dir(&f_path).unwrap();
                 //}
                 fs::write(
                     f_path + &hex_result[2..],
