@@ -402,7 +402,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                  println!(" f_path: {:?}", &f_path);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-
                 e.write_all(obj_write_data.as_bytes())?;
                 let compressed = e.finish().unwrap();
 
