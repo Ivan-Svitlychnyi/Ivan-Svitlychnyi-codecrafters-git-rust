@@ -90,6 +90,7 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
 
 fn checkout_tree(sha:String, file_path: String, target_dir:String) {
+    println!("target_dir: {target_dir}");
 
     fs::create_dir_all(&file_path).unwrap();
 
@@ -115,7 +116,7 @@ let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
 
 //let mut tree = &v_git_data[pos + "\x00".len()..];
 
-let mut tree = &v_git_data[pos..];
+let mut tree = &v_git_data[pos + 1..];
 
 while tree.len() > 0 {
 
@@ -134,7 +135,7 @@ while tree.len() > 0 {
      let mode = mode_name.next().unwrap();
      let name = mode_name.next().unwrap();
 
-    tree = &tree[pos..];
+    tree = &tree[pos + 1..];
 
     let sha = &tree[..20];
     tree = &tree[20..];
@@ -146,7 +147,6 @@ while tree.len() > 0 {
     let sha  = hasher.finalize();
 
     let sha = hex::encode(&sha[..]);
-
     let mode = String::from_utf8_lossy(mode);
     let name = String::from_utf8_lossy(name);
 
@@ -401,7 +401,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             objs_count += 1;
             let first = data_bytes[seek];
             let mut obj_type: usize = ((first & 112) >> 4).into();
-            println!("obj_type: {:?}", obj_type);
+          //  println!("obj_type: {:?}", obj_type);
             while data_bytes[seek] > 128 {
                 seek += 1;
             }
