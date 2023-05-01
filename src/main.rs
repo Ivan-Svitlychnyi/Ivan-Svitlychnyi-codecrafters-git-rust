@@ -123,7 +123,8 @@ for _ in tree{
      let  mode_name = &v_git_data[..pos];
     // println!("mode_name: {:#?}", &mode_name);
 
-     let  mut mode_name = mode_name.split(|num| num.to_string()  == " ");
+     let  mut mode_name = mode_name.split(|&num| num  == ' ' as u8);
+
      let (mode, name) = (&mode_name.nth(0).unwrap(), &mode_name.nth(1).unwrap());
 
     tree = &tree[pos + "\x00".len()..];
@@ -414,7 +415,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
               //  println!("f_path if: {:?}", &f_path);
                 fs::write(f_path, compressed.to_vec())?;
                 
-                println!("objs k: {:#?}", hex_result);
+               // println!("objs k: {:#?}", hex_result);
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
                 
 
@@ -431,7 +432,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let k = &data_bytes[seek..seek + 20];
                // println!("k data: {:#?}", k);
                 let k = hex::encode(k);
-                println!("k: {:#?}", k);
+              //  println!("k: {:#?}", k);
 
                 let (base, elem_num) = objs[&k].to_owned();
 
@@ -450,7 +451,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let content = identify(&v_delta, base);
                 obj_type = elem_num;
                 //println!("content else: {:#?}", &content);
-                println!("obj_type else: {:#?}", &obj_type);
+               // println!("obj_type else: {:#?}", &obj_type);
 
                 let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta","refs_delta"];
 
@@ -470,7 +471,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
               //  println!("hex_result: {:?}", hex_result);
 
                 let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
-                 println!(" f_path: {:?}", &f_path);
+                // println!(" f_path: {:?}", &f_path);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 e.write_all(obj_write_data.as_bytes())?;
@@ -484,7 +485,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                     &compressed,
                 ).unwrap();
 
-                println!("objs k else: {:#?}", hex_result);
+               // println!("objs k else: {:#?}", hex_result);
                 objs.insert(hex_result, (content.clone(), obj_type));
                 
                 seek += delta.total_in() as usize;
@@ -543,15 +544,15 @@ fn identify(delta: &[u8], base: String) -> String {
     let mut content = String::new();
 
     let delta_len = delta.len();
-    println!(" delta_len: {:?}", &delta_len);
+   // println!(" delta_len: {:?}", &delta_len);
     while seek < delta_len {
         let instr_byte = delta[seek];
         seek += 1;
-       println!(" instr_byte: {:?}", &instr_byte);
+     //  println!(" instr_byte: {:?}", &instr_byte);
 
         if instr_byte >= 128 {
             let offset_key = instr_byte & 0b00001111;
-            println!("offset_key: {:?}", & offset_key);
+           // println!("offset_key: {:?}", & offset_key);
             //let offset_key_bin_str = offset_key;
 
             // let offset_key =  offset_key.reverse_bits();
@@ -563,21 +564,21 @@ fn identify(delta: &[u8], base: String) -> String {
              
                 let b = offset_key >> n & 1;
 
-                println!("b offset_key: {}", b);
+               // println!("b offset_key: {}", b);
                 if b == 1 {
                   //  offset_bytes += &delta[seek].to_string();
                     offset_bytes[n] = delta[seek];
-                    println!("offset_bytes delta[seek]:{}", delta[seek]);
+                  //  println!("offset_bytes delta[seek]:{}", delta[seek]);
                     seek += 1
                 // } else {        
                 //    offset_bytes += &"0";          
                 }
             }
-            println!("offset_bytes: {:?}", &offset_bytes);
+           // println!("offset_bytes: {:?}", &offset_bytes);
           
             let offset = usize::from_le_bytes(offset_bytes);
            //  let offset = usize::from_str(&offset_bytes).unwrap();
-            println!("offset: {:?}", &offset);
+           // println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & 0b01110000) >> 4;
 
@@ -589,22 +590,22 @@ fn identify(delta: &[u8], base: String) -> String {
             
                 let b = len_key >> n & 1;
 
-                println!("b len_key:{}", b);
+              //  println!("b len_key:{}", b);
                 if b == 1 {
                    // len_bytes += &delta[seek].to_string();
                      len_bytes[n] = delta[seek];
-                    println!("len_bytes delta[seek]{}", delta[seek]);
+                  //  println!("len_bytes delta[seek]{}", delta[seek]);
                     seek += 1
             //    } else {
             //         len_bytes  += &"0";     
                 }
             }
 
-            println!("len_bytes: {:?}", &len_bytes);
+          //  println!("len_bytes: {:?}", &len_bytes);
             let len_int = usize::from_le_bytes(len_bytes);
             //let len_int = usize::from_str(&len_bytes).unwrap();
 
-            println!("len_int: {:?}", &len_int);
+          //  println!("len_int: {:?}", &len_int);
             content += &base[offset..offset + len_int];
 
            // println!("content : {:?}", &content );
