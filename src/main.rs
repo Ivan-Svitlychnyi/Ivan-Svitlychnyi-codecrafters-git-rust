@@ -426,18 +426,22 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         let mut data = ZlibDecoder::new(&git_data[..]);
 
-        let mut v_delta = String::new();
+        let mut v_delta = Vec::new();
 
-        data.read_to_string(&mut v_delta).unwrap();
+        data.read_to_end(&mut v_delta).unwrap();
+
+        let s_delta = unsafe {String::from_utf8_unchecked(v_delta)};
         
-        let data = v_delta.split("/");
+        let data = s_delta.split("/");
+
         let data = data.clone().nth(0).unwrap().split(" ");
+
         let tree_sha = data.clone().nth(data.count() -1).unwrap();
 
         println!("tree_sha: {}", &tree_sha);
-        //let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
-       // let (_, sha1_out) = write_tree(&path_f).unwrap();
-       // print!("{}", sha1_out);
+        let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
+        let (_, sha1_out) = write_tree(&path_f).unwrap();
+        print!("{}", sha1_out);
     }
     //-2-------------------------------------------------------------------------------
     Ok(" ".to_owned())
