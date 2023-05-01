@@ -158,7 +158,7 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
             let blob_sha = entry.2;
 
             println!("blob_sha: {}", &blob_sha);
-            
+
             let curr_dir = target_dir.clone()
                 + &format!("/.git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
 
@@ -179,6 +179,7 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
         }
     }
 }
+
 
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
     #[allow(unsafe_code)]
