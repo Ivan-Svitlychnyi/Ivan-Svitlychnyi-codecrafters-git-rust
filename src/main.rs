@@ -155,7 +155,6 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
 
         enteries.push((mode.clone(), name.clone(), sha.clone()));
     }
-
     for entry in enteries {
         if entry.0 == "40000" {
             println!("blob_sha 40000: {:#?}", &entry.1);
