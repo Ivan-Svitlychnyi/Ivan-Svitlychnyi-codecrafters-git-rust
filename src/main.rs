@@ -99,9 +99,12 @@ fn checkout_tree(sha:String,  target_dir:String) {
     git_data.read_to_string(&mut s_git_data).unwrap();
 
    // let enteries = String::new();
-    let tree = s_git_data.split("\x00");
+println!("enteries: {:#?}", &s_git_data);
+
+let tree = s_git_data.split("\x00");
+
 for a in tree{
-  println!("enteries: {:?}", &a);
+  println!("enteries: {:#?}", &a);
 
 }
 
