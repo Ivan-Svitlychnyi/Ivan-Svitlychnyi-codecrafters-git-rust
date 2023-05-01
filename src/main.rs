@@ -128,14 +128,13 @@ while tree.len() > 0 {
 
     println!("mode_name: {:#?}", &mode_name);
 
-     let (mode, name) = (&mode_name.nth(0).unwrap(), &mode_name.nth(1).unwrap());
-
-
-     
+     let (mode, name) = (mode_name.nth(0).unwrap().clone(), mode_name.nth(1).unwrap().clone());
 
     tree = &tree[pos + "\x00".len()..];
+
     let sha = &tree[..20];
     tree = &tree[20..];
+    
     println!("tree: {:#?}", &tree);
     let mut hasher = Sha1::new();
     hasher.update(sha);
