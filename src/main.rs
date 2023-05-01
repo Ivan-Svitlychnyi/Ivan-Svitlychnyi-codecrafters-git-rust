@@ -124,7 +124,6 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
         println!("position: {:#?}", &pos);
 
         let mode_name = &tree[..pos];
-        // println!("mode_name: {:#?}", &mode_name);
 
         let mut mode_name = mode_name.split(|&num| num == ' ' as u8);
 
