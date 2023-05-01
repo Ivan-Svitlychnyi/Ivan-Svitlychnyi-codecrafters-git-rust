@@ -9,7 +9,7 @@ use sha1::{Digest, Sha1};
 use std::env;
 //use std::fmt::Error;
 use std::collections::HashMap;
-use std::fmt::format;
+//use std::fmt::format;
 #[allow(unused_imports)]
 use std::fs;
 use std::io;
@@ -99,7 +99,7 @@ fn checkout_tree(sha:String,  target_dir:String) {
     git_data.read_to_string(&mut s_git_data).unwrap();
 
    // let enteries = String::new();
-println!("enteries: {:#?}", &s_git_data);
+//println!("enteries: {:#?}", &s_git_data);
 
 let tree = s_git_data.split("\x00");
 
