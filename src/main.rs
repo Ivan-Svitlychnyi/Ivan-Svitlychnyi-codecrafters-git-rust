@@ -133,7 +133,7 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
         let mode = mode_name.next().unwrap();
         let name = mode_name.next().unwrap();
 
-        tree = &tree[pos..];
+        tree = &tree[pos + 1..];
 
         let sha = &tree[..20];
         //println!("tree: {:#?}", &tree);
@@ -155,6 +155,7 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
 
         enteries.push((mode.clone(), name.clone(), sha.clone()));
     }
+
     for entry in enteries {
         if entry.0 == "40000" {
             println!("blob_sha 40000: {:#?}", &entry.1);
@@ -168,7 +169,7 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
 
             println!("blob_sha: {}", &blob_sha);
             let curr_dir = target_dir.clone()
-                + &format!("/.git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
+                + &format!("/git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
 
             println!("curr_dir: {}", &curr_dir);
 
