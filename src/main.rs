@@ -502,7 +502,6 @@ fn identify(delta: &[u8], base: String) -> String {
           
             let offset = usize::from_le_bytes(offset_bytes);
            //  let offset = usize::from_str(&offset_bytes).unwrap();
-
             println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & 0b01110000) >> 4;
