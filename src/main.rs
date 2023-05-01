@@ -402,6 +402,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             // println!("seek : {:?}", seek);
             if obj_type < 7 {
                 let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
+                let decompressed = &data_bytes[seek..];
 
                 //println!("git_data");
                 let mut v_git_data = Vec::new();
@@ -415,10 +416,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
 
-                obj_write_data += &s_git_data;
+                obj_write_data.push_str(&s_git_data);
 
                 let mut hasher = Sha1::new();
-                hasher.update(obj_write_data.as_bytes().to_vec());
+                hasher.update(obj_write_data.as_bytes());
 
                 let result = hasher.finalize();
 
@@ -427,22 +428,24 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
 
+                fs::create_dir_all(&f_path)?;
+
+                let f_path = f_path + "/" + &hex_result[2..];
+                
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
                 e.write_all(obj_write_data.as_bytes())?;
 
                 let compressed = e.finish()?;
 
-                fs::create_dir_all(&f_path)?;
-
-                let f_path = f_path + "/" + &hex_result[2..];
-
                 //println!(" f_path: {:?}", &f_path);
-                fs::write(f_path, compressed.to_vec())?;
+                fs::write(f_path, compressed)?;
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
 
-                seek += git_data.total_in() as usize;
+
+                seek += decompressed.len() as usize;
+
             } else {
                 println!("else !!!!!!!!!!!!!!!!");
 
@@ -456,6 +459,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 seek += 20;
 
                 let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
+                let decompressed = &data_bytes[seek..];
 
                 let mut v_delta = Vec::new();
                 delta.read_to_end(&mut v_delta).unwrap();
@@ -499,13 +503,14 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 fs::create_dir_all(&f_path).unwrap();
                 let f_path = f_path + "/" + &hex_result[2..];
-              //  println!(" f_path: {:?}", &f_path);
+                //  println!(" f_path: {:?}", &f_path);
                 fs::write(f_path, &compressed).unwrap();
 
                 // println!("objs k else: {:#?}", hex_result);
                 objs.insert(hex_result, (content.clone(), obj_type));
 
-                seek += delta.total_in() as usize;
+                //seek += delta.total_in() as usize;
+               seek += decompressed.len() as usize;
             }
         }
 
@@ -525,7 +530,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let data = s_delta.split("\n");
 
         let data = data.clone().nth(0).unwrap().split(" ");
-       // println!("data: {:?}", &data);
+        // println!("data: {:?}", &data);
         let tree_sha = data.clone().nth(data.count() - 1).unwrap();
 
         println!("tree_sha: {}", &tree_sha);
@@ -597,7 +602,6 @@ fn identify(delta: &[u8], base: String) -> String {
 
             let len_key = (instr_byte & 0b01110000) >> 4;
 
-;
             let mut len_bytes: [u8; 8] = [0; 8];
             for n in 0..8 {
                 let b = len_key >> n & 1;
@@ -618,7 +622,7 @@ fn identify(delta: &[u8], base: String) -> String {
             //let len_int = usize::from_str(&len_bytes).unwrap();
 
             //  println!("len_int: {:?}", &len_int);
-            content += &base[offset..offset + len_int];
+            content += &base[offset..(offset + len_int)];
 
             // println!("content : {:?}", &content );
         } else {
