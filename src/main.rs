@@ -90,6 +90,7 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
 fn checkout_tree(sha: String, file_path: String, target_dir: String) {
     println!("target_dir: {target_dir}");
+    println!("file_path: {file_path}");
 
     fs::create_dir_all(&file_path).unwrap();
 
@@ -101,20 +102,11 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
     let mut v_git_data = Vec::new();
     git_data.read_to_end(&mut v_git_data).unwrap();
 
-    // #[allow(unsafe_code)]
-    // let tree = unsafe {
-    //     String::from_utf8_unchecked(v_git_data)
-    // };
 
     let mut enteries = Vec::new();
     //println!("enteries: {:#?}", &s_git_data);
 
-    //let tree = s_git_data.split(|x| [*x] == "\x00".as_bytes());
-    //let tree = tree.split("\x00").skip(0);
-
     let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
-
-    //let mut tree = &v_git_data[pos + "\x00".len()..];
 
     let mut tree = &v_git_data[pos + 1..];
 
@@ -141,7 +133,6 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
         //println!("tree: {:#?}", &tree);
         let mut hasher = Sha1::new();
         hasher.update(sha);
-
         let sha = hasher.finalize();
 
         let sha = hex::encode(&sha[..]);
@@ -167,8 +158,7 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
             let blob_sha = entry.2;
 
             println!("blob_sha: {}", &blob_sha);
-            let curr_dir = target_dir.clone()
-                + &format!("/git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
+            let curr_dir = format!("/.git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
 
             println!("curr_dir: {}", &curr_dir);
 
