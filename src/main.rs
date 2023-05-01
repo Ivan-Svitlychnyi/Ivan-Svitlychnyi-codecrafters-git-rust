@@ -432,11 +432,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         let s_delta = unsafe {String::from_utf8_unchecked(v_delta)};
         
-        let data = s_delta.split("/");
+        let data = s_delta.split("\n");
 
-        let data = data.clone().nth(0).unwrap();
-        println!("data nth(0): {:?}", &data);
-        let data = data.split(" ");
+        let data = data.clone().nth(0).unwrap().split(" ");
         println!("data: {:?}", &data);
         let tree_sha = data.clone().nth(data.count() -1).unwrap();
 
