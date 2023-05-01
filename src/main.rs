@@ -165,7 +165,8 @@ for entry in enteries{
     }
 else {
     
-       let blob_sha = entry.2;
+    let blob_sha = entry.2;
+    println!("blob_sha: {:#?}", &blob_sha);
 
     let git_data = fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}",&blob_sha[..2], &blob_sha[2..])).unwrap();
 
