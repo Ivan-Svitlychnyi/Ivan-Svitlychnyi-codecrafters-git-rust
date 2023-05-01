@@ -426,11 +426,8 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let data_type = ["", "commit", "tree", "blob","", "tag","ofs_delta"];
 
                 let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
-               // println!("obj_write_data if: {:?}", obj_write_data);
 
                 obj_write_data += &s_git_data;
-
-               // println!("obj_write_data & git_data if: {:?}", obj_write_data);
 
                 let mut hasher = Sha1::new();
                 hasher.update(obj_write_data.as_bytes().to_vec());
@@ -441,32 +438,26 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                // println!("hex_result if: {:?}", hex_result);
 
                 let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
-              //  println!("f_path if: {:?}", &f_path);
+            
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
                 e.write_all(obj_write_data.as_bytes())?;
+
                 let compressed = e.finish()?;
-                //  if !does_folder_exist_in_current_directory(f_path.clone()).unwrap(){
+          
                 fs::create_dir_all(&f_path)?;
-                //}
+                
                 let f_path = f_path + "/" + &hex_result[2..];
-              //  println!("f_path if: {:?}", &f_path);
+            
+                println!(" f_path: {:?}", &f_path);
                 fs::write(f_path, compressed.to_vec())?;
                 
-               // println!("objs k: {:#?}", hex_result);
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
                 
-
-                // let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-                // e.write_all(s_git_data.as_bytes()).unwrap();
-
-                // let compressed = e.finish().unwrap();
-
                 seek += git_data.total_in() as usize;
             } else {
                 println!("else !!!!!!!!!!!!!!!!");
-
            
                 let k = &data_bytes[seek..seek + 20];
                // println!("k data: {:#?}", k);
@@ -482,11 +473,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut v_delta = Vec::new();
                 delta.read_to_end(&mut v_delta).unwrap();
 
-            //     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-            //     e.write_all(&v_delta).unwrap();
-            //    let compressed_data = e.finish().unwrap();
-                // println!("v_delta: {:#?}", &v_delta);
                 let content = identify(&v_delta, base);
                 obj_type = elem_num;
                 //println!("content else: {:#?}", &content);
@@ -510,17 +497,18 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
               //  println!("hex_result: {:?}", hex_result);
 
                 let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
-                // println!(" f_path: {:?}", &f_path);
+                
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 e.write_all(obj_write_data.as_bytes())?;
                 let compressed = e.finish().unwrap();
 
-               // if !does_folder_exist_in_current_directory(f_path.clone()).unwrap() {
+      
                     fs::create_dir_all(&f_path).unwrap();
-                //}
+                let f_path = f_path + "/" + &hex_result[2..];
+                println!(" f_path: {:?}", &f_path);
                 fs::write(
-                    f_path + &hex_result[2..],
+                    f_path,
                     &compressed,
                 ).unwrap();
 
