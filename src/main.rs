@@ -443,8 +443,8 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
 
-
-                seek += decompressed.len() as usize;
+                seek += git_data.total_in() as usize;
+                //seek += decompressed.len() as usize;
 
             } else {
                 println!("else !!!!!!!!!!!!!!!!");
@@ -508,8 +508,8 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 // println!("objs k else: {:#?}", hex_result);
                 objs.insert(hex_result, (content.clone(), obj_type));
 
-                //seek += delta.total_in() as usize;
-               seek += decompressed.len() as usize;
+                seek += delta.total_in() as usize;
+              // seek += decompressed.len() as usize;
             }
         }
 
