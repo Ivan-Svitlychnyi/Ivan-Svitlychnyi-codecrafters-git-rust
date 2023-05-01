@@ -189,7 +189,6 @@ let content = &v_git_data[pos +1..];
 }
 
 
-
 }
 
   
