@@ -149,13 +149,13 @@ while tree.len() > 0 {
     let mode = String::from_utf8_lossy(mode);
     let name = String::from_utf8_lossy(name);
 
-    enteries.push((mode.clone(), name.clone(),sha.clone()));
-    // println!("mode: {:#?}", &mode);
-    // enteries.push_str(&name);
-    // println!("name: {:#?}", &name);
-    // enteries.push_str(&sha);
-    // println!("sha: {:#?}", &sha);
+    println!("mode: {:#?}", &mode);
+    println!("name: {:#?}", &name);
+    println!("sha: {:#?}", &sha);
     
+
+    enteries.push((mode.clone(), name.clone(),sha.clone()));
+
 }
 
 for entry in enteries{
@@ -168,7 +168,7 @@ else {
     let blob_sha = entry.2;
     println!("blob_sha: {:#?}", &blob_sha);
 
-    let git_data = fs::read(target_dir.clone() + &format!(".git/objects/{}/{}",&blob_sha[..2], &blob_sha[2..])).unwrap();
+    let git_data = fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}",&blob_sha[..2], &blob_sha[2..])).unwrap();
 
     let mut git_data = ZlibDecoder::new(&git_data[..]);
 
