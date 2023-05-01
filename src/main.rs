@@ -127,9 +127,11 @@ while tree.len() > 0 {
 
      let  mut mode_name = mode_name.split(|&num| num  == ' ' as u8);
 
+
     println!("mode_name: {:#?}", &mode_name);
 
-     let (mode, name) = (mode_name.nth(0).unwrap().clone(), mode_name.nth(1).unwrap().clone());
+     let mode = mode_name.next().unwrap();
+     let name = mode_name.next().unwrap();
 
     tree = &tree[pos + 1..];
 
