@@ -356,6 +356,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             } else {
                 println!("else !!!!!!!!!!!!!!!!");
                 let k = &data_bytes[seek..seek + 20];
+                println!("k data: {:#?}", k);
                 let k = hex::encode(k);
                 println!("k: {:#?}", k);
 
@@ -519,7 +520,7 @@ fn identify(delta: &[u8], base: String) -> String {
             //         len_bytes  += &"0";     
                 }
             }
-            
+
             println!("len_bytes: {:?}", &len_bytes);
             let len_int = usize::from_le_bytes(len_bytes);
             //let len_int = usize::from_str(&len_bytes).unwrap();
