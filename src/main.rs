@@ -115,18 +115,22 @@ let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
 let mut tree = &v_git_data[pos + "\x00".len()..];
 
 
-for _ in tree{
+while tree.len() > 0 {
 
     let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
-   //  println!("position: {:#?}", &pos);
+    println!("position: {:#?}", &pos);
 
      let  mode_name = &v_git_data[..pos];
     // println!("mode_name: {:#?}", &mode_name);
 
      let  mut mode_name = mode_name.split(|&num| num  == ' ' as u8);
+
     println!("mode_name: {:#?}", &mode_name);
 
      let (mode, name) = (&mode_name.nth(0).unwrap(), &mode_name.nth(1).unwrap());
+
+
+     
 
     tree = &tree[pos + "\x00".len()..];
     let sha = &tree[..20];
