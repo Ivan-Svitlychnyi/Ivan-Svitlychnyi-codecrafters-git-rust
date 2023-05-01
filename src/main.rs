@@ -524,7 +524,6 @@ fn identify(delta: &[u8], base: String) -> String {
             //let len_int = usize::from_str(&len_bytes).unwrap();
 
             println!("len_int: {:?}", &len_int);
-
             content += &base[offset..offset + len_int];
 
             println!("content : {:?}", &content );
