@@ -110,11 +110,11 @@ fn checkout_tree(sha:String,  target_dir:String) {
 //let tree = tree.split("\x00").skip(0);
 
 
-//let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
+let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
 
 //let mut tree = &v_git_data[pos + "\x00".len()..];
 
-let mut tree = &v_git_data[..];
+let mut tree = &v_git_data[pos + "\x00".as_bytes().len()..];
 
 while tree.len() > 0 {
 
@@ -131,7 +131,7 @@ while tree.len() > 0 {
 
      let (mode, name) = (mode_name.nth(0).unwrap().clone(), mode_name.nth(1).unwrap().clone());
 
-    tree = &tree[pos..];
+    tree = &tree[pos + "\x00".as_bytes().len()..];
 
     let sha = &tree[..20];
     tree = &tree[20..];
