@@ -127,7 +127,7 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
         tree = &tree[pos + 1..];
 
         let sha = &tree[..20];
-      
+        //println!("tree: {:#?}", &tree);
         tree = &tree[20..];
 
         //println!("tree: {:#?}", &tree);
@@ -154,12 +154,11 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
                 file_path.clone() + &format!("/{}", entry.1).to_string(),
                 target_dir.to_string(),
             );
-
         } else {
             let blob_sha = entry.2;
 
             println!("blob_sha: {}", &blob_sha);
-            let curr_dir = format!("/.git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
+            let curr_dir = format!(".git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
 
             println!("curr_dir: {}", &curr_dir);
 
@@ -206,7 +205,6 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
     fs::create_dir(sub_dir_path)?;
     fs::write(full_path, compressed)?;
     Ok((result.to_vec(), hex_result))
-
 }
 
 fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
