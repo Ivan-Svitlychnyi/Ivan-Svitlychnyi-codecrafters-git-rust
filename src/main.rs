@@ -158,7 +158,9 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
             let blob_sha = entry.2;
 
             println!("blob_sha: {}", &blob_sha);
-            let curr_dir = format!(".git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
+            
+            let curr_dir = target_dir.clone()
+                + &format!("/.git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
 
             println!("curr_dir: {}", &curr_dir);
 
@@ -191,7 +193,6 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
 
     let mut hasher = Sha1::new();
     hasher.update(store.as_bytes());
-
 
     let result = hasher.finalize();
 
