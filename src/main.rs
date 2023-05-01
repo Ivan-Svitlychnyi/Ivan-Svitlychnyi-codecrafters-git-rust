@@ -343,9 +343,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
               //  println!("f_path if: {:?}", &f_path);
                 fs::write(f_path, compressed.to_vec())?;
                 
-
+                println!("objs k: {:#?}", hex_result);
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
-                //println!("objs if: {:#?}", objs);
+                
 
                 // let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 // e.write_all(s_git_data.as_bytes()).unwrap();
@@ -355,8 +355,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 seek += git_data.total_in() as usize;
             } else {
                 println!("else !!!!!!!!!!!!!!!!");
+
+           
                 let k = &data_bytes[seek..seek + 20];
-                println!("k data: {:#?}", k);
+               // println!("k data: {:#?}", k);
                 let k = hex::encode(k);
                 println!("k: {:#?}", k);
 
