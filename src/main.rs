@@ -371,7 +371,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             //     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
             //     e.write_all(&v_delta).unwrap();
-
             //    let compressed_data = e.finish().unwrap();
                 // println!("v_delta: {:#?}", &v_delta);
                 let content = identify(&v_delta, base);
