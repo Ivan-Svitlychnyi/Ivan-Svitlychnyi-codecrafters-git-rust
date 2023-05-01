@@ -435,7 +435,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let data = s_delta.split("/");
 
         let data = data.clone().nth(0).unwrap().split(" ");
-
+        println!("data: {:?}", &data);
         let tree_sha = data.clone().nth(data.count() -1).unwrap();
 
         println!("tree_sha: {}", &tree_sha);
