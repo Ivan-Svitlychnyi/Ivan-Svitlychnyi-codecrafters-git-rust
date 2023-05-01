@@ -420,15 +420,15 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 seek += delta.total_in() as usize;
             }
         }
-        let git_path = format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
+        let git_path = target_dir.to_owned() + &format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
+
         let git_data = fs::read(git_path).unwrap();
 
         let mut data = ZlibDecoder::new(&git_data[..]);
 
         let mut v_delta = String::new();
 
-        data.read_to_string(&mut v_delta)?;
-
+        data.read_to_string(&mut v_delta).unwrap();
         
         let data = v_delta.split("/");
         let data = data.clone().nth(0).unwrap().split(" ");
