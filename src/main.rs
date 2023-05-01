@@ -89,7 +89,8 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
 
 fn checkout_tree(sha:String,  target_dir:String) {
-    fs::create_dir_all(target_dir).unwrap();
+
+    fs::create_dir_all(&target_dir).unwrap();
 
     let git_data = fs::read(target_dir + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..])).unwrap();
     let mut git_data = ZlibDecoder::new(&git_data[..]);
@@ -97,7 +98,7 @@ fn checkout_tree(sha:String,  target_dir:String) {
     let mut s_git_data = String::new();
     git_data.read_to_string(&mut s_git_data).unwrap();
 
-    let enteries = String::new();
+   // let enteries = String::new();
     let tree = s_git_data.split("\x00");
 for a in tree{
   println!("enteries: {:?}", &a);
