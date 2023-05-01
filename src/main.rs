@@ -162,7 +162,7 @@ while tree.len() > 0 {
 for entry in enteries{
     
     if entry.0 == "40000"{
-        checkout_tree(entry.2.to_string(), file_path.clone() + &format!("/{}", entry.1).to_string(), target_dir.to_string());
+        //checkout_tree(entry.2.to_string(), file_path.clone() + &format!("/{}", entry.1).to_string(), target_dir.to_string());
     }
 else {
     
@@ -171,20 +171,20 @@ else {
     let curr_dir = target_dir.clone() + &format!("/.git/objects/{}/{}",&blob_sha[..2], &blob_sha[2..]);
     println!("curr_dir: {:#?}", &curr_dir);
 
-    let git_data = fs::read(curr_dir).unwrap();
+   // let git_data = fs::read(curr_dir).unwrap();
 
 
-    let mut git_data = ZlibDecoder::new(&git_data[..]);
+   // let mut git_data = ZlibDecoder::new(&git_data[..]);
 
-    let mut v_git_data = Vec::new();
-    git_data.read_to_end(&mut v_git_data).unwrap();
+    // let mut v_git_data = Vec::new();
+    // git_data.read_to_end(&mut v_git_data).unwrap();
 
-let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
+// let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
 
-let content = &v_git_data[pos +1..];
+// let content = &v_git_data[pos +1..];
 
 
-    fs::write(file_path.clone() + &format!("/{}", entry.1), content).unwrap();
+//     fs::write(file_path.clone() + &format!("/{}", entry.1), content).unwrap();
 
     
 }
