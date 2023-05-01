@@ -476,7 +476,6 @@ fn identify(delta: &[u8], base: String) -> String {
             println!("offset_key: {:?}", & offset_key);
             //let offset_key_bin_str = offset_key;
 
-    
             // let offset_key =  offset_key.reverse_bits();
           //  let offset_key =  offset_key;
             //let mut offset_bytes = String::new();
