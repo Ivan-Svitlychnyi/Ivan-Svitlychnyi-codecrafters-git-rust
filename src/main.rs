@@ -115,7 +115,7 @@ let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
 
 //let mut tree = &v_git_data[pos + "\x00".len()..];
 
-let mut tree = &v_git_data[pos + 1..];
+let mut tree = &v_git_data[pos..];
 
 while tree.len() > 0 {
 
@@ -134,7 +134,7 @@ while tree.len() > 0 {
      let mode = mode_name.next().unwrap();
      let name = mode_name.next().unwrap();
 
-    tree = &tree[pos + 1..];
+    tree = &tree[pos..];
 
     let sha = &tree[..20];
     tree = &tree[20..];
@@ -146,6 +146,7 @@ while tree.len() > 0 {
     let sha  = hasher.finalize();
 
     let sha = hex::encode(&sha[..]);
+
     let mode = String::from_utf8_lossy(mode);
     let name = String::from_utf8_lossy(name);
 
@@ -162,9 +163,6 @@ for entry in enteries{
     
     if entry.0 == "40000"{
         checkout_tree(entry.2.to_string(), file_path.clone() + &format!("/{}", entry.1).to_string(), target_dir.to_string());
-    }
-    else if entry.0 == "100644" {
-        
     }
 else {
     
