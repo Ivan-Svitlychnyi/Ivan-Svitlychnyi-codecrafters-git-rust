@@ -434,14 +434,16 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         
         let data = s_delta.split("/");
 
-        let data = data.clone().nth(0).unwrap().split(" ");
+        let data = data.clone().nth(0).unwrap();
+        println!("data nth(0): {:?}", &data);
+        let data = data.split(" ");
         println!("data: {:?}", &data);
         let tree_sha = data.clone().nth(data.count() -1).unwrap();
 
         println!("tree_sha: {}", &tree_sha);
         let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
         let (_, sha1_out) = write_tree(&path_f).unwrap();
-        print!("{}", sha1_out);
+        print!("sha1_out: {}", sha1_out);
     }
     //-2-------------------------------------------------------------------------------
     Ok(" ".to_owned())
