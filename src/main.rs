@@ -124,6 +124,7 @@ for _ in tree{
     // println!("mode_name: {:#?}", &mode_name);
 
      let  mut mode_name = mode_name.split(|&num| num  == ' ' as u8);
+    println!("mode_name: {:#?}", &mode_name);
 
      let (mode, name) = (&mode_name.nth(0).unwrap(), &mode_name.nth(1).unwrap());
 
