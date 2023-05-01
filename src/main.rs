@@ -9,6 +9,7 @@ use sha1::{Digest, Sha1};
 use std::env;
 //use std::fmt::Error;
 use std::collections::HashMap;
+use std::fmt::format;
 //use std::fmt::format;
 #[allow(unused_imports)]
 use std::fs;
@@ -88,11 +89,11 @@ fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 }
 
 
-fn checkout_tree(sha:String,  target_dir:String) {
+fn checkout_tree(sha:String, file_path: String, target_dir:String) {
 
-    fs::create_dir_all(&target_dir).unwrap();
+    fs::create_dir_all(&file_path).unwrap();
 
-    let git_data = fs::read(target_dir + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..])).unwrap();
+    let git_data = fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..])).unwrap();
     let mut git_data = ZlibDecoder::new(&git_data[..]);
 
     let mut v_git_data = Vec::new();
@@ -103,7 +104,7 @@ fn checkout_tree(sha:String,  target_dir:String) {
     //     String::from_utf8_unchecked(v_git_data)
     // };
 
-    let mut enteries= String::new();
+    let mut enteries= Vec::new();
 //println!("enteries: {:#?}", &s_git_data);
 
 //let tree = s_git_data.split(|x| [*x] == "\x00".as_bytes());
@@ -148,18 +149,46 @@ while tree.len() > 0 {
     let mode = String::from_utf8_lossy(mode);
     let name = String::from_utf8_lossy(name);
 
-    enteries.push_str(&mode);
-    println!("mode: {:#?}", &mode);
-    enteries.push_str(&name);
-    println!("name: {:#?}", &name);
-    enteries.push_str(&sha);
-    println!("sha: {:#?}", &sha);
+    enteries.push((mode.clone(), name.clone(),sha.clone()));
+    // println!("mode: {:#?}", &mode);
+    // enteries.push_str(&name);
+    // println!("name: {:#?}", &name);
+    // enteries.push_str(&sha);
+    // println!("sha: {:#?}", &sha);
     
 }
 
+for entry in enteries{
+    
+    if entry.0 == "40000"{
+        checkout_tree(entry.2.to_string(), file_path.clone() + &format!("/{}", entry.1).to_string(), target_dir.to_string());
+    }
+else {
+    
+       let blob_sha = entry.2;
+
+    let git_data = fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}",&blob_sha[..2], &blob_sha[2..])).unwrap();
+
+    let mut git_data = ZlibDecoder::new(&git_data[..]);
+
+    let mut v_git_data = Vec::new();
+    git_data.read_to_end(&mut v_git_data).unwrap();
+
+let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
+
+let content = &v_git_data[pos +1..];
+
+
+    fs::write(file_path.clone() + &format!("/{}", entry.1), content).unwrap();
+
+    
+}
+
+
+
+}
+
   
-
-
 
 
 }
@@ -518,7 +547,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         println!("tree_sha: {}", &tree_sha);
         
-        checkout_tree(tree_sha.to_owned(),  target_dir.to_string());
+        checkout_tree(tree_sha.to_owned(),  target_dir.to_string(),target_dir.to_string());
 
 
         //let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
