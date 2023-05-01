@@ -405,7 +405,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let compressed = e.finish().unwrap();
 
                // if !does_folder_exist_in_current_directory(f_path.clone()).unwrap() {
-                    fs::create_dir(&f_path).unwrap();
+                    fs::create_dir_all(&f_path).unwrap();
                 //}
                 fs::write(
                     f_path + &hex_result[2..],
@@ -475,7 +475,7 @@ fn identify(delta: &[u8], base: String) -> String {
 
     
              let offset_key =  offset_key.reverse_bits();
-            let offset_key =  offset_key;
+          //  let offset_key =  offset_key;
             let mut offset_bytes = String::new();
            // let mut offset_bytes:[u8; 8] = [0;8];
          
@@ -503,7 +503,7 @@ fn identify(delta: &[u8], base: String) -> String {
             let len_key = (instr_byte & 0b01110000) >> 4;
          
            let len_key = len_key.reverse_bits();
-           let len_key = len_key;
+          // let len_key = len_key;
             let mut len_bytes = String::new();
           // let mut len_bytes:[u8; 8] = [0;8];
             for n in 0..8{
