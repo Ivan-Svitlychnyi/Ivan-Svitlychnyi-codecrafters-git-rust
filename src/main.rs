@@ -95,13 +95,13 @@ fn checkout_tree(sha:String,  target_dir:String) {
     let git_data = fs::read(target_dir + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..])).unwrap();
     let mut git_data = ZlibDecoder::new(&git_data[..]);
 
-    let mut s_git_data = String::new();
-    git_data.read_to_string(&mut s_git_data).unwrap();
+    let mut s_git_data = Vec::new();
+    git_data.read_to_end(&mut s_git_data).unwrap();
 
    // let enteries = String::new();
 //println!("enteries: {:#?}", &s_git_data);
 
-let tree = s_git_data.split("\x00");
+let tree = s_git_data.split(|x| [*x] == "\x00".as_bytes());
 
 for a in tree{
   println!("enteries: {:#?}", &a);
