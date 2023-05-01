@@ -133,9 +133,10 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
         let mode = mode_name.next().unwrap();
         let name = mode_name.next().unwrap();
 
-        tree = &tree[pos + 1..];
+        tree = &tree[pos..];
 
         let sha = &tree[..20];
+        //println!("tree: {:#?}", &tree);
         tree = &tree[20..];
 
         //println!("tree: {:#?}", &tree);
@@ -402,7 +403,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             // println!("seek : {:?}", seek);
             if obj_type < 7 {
                 let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
-                let decompressed = &data_bytes[seek..];
+              //  let decompressed = &data_bytes[seek..];
 
                 //println!("git_data");
                 let mut v_git_data = Vec::new();
@@ -458,7 +459,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 seek += 20;
 
                 let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
-                let decompressed = &data_bytes[seek..];
+               // let decompressed = &data_bytes[seek..];
 
                 let mut v_delta = Vec::new();
                 delta.read_to_end(&mut v_delta).unwrap();
