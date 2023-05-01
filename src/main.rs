@@ -114,7 +114,7 @@ let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
 
 //let mut tree = &v_git_data[pos + "\x00".len()..];
 
-let mut tree = &v_git_data[pos + "\x00".as_bytes().len()..];
+let mut tree = &v_git_data[pos + 1..];
 
 while tree.len() > 0 {
 
@@ -131,7 +131,7 @@ while tree.len() > 0 {
 
      let (mode, name) = (mode_name.nth(0).unwrap().clone(), mode_name.nth(1).unwrap().clone());
 
-    tree = &tree[pos + "\x00".as_bytes().len()..];
+    tree = &tree[pos + 1..];
 
     let sha = &tree[..20];
     tree = &tree[20..];
