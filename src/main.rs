@@ -163,6 +163,9 @@ for entry in enteries{
     if entry.0 == "40000"{
         checkout_tree(entry.2.to_string(), file_path.clone() + &format!("/{}", entry.1).to_string(), target_dir.to_string());
     }
+    else if entry.0 == "100644" {
+        
+    }
 else {
     
     let blob_sha = entry.2;
