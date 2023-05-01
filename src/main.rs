@@ -446,7 +446,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     //-2-------------------------------------------------------------------------------
     Ok(" ".to_owned())
 }
-
 // fn does_folder_exist_in_current_directory(cur_dir: String) -> Result<bool, io::Error> {
 //     Ok(fs::read_dir(cur_dir)?.any(|x| {
 //         let x = x.unwrap();
