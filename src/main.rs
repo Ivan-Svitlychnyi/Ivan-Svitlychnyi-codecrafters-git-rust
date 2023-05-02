@@ -503,7 +503,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
               // seek += decompressed.len() as usize;
             }
         }
-
         let git_path = target_dir.to_owned()
             + &format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
 
