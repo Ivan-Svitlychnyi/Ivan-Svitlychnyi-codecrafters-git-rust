@@ -352,9 +352,9 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         CONTENT_TYPE,
         header::HeaderValue::from_static("application/x-git-upload-pack-request"),
     );
-    let data = format!("0032want {pack_hash}\n00000009done\n").as_bytes();
-
-    println!("0032 = {}", &data);
+    let data = format!("0032want {pack_hash}\n00000009done\n").to_string();
+   
+    //println!("0032 = {:#?}", &data);
     let client = reqwest::blocking::Client::new();
     //let data = data.as_bytes();
     let res = client.post(post_url).headers(headers).body(data);
@@ -366,7 +366,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     } else {
         println!("success!");
         let body = res_send.bytes().unwrap();
-        let res_data = body.to_vec();
+        let res_data = body;
         let res_data_size = res_data.len() - 20;
         
         println!("res_data_size: {:?}", res_data_size);
@@ -407,7 +407,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta"];
 
-                let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len());
+                let mut obj_write_data = format!("{} {}\0", data_type[obj_type], &s_git_data.len()).to_string();
 
                 obj_write_data.push_str(&s_git_data);
 
@@ -419,11 +419,11 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let hex_result = hex::encode(&result[..]);
                 // println!("hex_result if: {:?}", hex_result);
 
-                let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
+                let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
 
                 fs::create_dir_all(&f_path)?;
 
-                let f_path = f_path + "/" + &hex_result[2..];
+                let f_path = f_path + &hex_result[2..];
                 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
@@ -472,7 +472,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                     "refs_delta",
                 ];
 
-                let mut obj_write_data = format!("{} {}\0", data_type[obj_type], content.len());
+                let mut obj_write_data = format!("{} {}\0", data_type[obj_type], content.len()).to_string();
 
                 //  println!("obj_write_data : {:?}", obj_write_data);
 
@@ -509,7 +509,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         let git_data = fs::read(git_path).unwrap();
 
-        let mut data = ZlibDecoder::new(&git_data[..]);
+        let mut data = ZlibDecoder::new(&git_data[0..]);
 
         let mut v_delta = Vec::new();
 
@@ -517,9 +517,10 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
         let s_delta = unsafe { String::from_utf8_unchecked(v_delta) };
 
-        let data = s_delta.split("\n");
+        let mut data = s_delta.split("\n");
 
-        let data = data.clone().nth(0).unwrap().split(" ");
+        let data = data.next().unwrap();
+        let data = data.split(" ");
         // println!("data: {:?}", &data);
         let tree_sha = data.clone().nth(data.count() - 1).unwrap();
 
