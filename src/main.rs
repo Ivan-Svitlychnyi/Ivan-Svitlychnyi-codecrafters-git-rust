@@ -127,7 +127,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
 
     let full_path = format!("{sub_dir_path}{}", sha_file).to_string();
 
-    fs::create_dir(sub_dir_path)?;
+    fs::create_dir_all(sub_dir_path)?;
     fs::write(full_path, compressed)?;
 
     Ok((result, hex_result))
@@ -144,20 +144,14 @@ fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
 
     let split_data = file_content[..].split(|x| *x == '\x00' as u8).skip(1);
 
-  
     let mut result:Vec<Vec<u8>> = Vec::new();
-   // let mut result = Vec::new();
 
     for i in split_data { 
 
-    let  chars = i.split(|x| *x == ' ' as u8);
-    let x = chars.last().unwrap();
+    let  parts = i.split(|x| *x == ' ' as u8);
+    let x = parts.last().unwrap();
      result.push(x.to_vec());
-        
-        // let chars = String::from_utf8_lossy(&i);
-        // let chars = chars.split_whitespace();
-        // let x = chars.last().unwrap();
-        // result.push(x.to_string());
+
     }
     result.pop();
 
@@ -211,6 +205,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
     let res = write_hash_object(sha_out.into_bytes(), "tree");
     res
 }
+
 
 fn create_commit(args: &[String]) -> Result<String, io::Error> {
     let (tree_sha, parent_commit_sha, data) = (&args[2], &args[4], &args[6]);
