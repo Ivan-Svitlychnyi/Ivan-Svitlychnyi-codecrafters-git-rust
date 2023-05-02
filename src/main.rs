@@ -475,7 +475,6 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 //  println!("obj_write_data : {:?}", obj_write_data);
 
                 obj_write_data += &content;
-
                 //-----------------------
 
                 let mut hasher = Sha1::new();
