@@ -314,6 +314,8 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
     fs::create_dir(target_dir.clone() + "/.git/objects/")?;
 
+    fs::create_dir(target_dir.clone() + "/.git/refs")?;
+
     fs::write(
         target_dir.to_owned() + "/.git/HEAD",
         "ref: refs/heads/master\n",
