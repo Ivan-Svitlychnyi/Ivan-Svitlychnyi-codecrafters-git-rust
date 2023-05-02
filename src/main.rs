@@ -429,7 +429,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 let compressed = e.finish()?;
 
-                //println!(" f_path: {:?}", &f_path);
+                println!(" f_path: {:?}", &f_path);
                 fs::write(f_path, compressed)?;
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
@@ -493,7 +493,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 fs::create_dir_all(&f_path).unwrap();
                 let f_path = f_path + "/" + &hex_result[2..];
-                //  println!(" f_path: {:?}", &f_path);
+                println!(" f_path: {:?}", &f_path);
                 fs::write(f_path, &compressed).unwrap();
 
                 // println!("objs k else: {:#?}", hex_result);
