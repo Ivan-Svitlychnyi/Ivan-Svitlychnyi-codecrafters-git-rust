@@ -70,36 +70,50 @@ fn sha1_parse(sha_1: &String) -> (String, String) {
     (sub_dir, sha_num)
 }
 
+fn zlib_decode(enc_data:Vec<u8>) -> Result<Vec<u8>, io::Error>{
+
+    let mut enc_data = ZlibDecoder::new(&enc_data[..]);
+    let mut dec_data = Vec::new();
+    enc_data.read_to_end(&mut dec_data)?;
+
+     Ok(dec_data)
+}
+
+
 fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
     let (sub_dir, sha_num) = sha1_parse(&git_path);
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
-
     let git_data = fs::read(full_path)?;
-    let mut git_data = ZlibDecoder::new(&git_data[..]);
 
-    let mut v_git_data = Vec::new();
-    git_data.read_to_end(&mut v_git_data)?;
+    let git_data = zlib_decode(git_data)?;
 
-   let git_data: Vec<u8> = v_git_data[8..].iter().filter(|c| **c  != '\n' as u8).map(|x| *x as u8).collect();
-   //let git_data = String::from_utf8(git_data).unwrap();
-   
+   let git_data: Vec<u8> = git_data[8..].iter().filter(|c| **c  != '\n' as u8).map(|x| *x as u8).collect();
+  
     Ok(git_data)
 
 }
 
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
-    #[allow(unsafe_code)]
-    let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
-        String::from_utf8_unchecked(file_data)
-    });
+     let mut file_data = file_data;
+    let mut store = Vec::new();
+    store.append(&mut file_type.as_bytes().to_vec());
+    store.append(&mut ['\x00' as u8].to_vec());
+    let binding = (file_data.len()).to_be_bytes();
+    store.append(&mut binding.to_vec());
+    store.append(&mut file_data);
+
+    // #[allow(unsafe_code)]
+    // let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
+    //     String::from_utf8_unchecked(file_data)
+    // });
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-    e.write_all(store.as_bytes())?;
+    e.write_all(&store)?;
     let compressed = e.finish()?;
 
     let mut hasher = Sha1::new();
-    hasher.update(store.as_bytes());
+    hasher.update(store);
 
     let result = hasher.finalize();
 
