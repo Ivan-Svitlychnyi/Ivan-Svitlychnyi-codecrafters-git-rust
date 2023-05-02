@@ -94,26 +94,19 @@ fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
 }
 
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
-
-    let mut store = Vec::new();
-    store.push(file_type.as_bytes());
-    store.push(&['\x00' as u8]);
-    let binding = (file_data.len()).to_be_bytes();
-    store.push(&binding[..]);
-    store.push(&file_data[..]);
-
-    // #[allow(unsafe_code)]
-    // let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
-    //     String::from_utf8_unchecked(file_data)
-    // });
+    
+    #[allow(unsafe_code)]
+    let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
+        String::from_utf8_unchecked(file_data)
+    });
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
 
-    e.write_all(&store[0][..])?;
+    e.write_all(store.as_bytes())?;
     let compressed = e.finish()?;
 
     let mut hasher = Sha1::new();
-    hasher.update(&store[0][..]);
+    hasher.update(store.as_bytes());
 
     let result = hasher.finalize();
 
