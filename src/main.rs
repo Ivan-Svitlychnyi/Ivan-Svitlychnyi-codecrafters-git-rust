@@ -319,10 +319,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         "ref: refs/heads/master\n",
     )?;
 
-    // let body = reqwest::get(url + "/info/refs?service=git-upload-pack")
-    // .await?
-    // .text()
-    // .await?;
+  
     let body = reqwest::blocking::get(url.clone() + "/info/refs?service=git-upload-pack")
         .unwrap()
         .text()
@@ -369,6 +366,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         let body = res_send.bytes().unwrap();
         let res_data = body.to_vec();
         let res_data_size = res_data.len() - 20;
+        
         println!("res_data_size: {:?}", res_data_size);
 
         let entries_bytes = res_data[16..20].try_into().unwrap();
@@ -609,7 +607,6 @@ fn identify(delta: &[u8], base: String) -> String {
                 }
             }
 
-            //  println!("len_bytes: {:?}", &len_bytes);
             let len_int = usize::from_le_bytes(len_bytes);
             //let len_int = usize::from_str(&len_bytes).unwrap();
 
