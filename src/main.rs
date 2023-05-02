@@ -127,13 +127,17 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) {
         tree = &tree[pos + 1..];
 
         let sha = &tree[..20];
+
+        //println!("sha: {:#?}", &sha);
+        //let sha = hex::encode(sha);
+       //let mut hasher = Sha1::new();
+       // hasher.update(sha);
+       // let sha = hasher.finalize();
         //println!("tree: {:#?}", &tree);
         tree = &tree[20..];
 
         //println!("tree: {:#?}", &tree);
-        let mut hasher = Sha1::new();
-        hasher.update(sha);
-        let sha = hasher.finalize();
+    
 
         let sha = hex::encode(&sha[..]);
         let mode = String::from_utf8_lossy(mode);
@@ -431,7 +435,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 let compressed = e.finish()?;
 
-                println!(" f_path: {:?}", &f_path);
+               // println!(" f_path: {:?}", &f_path);
                 fs::write(f_path, compressed)?;
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
@@ -494,7 +498,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 fs::create_dir_all(&f_path).unwrap();
                 let f_path = f_path + "/" + &hex_result[2..];
-                println!(" f_path: {:?}", &f_path);
+                //println!(" f_path: {:?}", &f_path);
                 fs::write(f_path, &compressed).unwrap();
 
                 // println!("objs k else: {:#?}", hex_result);
@@ -559,7 +563,8 @@ fn identify(delta: &[u8], base: String) -> String {
     }
     seek += 1;
     let mut content = String::new();
-
+    //content = "".to_string();
+     println!("content: {:?}", &content);
     let delta_len = delta.len();
     // println!(" delta_len: {:?}", &delta_len);
     while seek < delta_len {
