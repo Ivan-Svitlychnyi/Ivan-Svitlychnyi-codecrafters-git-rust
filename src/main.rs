@@ -456,7 +456,8 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut v_delta = Vec::new();
                 delta.read_to_end(&mut v_delta).unwrap();
 
-                let content = identify(&v_delta, base);
+                let (content, seek_ret) = identify(&v_delta, base);
+                seek = seek_ret;
                 obj_type = elem_num;
                 //println!("content else: {:#?}", &content);
                 // println!("obj_type else: {:#?}", &obj_type);
@@ -546,7 +547,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 //     }))
 // }
 //***************************************************************************************************** */
-fn identify(delta: &[u8], base: String) -> String {
+fn identify(delta: &[u8], base: String) -> (String, usize) {
     println!("fidentify !!!!!!!!!!!");
     let mut seek: usize = 0;
     // println!("delta: {:#?}", delta);
@@ -626,5 +627,5 @@ fn identify(delta: &[u8], base: String) -> String {
             seek += num_bytes;
         }
     }
-    content
+    (content, seek)
 }
