@@ -32,7 +32,7 @@ fn main() {
         // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
 
-        print!("{:?}", read_git_object(&args[3]).unwrap());
+        print!("{}", String::from_utf8(read_git_object(&args[3]).unwrap()).unwrap());
 
     } else if args[1] == "hash-object" && args[2] == "-w" {
         let file_data = fs::read(args[3].to_string()).unwrap();
@@ -81,11 +81,11 @@ fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
     git_data.read_to_end(&mut v_git_data)?;
 
    let git_data: Vec<u8> = v_git_data[8..].iter().filter(|c| **c  != '\n' as u8).map(|x| *x as u8).collect();
-
+   //let git_data = String::from_utf8(git_data).unwrap();
+   
     Ok(git_data)
+
 }
-
-
 
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
     #[allow(unsafe_code)]
