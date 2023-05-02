@@ -31,7 +31,9 @@ fn main() {
         git_init().unwrap();
         // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
-        print!("{}", read_git_object(&args[3]).unwrap());
+
+        print!("{:?}", read_git_object(&args[3]).unwrap());
+
     } else if args[1] == "hash-object" && args[2] == "-w" {
         let file_data = fs::read(args[3].to_string()).unwrap();
         let (_, sha1_out) = write_hash_object(file_data, "blob").unwrap();
@@ -68,119 +70,22 @@ fn sha1_parse(sha_1: &String) -> (String, String) {
     (sub_dir, sha_num)
 }
 
-fn read_git_object(git_path: &String) -> Result<String, io::Error> {
+fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
     let (sub_dir, sha_num) = sha1_parse(&git_path);
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
 
     let git_data = fs::read(full_path)?;
     let mut git_data = ZlibDecoder::new(&git_data[..]);
 
-    let mut s_git_data = String::new();
-    git_data.read_to_string(&mut s_git_data)?;
+    let mut v_git_data = Vec::new();
+    git_data.read_to_end(&mut v_git_data)?;
 
-    let git_data_chars: Vec<char> = s_git_data.chars().collect();
-
-    let git_data = git_data_chars[8..]
-        .iter()
-        .filter(|c| **c != '\n')
-        .collect::<String>();
+   let git_data: Vec<u8> = v_git_data[8..].iter().filter(|c| **c  != '\n' as u8).map(|x| *x as u8).collect();
 
     Ok(git_data)
 }
 
-fn checkout_tree(sha: String, file_path: String, target_dir: String) {
-    println!("target_dir: {target_dir}");
-    println!("file_path: {file_path}");
 
-    fs::create_dir_all(&file_path).unwrap();
-
-    let git_data =
-        fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..]))
-            .unwrap();
-    let mut git_data = ZlibDecoder::new(&git_data[..]);
-
-    let mut v_git_data = Vec::new();
-    git_data.read_to_end(&mut v_git_data).unwrap();
-
-    let mut enteries = Vec::new();
-    //println!("enteries: {:#?}", &s_git_data);
-
-    let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
-
-    let mut tree = &v_git_data[pos + 1..];
-
-    while tree.len() > 0 {
-        let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
-
-        println!("position: {:#?}", &pos);
-
-        let mode_name = &tree[..pos];
-
-        let mut mode_name = mode_name.split(|&num| num == ' ' as u8);
-
-        //println!("mode_name: {:#?}", &mode_name);
-
-        let mode = mode_name.next().unwrap();
-        let name = mode_name.next().unwrap();
-
-        tree = &tree[pos + 1..];
-
-        let sha = &tree[..20];
-
-        //println!("sha: {:#?}", &sha);
-        //let sha = hex::encode(sha);
-        //let mut hasher = Sha1::new();
-        // hasher.update(sha);
-        // let sha = hasher.finalize();
-        //println!("tree: {:#?}", &tree);
-        tree = &tree[20..];
-
-        //println!("tree: {:#?}", &tree);
-
-        let sha = hex::encode(&sha[..]);
-        let mode = String::from_utf8_lossy(mode);
-        let name = String::from_utf8_lossy(name);
-
-        println!("mode: {:#?}", &mode);
-        println!("name: {:#?}", &name);
-        println!("sha: {:#?}", &sha);
-
-        enteries.push((mode.clone(), name.clone(), sha.clone()));
-    }
-
-    for entry in enteries {
-        if entry.0 == "40000" {
-            println!("blob_sha 40000: {:#?}", &entry.1);
-            checkout_tree(
-                entry.2.to_string(),
-                file_path.clone() + &format!("/{}", entry.1).to_string(),
-                target_dir.to_string(),
-            );
-        } else {
-            let blob_sha = entry.2;
-
-            println!("blob_sha: {}", &blob_sha);
-
-            let curr_dir = target_dir.clone()
-                + &format!("/.git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
-
-            println!("curr_dir: {}", &curr_dir);
-
-            let git_data = fs::read(curr_dir).unwrap();
-
-            let mut git_data = ZlibDecoder::new(&git_data[..]);
-
-            let mut v_git_data = Vec::new();
-            git_data.read_to_end(&mut v_git_data).unwrap();
-
-            let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
-
-            let content = &v_git_data[pos + 1..];
-
-            fs::write(file_path.clone() + &format!("/{}", entry.1), content).unwrap();
-        }
-    }
-}
 
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
     #[allow(unsafe_code)]
@@ -630,4 +535,93 @@ fn identify(delta: &[u8], base: String) -> String {
         }
     }
     content
+}
+
+fn checkout_tree(sha: String, file_path: String, target_dir: String) {
+
+    println!("target_dir: {target_dir}");
+    println!("file_path: {file_path}");
+
+    fs::create_dir_all(&file_path).unwrap();
+
+    let git_data =
+        fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..]))
+            .unwrap();
+    let mut git_data = ZlibDecoder::new(&git_data[..]);
+
+    let mut v_git_data = Vec::new();
+    git_data.read_to_end(&mut v_git_data).unwrap();
+
+    let mut enteries = Vec::new();
+    //println!("enteries: {:#?}", &s_git_data);
+
+    let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
+
+    let mut tree = &v_git_data[pos + 1..];
+
+    while tree.len() > 0 {
+        let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
+
+        println!("position: {:#?}", &pos);
+
+        let mode_name = &tree[..pos];
+
+        let mut mode_name = mode_name.split(|&num| num == ' ' as u8);
+
+        //println!("mode_name: {:#?}", &mode_name);
+
+        let mode = mode_name.next().unwrap();
+        let name = mode_name.next().unwrap();
+
+        tree = &tree[pos + 1..];
+
+        let sha = &tree[..20];
+
+        tree = &tree[20..];
+
+        //println!("tree: {:#?}", &tree);
+
+        let sha = hex::encode(&sha[..]);
+        let mode = String::from_utf8_lossy(mode);
+        let name = String::from_utf8_lossy(name);
+
+        println!("mode: {:#?}", &mode);
+        println!("name: {:#?}", &name);
+        println!("sha: {:#?}", &sha);
+
+        enteries.push((mode.clone(), name.clone(), sha.clone()));
+    }
+
+    for entry in enteries {
+        if entry.0 == "40000" {
+            println!("blob_sha 40000: {:#?}", &entry.1);
+            checkout_tree(
+                entry.2.to_string(),
+                file_path.clone() + &format!("/{}", entry.1).to_string(),
+                target_dir.to_string(),
+            );
+        } else {
+            let blob_sha = entry.2;
+
+            println!("blob_sha: {}", &blob_sha);
+
+            let curr_dir = target_dir.clone()
+                + &format!("/.git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
+
+            println!("curr_dir: {}", &curr_dir);
+
+            let git_data = fs::read(curr_dir).unwrap();
+
+            let mut git_data = ZlibDecoder::new(&git_data[..]);
+
+            let mut v_git_data = Vec::new();
+            git_data.read_to_end(&mut v_git_data).unwrap();
+
+            let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
+
+            let content = &v_git_data[pos + 1..];
+
+            fs::write(file_path.clone() + &format!("/{}", entry.1), content).unwrap();
+        }
+    }
 }
