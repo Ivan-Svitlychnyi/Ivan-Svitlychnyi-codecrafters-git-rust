@@ -38,6 +38,7 @@ fn main() {
         let file_data = fs::read(args[3].to_string()).unwrap();
         let (_, sha1_out) = write_hash_object(file_data, "blob").unwrap();
         println!("hash-object in: {}", sha1_out);
+        
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
         let result = read_tree(&args[3]).unwrap();
         for s in result {
