@@ -101,16 +101,14 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
     });
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-
     e.write_all(store.as_bytes())?;
     let compressed = e.finish()?;
 
     let mut hasher = Sha1::new();
     hasher.update(store.as_bytes());
-
     let result = hasher.finalize();
-
     let hex_result = hex::encode(&result[..]);
+
 
     let (sub_dir, sha_num) = sha1_parse(&hex_result);
 
@@ -120,6 +118,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
 
     fs::create_dir(sub_dir_path)?;
     fs::write(full_path, compressed)?;
+
     Ok((result.to_vec(), hex_result))
 }
 
@@ -128,17 +127,11 @@ fn read_tree(file_path: &String) -> Result<Vec<String>, io::Error> {
 
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
 
-    let git_data = fs::read(full_path).unwrap();
+    let file_content = fs::read(full_path).unwrap();
+    
+    let file_content = zlib_decode(file_content)?;
 
-    let mut git_data = ZlibDecoder::new(&git_data[..]);
-
-    let mut file_content = Vec::new();
-
-    git_data.read_to_end(&mut file_content).unwrap();
-
-    let cursor = io::Cursor::new(file_content);
-
-    let split_data = cursor.split(b'\x00').skip(1).map(|l| l.unwrap());
+    let split_data = file_content[..].split(|x| *x == '\x00' as u8).skip(1).map(|l| l);
 
     let mut result = Vec::new();
 
