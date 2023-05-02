@@ -531,6 +531,8 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             target_dir.to_string(),
             target_dir.to_string(),
         );
+
+        
         //let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
         // let (_, sha1_out) = write_tree(&path_f).unwrap();
         // print!("sha1_out: {}", sha1_out);
