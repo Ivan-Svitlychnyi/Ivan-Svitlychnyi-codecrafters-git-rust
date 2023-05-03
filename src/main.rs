@@ -288,6 +288,35 @@ fn post_to_git_data(url:String, data:String) ->Result<Vec<u8>, io::Error> {
 
 }
 
+fn make_git_object(obj_data:Vec<u8>, obj_type:usize, target_dir: String)-> Result<(String,String), io::Error>{
+   
+    #[allow(unsafe_code)]
+    let s_git_data = unsafe { String::from_utf8_unchecked(obj_data)};
+
+    let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta"];
+
+    let mut obj_write_data =
+        format!("{} {}\0", data_type[obj_type], &s_git_data.len()).to_string();
+
+    obj_write_data.push_str(&s_git_data);
+
+    let (_, hex_result) = make_hash( obj_write_data.as_bytes().to_vec())?;
+
+    let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
+
+    fs::create_dir_all(&f_path)?;
+
+    let f_path = f_path + &hex_result[2..];
+
+    let compressed = zlib_encode(obj_write_data.as_bytes().to_vec())?;
+
+    // println!(" f_path: {:?}", &f_path);
+    fs::write(f_path, compressed)?;
+
+    Ok((hex_result, s_git_data.clone()))
+
+   
+}
 
 fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     // ["/tmp/codecrafters-git-target/release/git-starter-rust",
@@ -349,47 +378,47 @@ let pack_hash = get_pack_hesh(url_adr)?;
             // println!("seek : {:?}", seek);
     
             if obj_type < 7 {
-
-                let v_git_data = zlib_decode(data_bytes[seek..].to_vec())?;          
+                
+                let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
+                let mut v_git_data = Vec::new();
+                git_data.read_to_end(&mut v_git_data).unwrap();
 //-----------------------------------------------------------------------------------------------------
-                #[allow(unsafe_code)]
-                let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data.clone()) };
 
-                let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta"];
+               
+            //    #[allow(unsafe_code)]
+            //     let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
 
-                let mut obj_write_data =
-                    format!("{} {}\0", data_type[obj_type], &s_git_data.len()).to_string();
+            //     let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta"];
 
-                obj_write_data.push_str(&s_git_data);
+            //     let mut obj_write_data =
+            //         format!("{} {}\0", data_type[obj_type], &s_git_data.len()).to_string();
 
-                let mut hasher = Sha1::new();
-                hasher.update(obj_write_data.as_bytes());
+            //     obj_write_data.push_str(&s_git_data);
 
-                let result = hasher.finalize();
+            //     let mut hasher = Sha1::new();
+            //     hasher.update(obj_write_data.as_bytes());
 
-                let hex_result = hex::encode(&result[..]);
-                // println!("hex_result if: {:?}", hex_result);
+            //     let result = hasher.finalize();
 
-                let f_path =
-                    target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
+            //     let hex_result = hex::encode(&result[..]);
+            //     // println!("hex_result if: {:?}", hex_result);
 
-                fs::create_dir_all(&f_path)?;
+            //     let f_path =
+            //         target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
 
-                let f_path = f_path + &hex_result[2..];
+            //     fs::create_dir_all(&f_path)?;
 
-                let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+            //     let f_path = f_path + &hex_result[2..];
 
-                e.write_all(obj_write_data.as_bytes())?;
+            //     let compressed = zlib_encode(obj_write_data.as_bytes().to_vec())?;
 
-                let compressed = e.finish()?;
+            //     // println!(" f_path: {:?}", &f_path);
+            //     fs::write(f_path, compressed)?;
+                let (hex_result, obj_data) = make_git_object( v_git_data, obj_type, target_dir.to_string())?;
 
-                // println!(" f_path: {:?}", &f_path);
-                fs::write(f_path, compressed)?;
-
-                objs.insert(hex_result, (s_git_data.clone(), obj_type));
+                objs.insert(hex_result, (obj_data, obj_type));
 //---------------------------------------------------------------------------------------------------------------
-                seek += v_git_data.len() as usize;
-                //seek += git_data.total_in() as usize;
+                seek += git_data.total_in() as usize;
                 //seek += decompressed.len() as usize;
             } else {
                 println!("else !!!!!!!!!!!!!!!!");
