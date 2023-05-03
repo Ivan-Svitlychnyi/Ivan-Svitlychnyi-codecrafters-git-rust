@@ -31,14 +31,14 @@ fn main() {
         git_init().unwrap();
         // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
-
-        print!("{}", String::from_utf8(read_git_object(&args[3]).unwrap()).unwrap());
-
+        print!(
+            "{}",
+            String::from_utf8(read_git_object(&args[3]).unwrap()).unwrap()
+        );
     } else if args[1] == "hash-object" && args[2] == "-w" {
         let file_data = fs::read(args[3].to_string()).unwrap();
         let (_, sha1_out) = write_hash_object(file_data, "blob").unwrap();
         println!("hash-object in: {}", sha1_out);
-
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
         let result = read_tree(&args[3]).unwrap();
         for s in result {
@@ -71,25 +71,22 @@ fn sha1_parse(sha_1: &String) -> (String, String) {
     (sub_dir, sha_num)
 }
 
-fn zlib_decode(enc_data:Vec<u8>) -> Result<Vec<u8>, io::Error>{
-
+fn zlib_decode(enc_data: Vec<u8>) -> Result<Vec<u8>, io::Error> {
     let mut enc_data = ZlibDecoder::new(&enc_data[..]);
     let mut dec_data = Vec::new();
     enc_data.read_to_end(&mut dec_data)?;
 
-     Ok(dec_data)
+    Ok(dec_data)
 }
 
-fn zlib_encode(data:Vec<u8>) -> Result<Vec<u8>, io::Error>{
-
+fn zlib_encode(data: Vec<u8>) -> Result<Vec<u8>, io::Error> {
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
     e.write_all(&data[..])?;
     let compressed = e.finish()?;
 
-   Ok(compressed)
+    Ok(compressed)
 }
-fn make_hash(data:Vec<u8>)->Result<(Vec<u8>, String), io::Error>{
-
+fn make_hash(data: Vec<u8>) -> Result<(Vec<u8>, String), io::Error> {
     let mut hasher = Sha1::new();
     hasher.update(data);
     let result = hasher.finalize();
@@ -105,28 +102,30 @@ fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
 
     let git_data = zlib_decode(git_data)?;
 
-   let git_data: Vec<u8> = git_data[8..].iter().filter(|c| **c  != '\n' as u8).map(|x| *x as u8).collect();
-  
+    let git_data: Vec<u8> = git_data[8..]
+        .iter()
+        .filter(|c| **c != '\n' as u8)
+        .map(|x| *x as u8)
+        .collect();
+
     Ok(git_data)
-
 }
-
 fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
-    
     #[allow(unsafe_code)]
     let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
         String::from_utf8_unchecked(file_data)
-    }).to_string();
-/******************************************** */
-// let mut file_data = file_data;
-// let mut store: Vec<u8> = Vec::new();
-// store.append(&mut file_type.as_bytes().to_vec());
-// store.push(' ' as u8);
-// store.append(&mut file_data.len().to_ne_bytes().to_vec());
-// store.push('\x00' as u8);
-// store.append(&mut file_data);
+    })
+    .to_string();
+    /******************************************** */
+    // let mut file_data = file_data;
+    // let mut store: Vec<u8> = Vec::new();
+    // store.append(&mut file_type.as_bytes().to_vec());
+    // store.push(' ' as u8);
+    // store.append(&mut file_data.len().to_ne_bytes().to_vec());
+    // store.push('\x00' as u8);
+    // store.append(&mut file_data);
 
-/******************************************* */
+    /******************************************* */
     let compressed = zlib_encode(store.clone().into())?;
 
     let (result, hex_result) = make_hash(store.into())?;
@@ -141,39 +140,33 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
     fs::write(full_path, compressed)?;
 
     Ok((result, hex_result))
-
 }
 
-
 fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
-
     let (sub_dir, sha_num) = sha1_parse(&file_path);
 
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
 
     let file_content = fs::read(full_path).unwrap();
-    
+
     let file_content = zlib_decode(file_content)?;
 
     let split_data = file_content[..].split(|x| *x == '\x00' as u8).skip(1);
 
-    let mut result:Vec<Vec<u8>> = Vec::new();
+    let mut result: Vec<Vec<u8>> = Vec::new();
 
-    for i in split_data { 
-
-    let  parts = i.split(|x| *x == ' ' as u8);
-    let x = parts.last().unwrap();
-     result.push(x.to_vec());
-
+    for i in split_data {
+        let parts = i.split(|x| *x == ' ' as u8);
+        let x = parts.last().unwrap();
+        result.push(x.to_vec());
     }
     result.pop();
 
     Ok(result)
 }
 
-
 fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
-   // let mut sha_out: String = "".to_string();
+    // let mut sha_out: String = "".to_string();
     let mut sha_out: Vec<u8> = Vec::new();
     let mut entries = fs::read_dir(file_path)
         .unwrap()
@@ -203,20 +196,27 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
             let file_data = fs::read(&path_name).unwrap();
             (sha_file, _) = write_hash_object(file_data, "blob").unwrap();
         }
-      
+
         let mut dir_sha_out: Vec<u8> = Vec::new();
         dir_sha_out.append(&mut mode.as_bytes().to_vec());
         dir_sha_out.push(' ' as u8);
-        dir_sha_out.append(&mut dir.file_name().unwrap().to_str().unwrap().as_bytes().to_vec());
+        dir_sha_out.append(
+            &mut dir
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .as_bytes()
+                .to_vec(),
+        );
         dir_sha_out.push('\x00' as u8);
         dir_sha_out.append(&mut sha_file);
 
-        sha_out.append(&mut dir_sha_out);  
+        sha_out.append(&mut dir_sha_out);
     }
     let res = write_hash_object(sha_out, "tree");
     res
 }
-
 
 fn create_commit(args: &[String]) -> Result<String, io::Error> {
     let (tree_sha, parent_commit_sha, data) = (&args[2], &args[4], &args[6]);
@@ -297,7 +297,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     } else {
         println!("success!");
         let res_data = res_send.bytes().unwrap();
-     
+
         let res_data_size = res_data.len() - 20;
 
         println!("res_data_size: {:?}", res_data_size);
@@ -419,7 +419,8 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let hex_result = hex::encode(&result[..]);
                 //  println!("hex_result: {:?}", hex_result);
 
-                let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
+                let f_path =
+                    target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 e.write_all(obj_write_data.as_bytes())?;
@@ -505,7 +506,6 @@ fn identify(delta: &[u8], base: String) -> String {
                     offset_bytes[n] = delta[seek];
                     //  println!("offset_bytes delta[seek]:{}", delta[seek]);
                     seek += 1
-   
                 }
             }
             // println!("offset_bytes: {:?}", &offset_bytes);
@@ -549,7 +549,6 @@ fn identify(delta: &[u8], base: String) -> String {
 }
 
 fn checkout_tree(sha: String, file_path: String, target_dir: String) {
-
     println!("target_dir: {target_dir}");
     println!("file_path: {file_path}");
 
