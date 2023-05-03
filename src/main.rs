@@ -141,6 +141,7 @@ store.append(&mut file_data);
     Ok((result, hex_result))
 }
 
+
 fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
 
     let (sub_dir, sha_num) = sha1_parse(&file_path);
