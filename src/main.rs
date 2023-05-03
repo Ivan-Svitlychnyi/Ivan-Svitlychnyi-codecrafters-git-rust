@@ -200,10 +200,13 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
         //     s
         // ); 
        // let mode = mode;
-        sha_out.append(&mut mode);
-        sha_out.push('\x00' as u8);
-        sha_out.append(&mut dir.file_name().unwrap().to_str().unwrap().as_bytes().to_vec());
-        sha_out.append(&mut sha_file);
+        let mut dir_sha_out: Vec<u8> = Vec::new();
+        dir_sha_out.append(&mut mode);
+        dir_sha_out.push('\x00' as u8);
+        dir_sha_out.append(&mut dir.file_name().unwrap().to_str().unwrap().as_bytes().to_vec());
+        dir_sha_out.append(&mut sha_file);
+
+      sha_out.append(&mut dir_sha_out);  
     }
     let res = write_hash_object(sha_out, "tree");
     res
