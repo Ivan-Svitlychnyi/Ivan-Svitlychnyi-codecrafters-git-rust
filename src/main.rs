@@ -50,7 +50,7 @@ fn main() {
     } else if args[1] == "commit-tree" {
         print!("{}", create_commit(&args).unwrap());
     } else if args[1] == "clone" {
-        print!("{}", clone_repo(&args).unwrap());
+        clone_repo(&args).unwrap();
     } else {
         println!("unknown command: {:#?}", args)
     }
