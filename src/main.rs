@@ -38,19 +38,25 @@ fn main() {
     } else if args[1] == "hash-object" && args[2] == "-w" {
         let file_data = fs::read(args[3].to_string()).unwrap();
         let (_, sha1_out) = write_hash_object(file_data, "blob").unwrap();
+
         println!("hash-object in: {}", sha1_out);
+
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
         let result = read_tree(&args[3]).unwrap();
         for s in result {
             println!("{}", String::from_utf8(s).unwrap());
         }
+
     } else if args[1] == "write-tree" {
         let (_, sha1_out) = write_tree(&".".to_string()).unwrap();
         print!("{}", sha1_out);
+
     } else if args[1] == "commit-tree" {
         print!("{}", create_commit(&args).unwrap());
+
     } else if args[1] == "clone" {
         clone_repo(&args).unwrap();
+
     } else {
         println!("unknown command: {:#?}", args)
     }
@@ -62,13 +68,6 @@ fn git_init() -> Result<String, io::Error> {
     fs::write(".git/HEAD", "ref: refs/heads/master\n")?;
 
     Ok("Initialized git directory".to_string())
-}
-
-fn sha1_parse(sha_1: &String) -> (String, String) {
-    let chars: Vec<char> = sha_1.chars().collect();
-    let sub_dir = chars[..2].iter().collect::<String>();
-    let sha_num = chars[2..].iter().collect::<String>();
-    (sub_dir, sha_num)
 }
 
 fn zlib_decode(enc_data: Vec<u8>) -> Result<Vec<u8>, io::Error> {
@@ -96,7 +95,9 @@ fn make_hash(data: Vec<u8>) -> Result<(Vec<u8>, String), io::Error> {
 }
 
 fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
-    let (sub_dir, sha_num) = sha1_parse(&git_path);
+
+    let (sub_dir, sha_num) = (&git_path[..2], &git_path[2..]);
+    
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
     let git_data = fs::read(full_path)?;
 
@@ -130,7 +131,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
 
     let (result, hex_result) = make_hash(store.into())?;
 
-    let (sub_dir, sha_file) = sha1_parse(&hex_result);
+    let (sub_dir, sha_file) = (&hex_result[..2], &hex_result[2..]);
 
     let sub_dir_path = format!(".git/objects/{}/", sub_dir).to_string();
 
@@ -143,7 +144,8 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
 }
 
 fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
-    let (sub_dir, sha_num) = sha1_parse(&file_path);
+    
+    let (sub_dir, sha_num) = (&file_path[..2], &file_path[2..]);
 
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
 
@@ -256,7 +258,6 @@ fn get_pack_hash(url: String) -> Result<String, io::Error> {
 }
 
 fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes, io::Error> {
-    
     let mut headers = header::HeaderMap::new();
     headers.insert(
         CONTENT_TYPE,
@@ -283,29 +284,26 @@ fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes, io::Error
     Ok(res_data)
 }
 
-fn write_git_object(data_type: &str, content: &str, target_dir: &str)-> Result<String, io::Error>{
+fn write_git_object(data_type: &str, content: &str, target_dir: &str) -> Result<String, io::Error> {
+    let mut obj_write_data = format!("{} {}\0", data_type, content.len()).to_string();
 
-let mut obj_write_data =format!("{} {}\0", data_type, content.len()).to_string();
+    obj_write_data += &content;
+    //-----------------------
+    let (_, hex_result) = make_hash(obj_write_data.as_bytes().to_vec())?;
+    // //  println!("hex_result: {:?}", hex_result);
 
-obj_write_data += &content;
-//-----------------------
-let (_,hex_result) = make_hash(obj_write_data.as_bytes().to_vec())?;
-// //  println!("hex_result: {:?}", hex_result);
+    let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
 
-let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
+    let compressed = zlib_encode(obj_write_data.as_bytes().to_vec())?;
 
-let compressed = zlib_encode(obj_write_data.as_bytes().to_vec())?;
+    fs::create_dir_all(&f_path).unwrap();
+    let f_path = f_path + &hex_result[2..];
+    //println!(" f_path: {:?}", &f_path);
+    fs::write(f_path, &compressed).unwrap();
 
-fs::create_dir_all(&f_path).unwrap();
-let f_path = f_path + &hex_result[2..];
-//println!(" f_path: {:?}", &f_path);
-fs::write(f_path, &compressed).unwrap();
-
-Ok(hex_result)
-
+    Ok(hex_result)
 }
-fn create_dirs(target_dir: &String)-> Result<(), io::Error> {
-    
+fn create_dirs(target_dir: &String) -> Result<(), io::Error> {
     fs::create_dir(&target_dir).unwrap();
 
     fs::create_dir(target_dir.clone() + "/.git").unwrap();
@@ -319,7 +317,7 @@ fn create_dirs(target_dir: &String)-> Result<(), io::Error> {
         "ref: refs/heads/master\n",
     )?;
 
-Ok(())
+    Ok(())
 }
 fn clone_repo(args: &[String]) -> Result<(), io::Error> {
     // ["/tmp/codecrafters-git-target/release/git-starter-rust",
@@ -329,18 +327,14 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
     let (url, target_dir) = (&args[2], &args[3]);
 
     create_dirs(target_dir)?;
-    //-1-----------------------------------------------------------------------------------
+    //------------------------------------------------------------------------------------
     let url_adr = url.clone() + "/info/refs?service=git-upload-pack";
-
     let pack_hash = get_pack_hash(url_adr)?;
-
-    //-2---------------------------------------------------------------------------------
-
+    //----------------------------------------------------------------------------------
     let post_url = url.to_owned() + "/git-upload-pack";
     let data = format!("0032want {pack_hash}\n00000009done\n").to_string();
 
     let res_data = post_to_git_data(post_url, data)?;
-
     //---------------------------------------------------------------------------------------
     let res_data_size = res_data.len() - 20;
 
@@ -370,24 +364,21 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
         // println!("seek : {:?}", seek);
 
         if obj_type < 7 {
-
             let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_git_data = Vec::new();
             git_data.read_to_end(&mut v_git_data).unwrap();
-        //-----------------------------------------------------------------------------------------------------
+            //-----------------------------------------------------------------------------------------------------
             #[allow(unsafe_code)]
             let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
-        
+
             let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta"];
-        //-------------------------------------------------------------------------------------------------------------
-        let hex_result = write_git_object(data_type[obj_type], &s_git_data, &target_dir)?;
+            //-------------------------------------------------------------------------------------------------------------
+            let hex_result = write_git_object(data_type[obj_type], &s_git_data, &target_dir)?;
 
             objs.insert(hex_result, (s_git_data, obj_type));
             //---------------------------------------------------------------------------------------------------------------
             seek += git_data.total_in() as usize;
-       
         } else {
-
             let k = &data_bytes[seek..seek + 20];
             // println!("k data: {:#?}", k);
             let k = hex::encode(k);
@@ -395,7 +386,7 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
             let (base, elem_num) = objs[&k].to_owned();
 
             seek += 20;
-//-------------------------------------------------------------------------------------------------------
+            //-------------------------------------------------------------------------------------------------------
             let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_delta = Vec::new();
             delta.read_to_end(&mut v_delta)?;
@@ -404,18 +395,27 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
             obj_type = elem_num;
             //println!("content else: {:#?}", &content);
             // println!("obj_type else: {:#?}", &obj_type);
-//---------------------------------------------------------------------------------------------------------
-            let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta", "refs_delta"];
+            //---------------------------------------------------------------------------------------------------------
+            let data_type = [
+                "",
+                "commit",
+                "tree",
+                "blob",
+                "",
+                "tag",
+                "ofs_delta",
+                "refs_delta",
+            ];
             let hex_result = write_git_object(data_type[obj_type], &content, &target_dir)?;
-//---------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content.into(), obj_type));
 
             seek += delta.total_in() as usize;
-         
         }
     }
-    let git_path = target_dir.to_owned() + &format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
+    let git_path =
+        target_dir.to_owned() + &format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
 
     let git_data = fs::read(git_path)?;
     let v_delta = zlib_decode(git_data[..].to_vec())?;
@@ -439,7 +439,6 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
 
 //***************************************************************************************************** */
 fn identify(delta: &[u8], base: String) -> Result<String, io::Error> {
-  
     let mut seek: usize = 0;
     // println!("delta: {:#?}", delta);
     while delta[seek] > 128 {
@@ -515,17 +514,16 @@ fn identify(delta: &[u8], base: String) -> Result<String, io::Error> {
     Ok(content)
 }
 
-fn checkout_tree(sha: String, file_path: String, target_dir: String) ->Result<(), std::io::Error> {
+fn checkout_tree(sha: String, file_path: String, target_dir: String) -> Result<(), std::io::Error> {
     println!("target_dir: {target_dir}");
     println!("file_path: {file_path}");
 
     fs::create_dir_all(&file_path).unwrap();
 
     let git_data =
-        fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..]))
-        ?;
+        fs::read(target_dir.clone() + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..]))?;
 
-    let v_git_data =  zlib_decode(git_data[..].to_vec())?;
+    let v_git_data = zlib_decode(git_data[..].to_vec())?;
 
     let mut enteries = Vec::new();
 
@@ -568,7 +566,7 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) ->Result<()
 
     for entry in enteries {
         if entry.0 == "40000" {
-          //  println!("blob_sha 40000: {:#?}", &entry.1);
+            //  println!("blob_sha 40000: {:#?}", &entry.1);
             checkout_tree(
                 entry.2.to_string(),
                 file_path.clone() + &format!("/{}", entry.1).to_string(),
@@ -577,12 +575,12 @@ fn checkout_tree(sha: String, file_path: String, target_dir: String) ->Result<()
         } else {
             let blob_sha = entry.2;
 
-           // println!("blob_sha: {}", &blob_sha);
+            // println!("blob_sha: {}", &blob_sha);
 
             let curr_dir = target_dir.clone()
                 + &format!("/.git/objects/{}/{}", &blob_sha[..2], &blob_sha[2..]);
 
-           // println!("curr_dir: {}", &curr_dir);
+            // println!("curr_dir: {}", &curr_dir);
 
             let git_data = fs::read(curr_dir)?;
             let v_git_data = zlib_decode(git_data)?;
