@@ -80,18 +80,18 @@ fn zlib_decode(enc_data:Vec<u8>) -> Result<Vec<u8>, io::Error>{
      Ok(dec_data)
 }
 
-fn zlib_encode(data:&String) -> Result<Vec<u8>, io::Error>{
+fn zlib_encode(data:&Vec<u8>) -> Result<Vec<u8>, io::Error>{
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-    e.write_all(data.as_bytes())?;
+    e.write_all(data)?;
     let compressed = e.finish()?;
 
    Ok(compressed)
 }
-fn make_hash(data:&String)->Result<(Vec<u8>, String), io::Error>{
+fn make_hash(data:&Vec<u8>)->Result<(Vec<u8>, String), io::Error>{
 
     let mut hasher = Sha1::new();
-    hasher.update(data.as_bytes());
+    hasher.update(data);
     let result = hasher.finalize();
     let hex_result = hex::encode(&result[..]);
 
@@ -111,13 +111,21 @@ fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
 
 }
 
-fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
+fn write_hash_object(mut file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
     
-    #[allow(unsafe_code)]
-    let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
-        String::from_utf8_unchecked(file_data)
-    }).to_string();
-
+    // #[allow(unsafe_code)]
+    // let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
+    //     String::from_utf8_unchecked(file_data)
+    // }).to_string();
+/******************************************** */
+//let mut file_data_mut = file_data;
+let mut store: Vec<u8> = Vec::new();
+store.append(&mut file_type.as_bytes().to_vec());
+store.push(' ' as u8);
+store.append(&mut file_data.len().to_ne_bytes().to_vec());
+store.push('\x00' as u8);
+store.append(&mut file_data);
+/******************************************* */
     let compressed = zlib_encode(&store)?;
 
     let (result, hex_result) = make_hash(&store)?;
@@ -135,6 +143,7 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
 }
 
 fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
+
     let (sub_dir, sha_num) = sha1_parse(&file_path);
 
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
@@ -180,7 +189,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
         if path_name == "./.git" {
             continue;
         }
-        let sha_file;
+        let mut sha_file;
         if dir.is_dir() {
             mode = "40000".as_bytes().to_vec();
             (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
@@ -191,15 +200,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
             let file_data = fs::read(&path_name).unwrap();
             (sha_file, _) = write_hash_object(file_data, "blob").unwrap();
         }
-       let mut sha_file = sha_file;
-    //#[allow(unsafe_code)]
-        // let s = unsafe { String::from_utf8_unchecked(&sha_file) };
-        // sha_out += &format!(
-        //     "{mode} {}\x00{}",
-        //     dir.file_name().unwrap().to_str().unwrap(),
-        //     s
-        // ); 
-       // let mode = mode;
+      
         let mut dir_sha_out: Vec<u8> = Vec::new();
         dir_sha_out.append(&mut mode);
         dir_sha_out.push(' ' as u8);
@@ -207,7 +208,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
         dir_sha_out.push('\x00' as u8);
         dir_sha_out.append(&mut sha_file);
 
-      sha_out.append(&mut dir_sha_out);  
+        sha_out.append(&mut dir_sha_out);  
     }
     let res = write_hash_object(sha_out, "tree");
     res
