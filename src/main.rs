@@ -69,7 +69,7 @@ fn  main() {
   
 
 
-fn git_init() -> Result<String, io::Error> {
+fn git_init() -> Result<String> {
     fs::create_dir(".git")?;
     fs::create_dir(".git")?;
     fs::create_dir(".git/objects")?;
