@@ -349,16 +349,11 @@ let pack_hash = get_pack_hesh(url_adr)?;
             // println!("seek : {:?}", seek);
     
             if obj_type < 7 {
-                let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
-                //  let decompressed = &data_bytes[seek..];
 
-                //println!("git_data");
-                let mut v_git_data = Vec::new();
-
-                git_data.read_to_end(&mut v_git_data).unwrap();
+                let v_git_data = zlib_decode(data_bytes[seek..].to_vec())?;          
 //-----------------------------------------------------------------------------------------------------
                 #[allow(unsafe_code)]
-                let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
+                let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data.clone()) };
 
                 let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta"];
 
@@ -393,7 +388,8 @@ let pack_hash = get_pack_hesh(url_adr)?;
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
 //---------------------------------------------------------------------------------------------------------------
-                seek += git_data.total_in() as usize;
+                seek += v_git_data.len() as usize;
+                //seek += git_data.total_in() as usize;
                 //seek += decompressed.len() as usize;
             } else {
                 println!("else !!!!!!!!!!!!!!!!");
