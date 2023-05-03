@@ -118,7 +118,6 @@ fn write_hash_object(mut file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>
     //     String::from_utf8_unchecked(file_data)
     // }).to_string();
 /******************************************** */
-//let mut file_data_mut = file_data;
 let mut store: Vec<u8> = Vec::new();
 store.append(&mut file_type.as_bytes().to_vec());
 store.push(' ' as u8);
