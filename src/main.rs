@@ -90,7 +90,6 @@ fn make_hash(data: Vec<u8>) -> Result<(Vec<u8>, String), io::Error> {
     hasher.update(data);
     let result = hasher.finalize();
     let hex_result = hex::encode(&result[..]);
-
     Ok((result.to_vec(), hex_result))
 }
 
