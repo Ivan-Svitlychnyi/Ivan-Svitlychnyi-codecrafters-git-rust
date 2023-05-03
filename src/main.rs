@@ -50,6 +50,7 @@ fn  main() {
             println!("{}", String::from_utf8(s).unwrap());
         }
 
+
     } else if args[1] == "write-tree" {
         let (_, sha1_out) = write_tree(&".".to_string()).unwrap();
         print!("{}", sha1_out);
