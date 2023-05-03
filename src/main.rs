@@ -121,13 +121,14 @@ fn write_hash_object(mut file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>
 let mut store: Vec<u8> = Vec::new();
 store.append(&mut file_type.as_bytes().to_vec());
 store.push(' ' as u8);
-store.append(&mut file_data.len().to_le_bytes().to_vec());
+store.append(&mut file_data.len().to_ne_bytes().to_vec());
 store.push('\x00' as u8);
 store.append(&mut file_data);
+store.push('\n' as u8);
 /******************************************* */
-    let compressed = zlib_encode(store.clone().into())?;
+    let compressed = zlib_encode(store.clone())?;
 
-    let (result, hex_result) = make_hash(store.into())?;
+    let (result, hex_result) = make_hash(store)?;
 
     let (sub_dir, sha_file) = sha1_parse(&hex_result);
 
@@ -182,7 +183,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
     entries.sort();
 
     for dir in entries {
-        let mut mode;
+        let mode;
 
         let path_name = dir.to_str().unwrap();
         //  println!("dir: {}", path_name);
@@ -417,14 +418,14 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let hex_result = hex::encode(&result[..]);
                 //  println!("hex_result: {:?}", hex_result);
 
-                let f_path = target_dir.to_owned() + &format!("/.git/objects/{}", &hex_result[..2]);
+                let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
 
                 let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
                 e.write_all(obj_write_data.as_bytes())?;
                 let compressed = e.finish().unwrap();
 
                 fs::create_dir_all(&f_path).unwrap();
-                let f_path = f_path + "/" + &hex_result[2..];
+                let f_path = f_path + &hex_result[2..];
                 //println!(" f_path: {:?}", &f_path);
                 fs::write(f_path, &compressed).unwrap();
 
