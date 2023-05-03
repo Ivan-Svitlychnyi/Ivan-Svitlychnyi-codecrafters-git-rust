@@ -31,8 +31,14 @@ fn  main() ->Result<()> {
         panic!("enter the arguments!");
     }
     if args[1] == "init" {
-        git_init()?;
-        // println!("{}", )
+
+        if let Err(err) =  git_init() {
+            eprintln!("ERROR: {}", err);
+            err.chain().skip(1).for_each(|cause| eprintln!("because: {}", cause));
+            std::process::exit(1);
+        }
+      
+      
     } else if args[1] == "cat-file" && args[2] == "-p" {
         print!(
             "{}",
@@ -71,7 +77,7 @@ fn  main() ->Result<()> {
   
 
 
-fn git_init() -> Result<String, io::Error> {
+fn git_init() -> Result<String> {
     fs::create_dir(".git")?;
     fs::create_dir(".git")?;
     fs::create_dir(".git/objects")?;
