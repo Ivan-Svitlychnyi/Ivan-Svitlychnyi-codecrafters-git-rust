@@ -50,7 +50,6 @@ fn  main() {
             println!("{}", String::from_utf8(s).unwrap());
         }
 
-
     } else if args[1] == "write-tree" {
         let (_, sha1_out) = write_tree(&".".to_string()).unwrap();
         print!("{}", sha1_out);
@@ -67,11 +66,7 @@ fn  main() {
 }
 
 
-  
-
-
-fn git_init() -> Result<String> {
-    fs::create_dir(".git")?;
+fn git_init() -> Result<String, io::Error> {
     fs::create_dir(".git")?;
     fs::create_dir(".git/objects")?;
     fs::create_dir(".git/refs")?;
