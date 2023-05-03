@@ -192,18 +192,18 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
         }
         let mut sha_file;
         if dir.is_dir() {
-            mode = "40000".as_bytes().to_vec();
+            mode = "40000";
             (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
         } else
         /*if dir.is_file()*/
         {
-            mode = "100644".as_bytes().to_vec();
+            mode = "100644";
             let file_data = fs::read(&path_name).unwrap();
             (sha_file, _) = write_hash_object(file_data, "blob").unwrap();
         }
       
         let mut dir_sha_out: Vec<u8> = Vec::new();
-        dir_sha_out.append(&mut mode);
+        dir_sha_out.append(&mut mode.as_bytes().to_vec());
         dir_sha_out.push(' ' as u8);
         dir_sha_out.append(&mut dir.file_name().unwrap().to_str().unwrap().as_bytes().to_vec());
         dir_sha_out.push('\x00' as u8);
