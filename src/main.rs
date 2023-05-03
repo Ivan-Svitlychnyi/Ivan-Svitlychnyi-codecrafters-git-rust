@@ -80,15 +80,15 @@ fn zlib_decode(enc_data:Vec<u8>) -> Result<Vec<u8>, io::Error>{
      Ok(dec_data)
 }
 
-fn zlib_encode(data:&Vec<u8>) -> Result<Vec<u8>, io::Error>{
+fn zlib_encode(data:Vec<u8>) -> Result<Vec<u8>, io::Error>{
 
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-    e.write_all(data)?;
+    e.write_all(&data[..])?;
     let compressed = e.finish()?;
 
    Ok(compressed)
 }
-fn make_hash(data:&Vec<u8>)->Result<(Vec<u8>, String), io::Error>{
+fn make_hash(data:Vec<u8>)->Result<(Vec<u8>, String), io::Error>{
 
     let mut hasher = Sha1::new();
     hasher.update(data);
@@ -111,23 +111,23 @@ fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
 
 }
 
-fn write_hash_object(mut file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
+fn write_hash_object( file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
     
-    // #[allow(unsafe_code)]
-    // let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
-    //     String::from_utf8_unchecked(file_data)
-    // }).to_string();
+    #[allow(unsafe_code)]
+    let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
+        String::from_utf8_unchecked(file_data)
+    }).to_string();
 /******************************************** */
-let mut store: Vec<u8> = Vec::new();
-store.append(&mut file_type.as_bytes().to_vec());
-store.push(' ' as u8);
-store.append(&mut file_data.len().to_ne_bytes().to_vec());
-store.push('\x00' as u8);
-store.append(&mut file_data);
+// let mut store: Vec<u8> = Vec::new();
+// store.append(&mut file_type.as_bytes().to_vec());
+// store.push(' ' as u8);
+// store.append(&mut file_data.len().to_ne_bytes().to_vec());
+// store.push('\x00' as u8);
+// store.append(&mut file_data);
 /******************************************* */
-    let compressed = zlib_encode(&store)?;
+    let compressed = zlib_encode(store.clone().into())?;
 
-    let (result, hex_result) = make_hash(&store)?;
+    let (result, hex_result) = make_hash(store.into())?;
 
     let (sub_dir, sha_file) = sha1_parse(&hex_result);
 
@@ -139,6 +139,7 @@ store.append(&mut file_data);
     fs::write(full_path, compressed)?;
 
     Ok((result, hex_result))
+
 }
 
 
