@@ -5,63 +5,74 @@ use flate2::Compression;
 use reqwest::header;
 use reqwest::header::CONTENT_TYPE;
 use sha1::{Digest, Sha1};
-#[allow(unused_imports)]
+//#[allow(unused_imports)]
 use std::env;
-//use std::fmt::Error;
+
 use std::collections::HashMap;
-//use std::fmt::format;
-//use std::fmt::format;
-#[allow(unused_imports)]
+
+
 use std::fs;
 use std::io;
 use std::io::prelude::*;
 use std::str;
 use std::str::FromStr;
+#[allow(unused_imports)]
+use anyhow::{Context, Result};
 
-fn main() {
+
+fn  main() ->Result<()> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     // println!("Logs from your program will appear here!");
 
     // Uncomment this block to pass the first stage
+  
     let args: Vec<String> = env::args().collect();
     if args.is_empty() {
         panic!("enter the arguments!");
     }
     if args[1] == "init" {
-        git_init().unwrap();
+        git_init()?;
         // println!("{}", )
     } else if args[1] == "cat-file" && args[2] == "-p" {
         print!(
             "{}",
-            String::from_utf8(read_git_object(&args[3]).unwrap()).unwrap()
+            String::from_utf8(read_git_object(&args[3])?)?
         );
     } else if args[1] == "hash-object" && args[2] == "-w" {
-        let file_data = fs::read(args[3].to_string()).unwrap();
-        let (_, sha1_out) = write_hash_object(file_data, "blob").unwrap();
+        let file_data = fs::read(args[3].to_string())?;
+        let (_, sha1_out) = write_hash_object(file_data, "blob")?;
 
         println!("hash-object in: {}", sha1_out);
 
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
-        let result = read_tree(&args[3]).unwrap();
+        let result = read_tree(&args[3])?;
         for s in result {
-            println!("{}", String::from_utf8(s).unwrap());
+            println!("{}", String::from_utf8(s)?);
         }
 
     } else if args[1] == "write-tree" {
-        let (_, sha1_out) = write_tree(&".".to_string()).unwrap();
+        let (_, sha1_out) = write_tree(&".".to_string())?;
         print!("{}", sha1_out);
 
     } else if args[1] == "commit-tree" {
-        print!("{}", create_commit(&args).unwrap());
+        print!("{}", create_commit(&args)?);
 
     } else if args[1] == "clone" {
-        clone_repo(&args).unwrap();
+        clone_repo(&args)?;
 
     } else {
         println!("unknown command: {:#?}", args)
     }
+    Ok(())
+
 }
-fn git_init() -> Result<String, io::Error> {
+
+
+  
+
+
+fn git_init() -> Result<String> {
+    fs::create_dir(".git")?;
     fs::create_dir(".git")?;
     fs::create_dir(".git/objects")?;
     fs::create_dir(".git/refs")?;
@@ -124,7 +135,6 @@ fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, St
     // store.append(&mut file_data.len().to_ne_bytes().to_vec());
     // store.push('\x00' as u8);
     // store.append(&mut file_data);
-
     /******************************************* */
     let compressed = zlib_encode(store.clone().into())?;
 
@@ -422,7 +432,7 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
     let s_delta = unsafe { String::from_utf8_unchecked(v_delta) };
 
     let data = s_delta.split("\n").next().unwrap().split(" ");
-    //let data = data.next().unwrap().split(" ");
+
     let tree_sha = data.clone().nth(data.count() - 1).unwrap();
     println!("tree_sha: {:?}", &tree_sha);
 
