@@ -388,8 +388,6 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
        
         } else {
 
-            let data_type = "refs_delta";
-
             let k = &data_bytes[seek..seek + 20];
             // println!("k data: {:#?}", k);
             let k = hex::encode(k);
@@ -407,7 +405,8 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
             //println!("content else: {:#?}", &content);
             // println!("obj_type else: {:#?}", &obj_type);
 //---------------------------------------------------------------------------------------------------------
-            let hex_result = write_git_object(data_type, &content, &target_dir)?;
+            let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta", "refs_delta"];
+            let hex_result = write_git_object(data_type[obj_type], &content, &target_dir)?;
 //--------------------------------------------------------------------------------------------------
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content.into(), obj_type));
