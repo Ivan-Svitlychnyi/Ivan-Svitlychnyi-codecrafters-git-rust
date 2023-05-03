@@ -407,7 +407,7 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
 //---------------------------------------------------------------------------------------------------------
             let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta", "refs_delta"];
             let hex_result = write_git_object(data_type[obj_type], &content, &target_dir)?;
-//--------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content.into(), obj_type));
 
@@ -415,17 +415,15 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
          
         }
     }
-    let git_path =
-        target_dir.to_owned() + &format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
+    let git_path = target_dir.to_owned() + &format!("/.git/objects/{}/{}", &pack_hash[..2], &pack_hash[2..]);
 
     let git_data = fs::read(git_path)?;
     let v_delta = zlib_decode(git_data[..].to_vec())?;
 
     let s_delta = unsafe { String::from_utf8_unchecked(v_delta) };
 
-    let mut data = s_delta.split("\n");
-    let data = data.next().unwrap().split(" ");
-
+    let data = s_delta.split("\n").next().unwrap().split(" ");
+    //let data = data.next().unwrap().split(" ");
     let tree_sha = data.clone().nth(data.count() - 1).unwrap();
     println!("tree_sha: {:?}", &tree_sha);
 
