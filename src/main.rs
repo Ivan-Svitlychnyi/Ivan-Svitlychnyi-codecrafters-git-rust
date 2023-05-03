@@ -121,7 +121,7 @@ fn write_hash_object(mut file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>
 let mut store: Vec<u8> = Vec::new();
 store.append(&mut file_type.as_bytes().to_vec());
 store.push(' ' as u8);
-store.append(&mut file_data.len().to_be_bytes().to_vec());
+store.append(&mut file_data.len().to_le_bytes().to_vec());
 store.push('\x00' as u8);
 store.append(&mut file_data);
 /******************************************* */
