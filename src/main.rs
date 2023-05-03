@@ -255,7 +255,7 @@ fn get_pack_hash(url: String) -> Result<String, io::Error> {
     Ok(pack_hash)
 }
 
-fn post_to_git_data(url: String, data: String) -> Result<Vec<u8>, io::Error> {
+fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes, io::Error> {
     let mut headers = header::HeaderMap::new();
     headers.insert(
         CONTENT_TYPE,
@@ -278,7 +278,7 @@ fn post_to_git_data(url: String, data: String) -> Result<Vec<u8>, io::Error> {
     println!("success!");
     let res_data = res_send.bytes().unwrap();
 
-    Ok(res_data.to_vec())
+    Ok(res_data)
 }
 
 fn make_git_object(
@@ -340,6 +340,7 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
 
     let post_url = url.to_owned() + "/git-upload-pack";
     let data = format!("0032want {pack_hash}\n00000009done\n").to_string();
+
     let res_data = post_to_git_data(post_url, data)?;
 
     //---------------------------------------------------------------------------------------
