@@ -111,20 +111,21 @@ fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
 
 }
 
-fn write_hash_object(mut file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
+fn write_hash_object(file_data: Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
     
     // #[allow(unsafe_code)]
     // let store = format!("{file_type} {}\x00{}", file_data.len(), unsafe {
     //     String::from_utf8_unchecked(file_data)
     // }).to_string();
 /******************************************** */
+let mut file_data = file_data;
 let mut store: Vec<u8> = Vec::new();
 store.append(&mut file_type.as_bytes().to_vec());
 store.push(' ' as u8);
 store.append(&mut file_data.len().to_ne_bytes().to_vec());
 store.push('\x00' as u8);
 store.append(&mut file_data);
-store.push('\n' as u8);
+
 /******************************************* */
     let compressed = zlib_encode(store.clone())?;
 
