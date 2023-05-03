@@ -256,6 +256,7 @@ fn get_pack_hash(url: String) -> Result<String, io::Error> {
 }
 
 fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes, io::Error> {
+    
     let mut headers = header::HeaderMap::new();
     headers.insert(
         CONTENT_TYPE,
@@ -276,6 +277,7 @@ fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes, io::Error
     }
 
     println!("success!");
+
     let res_data = res_send.bytes().unwrap();
 
     Ok(res_data)
@@ -349,8 +351,9 @@ fn clone_repo(args: &[String]) -> Result<(), io::Error> {
     println!("res_data_size: {:?}", res_data_size);
 
     let entries_bytes = res_data[16..20].try_into().unwrap();
+
     //  println!("entries_bytes: {:#?}", entries_bytes);
-    let num = usize::from_be_bytes(entries_bytes);
+    let num = u32::from_be_bytes(entries_bytes);
     println!("num: {:?}", num);
     let data_bytes: Vec<u8> = res_data[20..res_data_size].try_into().unwrap();
     // println!("data_bytes: {:?}", data_bytes);
