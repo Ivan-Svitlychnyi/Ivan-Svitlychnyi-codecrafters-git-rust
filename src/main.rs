@@ -231,6 +231,63 @@ fn create_commit(args: &[String]) -> Result<String, io::Error> {
 
     Ok(sha)
 }
+fn get_pack_hesh(url:String) -> Result<String, io::Error> {
+
+
+    let body = reqwest::blocking::get(url)
+    .unwrap()
+    .text()
+    .unwrap();
+
+println!("body = {:#?}", body);
+let content = body.split("\n");
+
+let mut pack_hash = String::new();
+
+for c in content.clone() {
+    if c.contains("refs/heads/master") && c.contains("003f") {
+        let tup = c.split(" ").enumerate();
+
+        for (num, value) in tup {
+            if num == 0 {
+                pack_hash = value[4..].to_string();
+            }
+        }
+    }
+}
+
+println!("pack_hash = {}", pack_hash);
+Ok(pack_hash)
+}
+
+fn post_to_git_data(url:String, data:String) ->Result<Vec<u8>, io::Error> {
+
+    
+    let mut headers = header::HeaderMap::new();
+    headers.insert(
+        CONTENT_TYPE,
+        header::HeaderValue::from_static("application/x-git-upload-pack-request"),
+    ); 
+    //println!("0032 = {:#?}", &data);
+    let client = reqwest::blocking::Client::new();
+    //let data = data.as_bytes();
+    let res = client.post(url).headers(headers).body(data);
+
+    let res_send = res.send().unwrap();
+
+    if !res_send.status().is_success() {
+        panic!("Something happened with Response. Status: {:?}", res_send.status());
+    }
+
+
+
+        println!("success!");
+        let res_data = res_send.bytes().unwrap();
+
+     Ok(res_data.to_vec())
+
+}
+
 
 fn clone_repo(args: &[String]) -> Result<String, io::Error> {
     // ["/tmp/codecrafters-git-target/release/git-starter-rust",
@@ -252,52 +309,18 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         target_dir.to_owned() + "/.git/HEAD",
         "ref: refs/heads/master\n",
     )?;
+//-1------------------------------------------------------------------------------------------------------------------------------
+let url_adr = url.clone() + "/info/refs?service=git-upload-pack";
 
-    let body = reqwest::blocking::get(url.clone() + "/info/refs?service=git-upload-pack")
-        .unwrap()
-        .text()
-        .unwrap();
+let pack_hash = get_pack_hesh(url_adr)?;
 
-    println!("body = {:#?}", body);
-    let content = body.split("\n");
+//-2---------------------------------------------------------------------------------
 
-    let mut pack_hash = String::new();
-
-    for c in content.clone() {
-        if c.contains("refs/heads/master") && c.contains("003f") {
-            let tup = c.split(" ").enumerate();
-
-            for (num, value) in tup {
-                if num == 0 {
-                    pack_hash = value[4..].to_string();
-                }
-            }
-        }
-    }
-
-    println!("pack_hash = {}", pack_hash);
     let post_url = url.to_owned() + "/git-upload-pack";
-
-    let mut headers = header::HeaderMap::new();
-    headers.insert(
-        CONTENT_TYPE,
-        header::HeaderValue::from_static("application/x-git-upload-pack-request"),
-    );
     let data = format!("0032want {pack_hash}\n00000009done\n").to_string();
+    let res_data = post_to_git_data(post_url, data)?;
 
-    //println!("0032 = {:#?}", &data);
-    let client = reqwest::blocking::Client::new();
-    //let data = data.as_bytes();
-    let res = client.post(post_url).headers(headers).body(data);
-
-    let res_send = res.send().unwrap();
-
-    if !res_send.status().is_success() {
-        println!("Something else happened. Status: {:?}", res_send.status());
-    } else {
-        println!("success!");
-        let res_data = res_send.bytes().unwrap();
-
+//---------------------------------------------------------------------------------------
         let res_data_size = res_data.len() - 20;
 
         println!("res_data_size: {:?}", res_data_size);
@@ -324,6 +347,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             }
             seek += 1;
             // println!("seek : {:?}", seek);
+    
             if obj_type < 7 {
                 let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
                 //  let decompressed = &data_bytes[seek..];
@@ -332,7 +356,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let mut v_git_data = Vec::new();
 
                 git_data.read_to_end(&mut v_git_data).unwrap();
-
+//-----------------------------------------------------------------------------------------------------
                 #[allow(unsafe_code)]
                 let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
 
@@ -368,7 +392,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 fs::write(f_path, compressed)?;
 
                 objs.insert(hex_result, (s_git_data.clone(), obj_type));
-
+//---------------------------------------------------------------------------------------------------------------
                 seek += git_data.total_in() as usize;
                 //seek += decompressed.len() as usize;
             } else {
@@ -381,7 +405,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
                 let (base, elem_num) = objs[&k].to_owned();
 
                 seek += 20;
-
+//------------------------------------------------------------------------------------------------------
                 let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
                 // let decompressed = &data_bytes[seek..];
 
@@ -433,7 +457,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
 
                 // println!("objs k else: {:#?}", hex_result);
                 objs.insert(hex_result, (content.clone(), obj_type));
-
+//------------------------------------------------------------------------------------------------
                 seek += delta.total_in() as usize;
                 // seek += decompressed.len() as usize;
             }
@@ -465,7 +489,7 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             target_dir.to_string(),
             target_dir.to_string(),
         );
-    }
+    
     //-2-------------------------------------------------------------------------------
     Ok(" ".to_owned())
 }
