@@ -38,7 +38,7 @@ fn main() {
         let file_data = fs::read(args[3].to_string()).unwrap();
         let (_, sha1_out) = write_hash_object(file_data, "blob").unwrap();
         println!("hash-object in: {}", sha1_out);
-        
+
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
         let result = read_tree(&args[3]).unwrap();
         for s in result {
@@ -160,10 +160,9 @@ fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
 }
 
 
-
 fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
-    let mut sha_out: String = "".to_string();
-
+   // let mut sha_out: String = "".to_string();
+    let mut sha_out: Vec<u8> = Vec::new();
     let mut entries = fs::read_dir(file_path)
         .unwrap()
         .map(|res| res.map(|e| e.path()))
@@ -173,7 +172,7 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
     entries.sort();
 
     for dir in entries {
-        let mode;
+        let mut mode;
 
         let path_name = dir.to_str().unwrap();
         //  println!("dir: {}", path_name);
@@ -183,27 +182,30 @@ fn write_tree(file_path: &String) -> Result<(Vec<u8>, String), io::Error> {
         }
         let sha_file;
         if dir.is_dir() {
-            mode = "40000";
+            mode = "40000".as_bytes().to_vec();
             (sha_file, _) = write_tree(&String::from_str(path_name).unwrap()).unwrap();
         } else
         /*if dir.is_file()*/
         {
-            mode = "100644";
-
+            mode = "100644".as_bytes().to_vec();
             let file_data = fs::read(&path_name).unwrap();
-
             (sha_file, _) = write_hash_object(file_data, "blob").unwrap();
         }
-
-        #[allow(unsafe_code)]
-        let s = unsafe { String::from_utf8_unchecked(sha_file) };
-        sha_out += &format!(
-            "{mode} {}\x00{}",
-            dir.file_name().unwrap().to_str().unwrap(),
-            s
-        );
+       let mut sha_file = sha_file;
+    //#[allow(unsafe_code)]
+        // let s = unsafe { String::from_utf8_unchecked(&sha_file) };
+        // sha_out += &format!(
+        //     "{mode} {}\x00{}",
+        //     dir.file_name().unwrap().to_str().unwrap(),
+        //     s
+        // ); 
+       // let mode = mode;
+        sha_out.append(&mut mode);
+        sha_out.push('\x00' as u8);
+        sha_out.append(&mut dir.file_name().unwrap().to_str().unwrap().as_bytes().to_vec());
+        sha_out.append(&mut sha_file);
     }
-    let res = write_hash_object(sha_out.into_bytes(), "tree");
+    let res = write_hash_object(sha_out, "tree");
     res
 }
 
@@ -286,8 +288,8 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
         println!("Something else happened. Status: {:?}", res_send.status());
     } else {
         println!("success!");
-        let body = res_send.bytes().unwrap();
-        let res_data = body;
+        let res_data = res_send.bytes().unwrap();
+     
         let res_data_size = res_data.len() - 20;
 
         println!("res_data_size: {:?}", res_data_size);
@@ -454,20 +456,11 @@ fn clone_repo(args: &[String]) -> Result<String, io::Error> {
             target_dir.to_string(),
             target_dir.to_string(),
         );
-
-        //let path_f = target_dir.to_owned() + &format!("/.git/objects/{}/{}",&tree_sha[..2],&tree_sha[2..]);
-        // let (_, sha1_out) = write_tree(&path_f).unwrap();
-        // print!("sha1_out: {}", sha1_out);
     }
     //-2-------------------------------------------------------------------------------
     Ok(" ".to_owned())
 }
-// fn does_folder_exist_in_current_directory(cur_dir: String) -> Result<bool, io::Error> {
-//     Ok(fs::read_dir(cur_dir)?.any(|x| {
-//         let x = x.unwrap();
-//         x.file_type().unwrap().is_dir()
-//     }))
-// }
+
 //***************************************************************************************************** */
 fn identify(delta: &[u8], base: String) -> String {
     println!("fidentify !!!!!!!!!!!");
@@ -501,18 +494,15 @@ fn identify(delta: &[u8], base: String) -> String {
 
                 // println!("b offset_key: {}", b);
                 if b == 1 {
-                    //  offset_bytes += &delta[seek].to_string();
                     offset_bytes[n] = delta[seek];
                     //  println!("offset_bytes delta[seek]:{}", delta[seek]);
                     seek += 1
-                    // } else {
-                    //    offset_bytes += &"0";
+   
                 }
             }
             // println!("offset_bytes: {:?}", &offset_bytes);
 
             let offset = usize::from_le_bytes(offset_bytes);
-            //  let offset = usize::from_str(&offset_bytes).unwrap();
             // println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & 0b01110000) >> 4;
@@ -523,12 +513,9 @@ fn identify(delta: &[u8], base: String) -> String {
 
                 //  println!("b len_key:{}", b);
                 if b == 1 {
-                    // len_bytes += &delta[seek].to_string();
                     len_bytes[n] = delta[seek];
                     //  println!("len_bytes delta[seek]{}", delta[seek]);
                     seek += 1
-                    //    } else {
-                    //         len_bytes  += &"0";
                 }
             }
 
