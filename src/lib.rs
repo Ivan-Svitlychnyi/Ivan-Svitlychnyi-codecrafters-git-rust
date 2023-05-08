@@ -233,7 +233,7 @@ fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes> {
     let mut headers = HeaderMap::new();
     headers.insert(
         CONTENT_TYPE,
-        header::HeaderValue::from_static("application/x-git-upload-pack-request"),
+        HeaderValue::from_static("application/x-git-upload-pack-request"),
     );
     println!("url = {:#?}", &url);
     println!("0032 = {:#?}", &data);
