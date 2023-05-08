@@ -3,7 +3,6 @@ use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 
-use reqwest::header;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::HeaderMap;
 use reqwest::header::HeaderValue;
@@ -230,22 +229,6 @@ fn get_pack_hash(url: String) -> Result<String> {
 
 /**************************************************************************************************************** */
 
-fn get_data_form_git(link: String, body : String) -> Result<bytes::Bytes, io::Error>{
-
-    let mut headers = HeaderMap::new();
-    headers.insert(
-         CONTENT_TYPE,
-            HeaderValue::from_static("application/x-git-upload-pack-request"),
-        );
-
-    let client = reqwest::blocking::Client::new();
-    let client_req = client.post(link).headers(headers).body(body);
-    let response_data = client_req.send().unwrap();
- 
-    let response_data = response_data.bytes().unwrap();
-    Ok(response_data)
-}
-
 fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes> {
     let mut headers = HeaderMap::new();
     headers.insert(
@@ -320,7 +303,7 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     // "test_dir",]
     let (url, target_dir) = (&args[2], &args[3]);
 
-    create_dirs(&target_dir)?;
+   // create_dirs(&target_dir)?;
     //------------------------------------------------------------------------------------
     let url_adr = url.clone() + &"/info/refs?service=git-upload-pack".to_string();
     let pack_hash = get_pack_hash(url_adr)?;
@@ -328,7 +311,7 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     let post_url = url.clone() + &"/git-upload-pack".to_string();
     let data = format!("0032want {pack_hash}\n00000009done\n").to_string();
 
-    let res_data = /*post_to_git_data*/get_data_form_git(post_url, data)?;
+    let res_data = post_to_git_data(post_url, data)?;
     
     //---------------------------------------------------------------------------------------
     let res_data_size = res_data.len() - 20;
