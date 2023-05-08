@@ -299,13 +299,13 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     // "test_dir",]
     let (url, target_dir) = (&args[2], &args[3]);
 
-    create_dirs(target_dir)?;
+    create_dirs(&target_dir)?;
     //------------------------------------------------------------------------------------
-    let url_adr = url.clone() + "/info/refs?service=git-upload-pack";
+    let url_adr = url.clone() + &"/info/refs?service=git-upload-pack".to_string();
     let pack_hash = get_pack_hash(url_adr)?;
     //----------------------------------------------------------------------------------
-    let post_url = url.to_owned() + "/git-upload-pack";
-    let data = format!("0032want {pack_hash}\n00000009done\n").to_string();
+    let post_url = url.clone() + &"/git-upload-pack".to_string();
+    let data = format!("0032want {pack_hash}\n00000009done\n");
 
     let res_data = post_to_git_data(post_url, data)?;
     //---------------------------------------------------------------------------------------
