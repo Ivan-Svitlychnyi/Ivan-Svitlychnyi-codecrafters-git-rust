@@ -233,7 +233,8 @@ fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes> {
         CONTENT_TYPE,
         header::HeaderValue::from_static("application/x-git-upload-pack-request"),
     );
-    //println!("0032 = {:#?}", &data);
+    println!("url = {:#?}", &url);
+    println!("0032 = {:#?}", &data);
     let client = reqwest::blocking::Client::new();
     //let data = data.as_bytes();
     let res = client.post(url).headers(headers).body(data);
