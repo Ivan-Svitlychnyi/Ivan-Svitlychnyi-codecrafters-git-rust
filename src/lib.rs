@@ -309,8 +309,8 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     let pack_hash = get_pack_hash(url_adr)?;
     //----------------------------------------------------------------------------------
     let post_url = url.clone() + &"/git-upload-pack".to_string();
-    let data = format!("0032want {}\n00000009done\n", pack_hash);
-
+    //let data = format!("0032want {pack_hash}\n00000009done\n");
+    let data =  format!("0032want {}\n00000009done\n",pack_hash.clone());
     let res_data = post_to_git_data(post_url, data)?;
     
     //---------------------------------------------------------------------------------------
