@@ -295,7 +295,6 @@ fn create_dirs(target_dir: &String) -> Result<(), io::Error> {
 
     Ok(())
 }
-
 /************************************************************************************************************************** */
 pub fn clone_repo(args: &[String]) -> Result<()> {
     // ["/tmp/codecrafters-git-target/release/git-starter-rust",
