@@ -314,7 +314,6 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     println!("res_data_size: {:?}", res_data_size);
 
     let entries_bytes = res_data[16..20].try_into()?;
-
     //  println!("entries_bytes: {:#?}", entries_bytes);
     let num = u32::from_be_bytes(entries_bytes);
     println!("num: {:?}", num);
