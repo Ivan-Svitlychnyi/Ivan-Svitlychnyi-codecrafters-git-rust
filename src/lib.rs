@@ -5,6 +5,7 @@ use flate2::Compression;
 
 use reqwest::header;
 use reqwest::header::CONTENT_TYPE;
+use reqwest::header::HeaderMap;
 use sha1::{Digest, Sha1};
 use std::collections::HashMap;
 use std::fs;
@@ -227,8 +228,24 @@ fn get_pack_hash(url: String) -> Result<String> {
 }
 
 /**************************************************************************************************************** */
+
+fn get_data_form_git(link: String, body : String) -> Result<bytes::Bytes, io::Error>{
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+         CONTENT_TYPE,
+            HeaderValue::from_static("application/x-git-upload-pack-request"),
+        );
+
+    let client = reqwest::blocking::Client::new();
+    let client_req = client.post(link).headers(headers).body(body);
+    let response_data = client_req.send().unwrap();
+ 
+    let response_data = response_data.bytes().unwrap();
+    Ok(response_data)
+}
 fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes> {
-    let mut headers = header::HeaderMap::new();
+    let mut headers = HeaderMap::new();
     headers.insert(
         CONTENT_TYPE,
         header::HeaderValue::from_static("application/x-git-upload-pack-request"),
@@ -309,7 +326,8 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     let post_url = url.clone() + &"/git-upload-pack".to_string();
     let data = format!("0032want {pack_hash}\n00000009done\n").to_string();
 
-    let res_data = post_to_git_data(post_url, data)?;
+    let res_data = /*post_to_git_data*/get_data_form_git(post_url, data)?;
+    
     //---------------------------------------------------------------------------------------
     let res_data_size = res_data.len() - 20;
 
