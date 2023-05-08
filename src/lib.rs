@@ -241,7 +241,7 @@ fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes> {
     let client = reqwest::blocking::Client::new();
     //let data = data.as_bytes();
     let res = client.post(url).headers(headers).body(data);
-
+    println!("res = {:#?}", &res);
     let res_send = res.send()?;
      println!(" res_send = {:#?}", &res_send);
     if !res_send.status().is_success() {
@@ -303,7 +303,7 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     // "test_dir",]
     let (url, target_dir) = (&args[2], &args[3]);
 
-   // create_dirs(&target_dir)?;
+    create_dirs(&target_dir)?;
     //------------------------------------------------------------------------------------
     let url_adr = url.clone() + &"/info/refs?service=git-upload-pack".to_string();
     let pack_hash = get_pack_hash(url_adr)?;
