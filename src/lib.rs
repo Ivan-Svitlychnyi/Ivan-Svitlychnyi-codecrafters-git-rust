@@ -235,6 +235,7 @@ fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes> {
     );
     println!("url = {:#?}", &url);
     println!("0032 = {:#?}", &data);
+    println!("headers = {:#?}", &headers);
     let client = reqwest::blocking::Client::new();
     //let data = data.as_bytes();
     let res = client.post(url).headers(headers).body(data);
