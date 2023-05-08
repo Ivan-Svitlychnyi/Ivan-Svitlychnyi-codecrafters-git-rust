@@ -239,7 +239,7 @@ fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes> {
     let res = client.post(url).headers(headers).body(data);
 
     let res_send = res.send()?;
-
+     println!(" res_send = {:#?}", &res_send);
     if !res_send.status().is_success() {
         panic!(
             "Something happened with Response. Status: {:?}",
@@ -305,7 +305,7 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     let pack_hash = get_pack_hash(url_adr)?;
     //----------------------------------------------------------------------------------
     let post_url = url.clone() + &"/git-upload-pack".to_string();
-    let data = format!("0032want {pack_hash}\n00000009done\n");
+    let data = format!("0032want {pack_hash}\n00000009done\n").to_string();
 
     let res_data = post_to_git_data(post_url, data)?;
     //---------------------------------------------------------------------------------------
@@ -314,6 +314,7 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     println!("res_data_size: {:?}", res_data_size);
 
     let entries_bytes = res_data[16..20].try_into()?;
+
     //  println!("entries_bytes: {:#?}", entries_bytes);
     let num = u32::from_be_bytes(entries_bytes);
     println!("num: {:?}", num);
