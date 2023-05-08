@@ -6,6 +6,7 @@ use flate2::Compression;
 use reqwest::header;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::HeaderMap;
+use reqwest::header::HeaderValue;
 use sha1::{Digest, Sha1};
 use std::collections::HashMap;
 use std::fs;
