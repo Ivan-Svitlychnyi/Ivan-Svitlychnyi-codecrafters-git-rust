@@ -235,15 +235,15 @@ fn post_to_git_data(url: String, data: String) -> Result<bytes::Bytes> {
         CONTENT_TYPE,
         HeaderValue::from_static("application/x-git-upload-pack-request"),
     );
-    println!("url = {:#?}", &url);
-    println!("0032 = {:#?}", &data);
-    println!("headers = {:#?}", &headers);
+   // println!("url = {:#?}", &url);
+   // println!("0032 = {:#?}", &data);
+   // println!("headers = {:#?}", &headers);
     let client = reqwest::blocking::Client::new();
     //let data = data.as_bytes();
     let res = client.post(url).headers(headers).body(data);
-    println!("res = {:#?}", &res);
+   // println!("res = {:#?}", &res);
     let res_send = res.send()?;
-     println!(" res_send = {:#?}", &res_send);
+    // println!(" res_send = {:#?}", &res_send);
     if !res_send.status().is_success() {
         panic!(
             "Something happened with Response. Status: {:?}",
@@ -309,8 +309,9 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     let pack_hash = get_pack_hash(url_adr)?;
     //----------------------------------------------------------------------------------
     let post_url = url.clone() + &"/git-upload-pack".to_string();
-    //let data = format!("0032want {pack_hash}\n00000009done\n");
-    let data =  format!("0032want {}\n00000009done\n",pack_hash.clone());
+
+    let data = format!("0032want {pack_hash}\n00000009done\n");
+   
     let res_data = post_to_git_data(post_url, data)?;
     
     //---------------------------------------------------------------------------------------
@@ -411,6 +412,8 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
 
     Ok(())
 }
+
+
 
 //************************************************************************************************************************* */
 fn identify(delta: &[u8], base: String) -> Result<String, io::Error> {
