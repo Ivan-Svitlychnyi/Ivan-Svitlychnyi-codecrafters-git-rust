@@ -118,28 +118,22 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
 
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
 
-    let file_content = zlib_decode(&fs::read(&full_path)?)?;
+    let mut file_content = zlib_decode(&fs::read(&full_path)?)?;
 
    // let split_data:Vec<&[u8]> = file_content[..].split(|x| *x == '\x00' as u8).skip(1).collect();
-    let pos = &file_content.iter().position(|&r| r == '\x00' as u8).unwrap();
+    //let pos = &file_content.iter().position(|&r| r == '\x00' as u8).unwrap();
+    //let mut file_content = file_content[*pos+1..].to_owned();
 
-    let mut file_content = file_content[*pos+1..].to_owned();
-
-    println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content));
+   // println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content));
 
     let mut result: Vec<Vec<u8>> = Vec::new();
     let mut start_byte = 0;
-  loop {
-    
+  loop {   
      if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8){
-       // let data_content = 
-        let data_pos = &file_content[start_byte..pos].split(|&r| r == ' ' as u8); 
-       // pos +=20;
-       println!("data_pos = {:#?}", String::from_utf8_lossy(&file_content[start_byte..pos]));
 
+        let data_pos = &file_content[start_byte..pos].split(|&r| r == ' ' as u8); 
         result.push(data_pos.clone().last().unwrap().to_vec()); 
         println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));
-
         file_content = file_content[pos + 1..].to_vec();
         println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
         start_byte = 20;
@@ -149,9 +143,6 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
      }
     
   } 
-    //    for s in &result{
-    //     println!("result_content = {:#?}", String::from_utf8(s.to_vec()));
-    //     }
 
     Ok(result)
 }
