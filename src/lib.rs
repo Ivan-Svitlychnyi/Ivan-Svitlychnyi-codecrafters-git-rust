@@ -123,6 +123,7 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
     let split_data = file_content[..].split(|x| *x == '\x00' as u8).skip(1);
 
     let mut result: Vec<Vec<u8>> = Vec::new();
+    println!("result = {:#?}", &result);
 
     for i in split_data {
         let parts = i.split(|x| *x == ' ' as u8);
