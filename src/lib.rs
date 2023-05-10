@@ -63,7 +63,7 @@ pub fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
     let git_data = fs::read(full_path)?;
 
     let git_data = zlib_decode(&git_data)?;
-
+     println!("git_data = {:#?}", &git_data);
     let git_data: Vec<u8> = git_data[8..]
         .iter()
         .filter(|c| **c != '\n' as u8)
