@@ -1,4 +1,5 @@
 
+use bytes::BufMut;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
@@ -15,7 +16,6 @@ use std::str;
 use std::str::FromStr;
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
-use bytes::{BytesMut, BufMut};
 
 /******************************************************************************************************** */
 pub fn git_init() -> Result<String, io::Error> {
