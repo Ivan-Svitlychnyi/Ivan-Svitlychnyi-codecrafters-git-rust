@@ -27,7 +27,7 @@ fn main() ->Result<()>{
     //-------------------------------------------------------------------------------------------------------
     } else if args[1] == "hash-object" && args[2] == "-w" {
         let file_data = fs::read(args[3].to_string())?;
-        let (_, sha1_out) = write_hash_object(file_data, "blob")?;
+        let (_, sha1_out) = write_hash_object(&file_data, "blob")?;
 
         println!("hash-object in: {}", sha1_out);
     //--------------------------------------------------------------------------------------------------------
