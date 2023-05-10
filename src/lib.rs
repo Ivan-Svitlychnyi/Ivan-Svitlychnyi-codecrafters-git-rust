@@ -46,12 +46,12 @@ fn zlib_encode(data: &Vec<u8>) -> Result<Vec<u8>, io::Error> {
 }
 
 /*********************************************************************************************************** */
-fn make_hash(data: &Vec<u8>) -> Result<(Vec<u8>, String), io::Error> {
+fn make_hash(data: &Vec<u8>) -> Result<String, io::Error> {
     let mut hasher = Sha1::new();
     hasher.update(data);
     let result = hasher.finalize();
     let hex_result = hex::encode(&result[..]);
-    Ok((result.to_vec(), hex_result))
+    Ok(hex_result)
 }
 
 //********************************************************************************************************** */
@@ -66,7 +66,7 @@ pub fn read_git_object(git_path: &String) -> Result<String, io::Error> {
    // println!("git_data = {:#?}", &git_data);
     let git_data:Vec<&[u8]> = git_data[..].split(|c|*c == '/' as u8).collect();
     let git_data =  git_data[git_data.len()-1];
-    let data_pos = git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
+    let data_pos = git_data.iter().position(|&r| r == '\x00' as u8).unwrap_or(0);
    // println!("git_data_fin = {:#?}", &git_data);
     let git_data =  String::from_utf8_lossy(&git_data[data_pos + 1..]).to_string();
     Ok(git_data)
@@ -74,7 +74,7 @@ pub fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
 
 /************************************************************************************************************* */
-pub fn write_hash_object(file_data: &Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
+pub fn write_hash_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, io::Error> {
 
     // #[allow(unsafe_code)]
     // let store = Vec::from(format!("{file_type} {}\x00{}", file_data.len(), unsafe {
@@ -96,7 +96,7 @@ pub fn write_hash_object(file_data: &Vec<u8>, file_type: &str) -> Result<(Vec<u8
 
     let compressed = zlib_encode(&store)?;
 
-    let (result, hex_result) = make_hash(&store)?;
+    let hex_result = make_hash(&store)?;
 
     let (sub_dir, sha_file) = (&hex_result[..2], &hex_result[2..]);
 
@@ -107,7 +107,7 @@ pub fn write_hash_object(file_data: &Vec<u8>, file_type: &str) -> Result<(Vec<u8
     fs::create_dir_all(sub_dir_path)?;
     fs::write(full_path, compressed)?;
 
-    Ok((result, hex_result))
+    Ok(hex_result)
 }
 
 
@@ -136,7 +136,7 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
     Ok(result)
 }
 /******************************************************************************************************************* */
-pub fn write_tree(file_path: &String) -> Result<(Vec<u8>, String)> {
+pub fn write_tree(file_path: &String) -> Result<String> {
     // let mut sha_out: String = "".to_string();
     let mut sha_out: Vec<u8> = Vec::new();
     let mut entries = fs::read_dir(file_path)
@@ -159,13 +159,13 @@ pub fn write_tree(file_path: &String) -> Result<(Vec<u8>, String)> {
         let mut sha_file;
         if dir.is_dir() {
             mode = "40000";
-            (sha_file, _) = write_tree(&String::from_str(path_name)?)?;
+            sha_file = hex::decode(write_tree(&String::from_str(path_name)?)?)?;
         } else
         /*if dir.is_file()*/
         {
             mode = "100644";
             let file_data = fs::read(&path_name)?;
-            (sha_file, _) = write_hash_object(&file_data, "blob")?;
+            sha_file = hex::decode(write_hash_object(&file_data, "blob")?)?;
         }
 
         let mut dir_sha_out: Vec<u8> = Vec::new();
@@ -200,7 +200,7 @@ pub fn create_commit(args: &[String]) -> Result<String, io::Error> {
         format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n").to_string();
 
     //println!("content: {:?}", &content);
-    let (_, sha) = write_hash_object(&mut content.into_bytes(), "commit")?;
+    let sha= write_hash_object(&mut content.into_bytes(), "commit")?;
 
     Ok(sha)
 }
@@ -267,7 +267,7 @@ fn write_git_object(data_type: &str, content: &str, target_dir: &str) -> Result<
 
     obj_write_data += &content;
     //-----------------------
-    let (_, hex_result) = make_hash(&obj_write_data.as_bytes().to_vec())?;
+    let hex_result = make_hash(&obj_write_data.as_bytes().to_vec())?;
     // //  println!("hex_result: {:?}", hex_result);
 
     let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
