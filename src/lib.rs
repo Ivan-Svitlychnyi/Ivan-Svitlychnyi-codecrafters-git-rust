@@ -124,21 +124,20 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
     let pos = &file_content.iter().position(|&r| r == '\x00' as u8).unwrap();
 
     let mut file_content = file_content[*pos+1..].to_owned();
-    
+
     println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content));
 
     let mut result: Vec<Vec<u8>> = Vec::new();
   loop {
 
-     if let Some(pos) = &file_content[20..].iter().position(|&r| r == '\x00' as u8){
-       // let data_content = 
-        println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[*pos..]));
-
-        let data_pos = &file_content[20..*pos].split(|&r| r == ' ' as u8); 
+        let data_pos = &file_content[..].split(|&r| r == ' ' as u8); 
         result.push(data_pos.clone().last().unwrap().to_vec()); 
 
+     if let Some(pos) = &file_content[20..].iter().position(|&r| r == '\x00' as u8){
+       // let data_content = 
+        
         file_content = file_content[pos + 1..].to_vec();
-
+        println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
      }
      else {
         break;
