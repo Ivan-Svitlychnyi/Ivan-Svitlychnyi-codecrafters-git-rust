@@ -68,7 +68,7 @@ pub fn read_git_object(git_path: &String) -> Result<String, io::Error> {
     let git_data =  git_data[git_data.len()-1];
     let data_pos = git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
    // println!("git_data_fin = {:#?}", &git_data);
-    let git_data =  String::from_utf8_lossy(&git_data[data_pos..]).to_string();
+    let git_data =  String::from_utf8_lossy(&git_data[data_pos + 1..]).to_string();
     Ok(git_data)
 }
 
