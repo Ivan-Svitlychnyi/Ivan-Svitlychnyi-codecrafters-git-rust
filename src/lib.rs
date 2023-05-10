@@ -125,18 +125,11 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
     println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
 
     let mut result: Vec<Vec<u8>> = Vec::new();
-   for s in split_data.clone() {
-
-    println!("split_data = {:#?}", &String::from_utf8_lossy(s));
-   }
-    
 
     for i in split_data {
         let parts = i.split(|x| *x == ' ' as u8);
-        
         let x = parts.last().unwrap();
         result.push(x.to_vec()); 
-       
     }
     result.pop();
 
