@@ -20,10 +20,15 @@ fn main() ->Result<()>{
         // println!("{}", )
     //------------------------------------------------------------------------------------------------------
     } else if args[1] == "cat-file" && args[2] == "-p" {
+        // print!(
+        //     "{}",
+        //     String::from_utf8(read_git_object(&args[3])?)?
+        // );
         print!(
             "{}",
-            String::from_utf8(read_git_object(&args[3])?)?
-        );
+           read_git_object(&args[3])?)
+        ;
+
     //-------------------------------------------------------------------------------------------------------
     // } else if args[1] == "hash-object" && args[2] == "-w" {
     //     let file_data = fs::read(args[3].to_string())?;

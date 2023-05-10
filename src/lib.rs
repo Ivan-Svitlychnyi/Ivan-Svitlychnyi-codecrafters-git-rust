@@ -55,7 +55,7 @@ fn make_hash(data: &Vec<u8>) -> Result<(Vec<u8>, String), io::Error> {
 }
 
 //********************************************************************************************************** */
-pub fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
+pub fn read_git_object(git_path: &String) -> Result<String, io::Error> {
 
     let (sub_dir, sha_num) = (&git_path[..2], &git_path[2..]);
     
@@ -63,13 +63,13 @@ pub fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
     let git_data = fs::read(full_path)?;
 
     let git_data = zlib_decode(&git_data)?;
-     println!("git_data = {:#?}", &git_data);
-    let git_data: Vec<u8> = git_data[8..]
-        .iter()
-        .filter(|c| **c != '\n' as u8)
-        .map(|x| *x as u8)
-        .collect();
+    println!("git_data = {:#?}", &git_data);
 
+    let git_data:Vec<&[u8]> = git_data[..].split(|c|*c == '/' as u8).collect();
+
+    let git_data =  git_data[git_data.len()-1];
+    println!("git_data_fin = {:#?}", &git_data);
+    let git_data =  String::from_utf8_lossy(git_data).to_string();
     Ok(git_data)
 }
 
