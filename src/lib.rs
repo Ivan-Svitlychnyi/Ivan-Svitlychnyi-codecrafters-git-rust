@@ -124,6 +124,8 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
     let pos = &file_content.iter().position(|&r| r == '\x00' as u8).unwrap();
 
     let mut file_content = file_content[*pos+1..].to_owned();
+    
+    println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content));
 
     let mut result: Vec<Vec<u8>> = Vec::new();
   loop {
