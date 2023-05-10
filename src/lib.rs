@@ -63,14 +63,11 @@ pub fn read_git_object(git_path: &String) -> Result<String, io::Error> {
     let git_data = fs::read(full_path)?;
 
     let git_data = zlib_decode(&git_data)?;
-    println!("git_data = {:#?}", &git_data);
-
+   // println!("git_data = {:#?}", &git_data);
     let git_data:Vec<&[u8]> = git_data[..].split(|c|*c == '/' as u8).collect();
-
     let git_data =  git_data[git_data.len()-1];
     let data_pos = git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
-
-    println!("git_data_fin = {:#?}", &git_data);
+   // println!("git_data_fin = {:#?}", &git_data);
     let git_data =  String::from_utf8_lossy(&git_data[data_pos..]).to_string();
     Ok(git_data)
 }
@@ -406,7 +403,7 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
     let data = s_delta.split("\n").next().unwrap().split(" ");
 
     let tree_sha = data.clone().nth(data.count() - 1).unwrap();
-    println!("tree_sha: {:?}", &tree_sha);
+   // println!("tree_sha: {:?}", &tree_sha);
 
     checkout_tree(
         &tree_sha.to_owned(),
@@ -433,7 +430,7 @@ fn identify(delta: &[u8], base: &String) -> Result<String, io::Error> {
     seek += 1;
     let mut content = String::new();
     //content = "".to_string();
-    println!("content: {:?}", &content);
+  //  println!("content: {:?}", &content);
     let delta_len = delta.len();
     // println!(" delta_len: {:?}", &delta_len);
     while seek < delta_len {
@@ -482,12 +479,12 @@ fn identify(delta: &[u8], base: &String) -> Result<String, io::Error> {
 
             // println!("content : {:?}", &content );
         } else {
-            println!("instr_byte:{}", instr_byte);
+           // println!("instr_byte:{}", instr_byte);
             let num_bytes = instr_byte & 0b01111111;
-            println!("num_bytes u8:{}", num_bytes);
+          //  println!("num_bytes u8:{}", num_bytes);
             let num_bytes = usize::from(num_bytes);
 
-            println!("seek usize:{}", seek);
+           // println!("seek usize:{}", seek);
             content += &String::from_utf8_lossy(&delta[seek..(seek + num_bytes)]);
 
             seek += num_bytes;
@@ -516,7 +513,7 @@ fn checkout_tree(sha: &String, file_path: &String, target_dir: &String) -> Resul
     while tree.len() > 0 {
         let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
 
-        println!("position: {:#?}", &pos);
+       // println!("position: {:#?}", &pos);
 
         let mode_name = &tree[..pos];
 
@@ -539,9 +536,9 @@ fn checkout_tree(sha: &String, file_path: &String, target_dir: &String) -> Resul
         let mode = String::from_utf8_lossy(mode);
         let name = String::from_utf8_lossy(name);
 
-        println!("mode: {:#?}", &mode);
-        println!("name: {:#?}", &name);
-        println!("sha: {:#?}", &sha);
+       // println!("mode: {:#?}", &mode);
+       // println!("name: {:#?}", &name);
+        //println!("sha: {:#?}", &sha);
 
         enteries.push((mode.clone(), name.clone(), sha.clone()));
     }
