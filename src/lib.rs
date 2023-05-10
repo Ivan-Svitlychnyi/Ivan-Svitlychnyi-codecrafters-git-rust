@@ -135,9 +135,8 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
        // let data_content = 
         let data_pos = &file_content[start_byte..pos].split(|&r| r == ' ' as u8); 
        // pos +=20;
-       
-       println!("data_pos = {:#?}", data_pos);
-     
+       println!("data_pos = {:#?}", String::from_utf8_lossy(&file_content[start_byte..pos]));
+
         result.push(data_pos.clone().last().unwrap().to_vec()); 
         println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));
 
