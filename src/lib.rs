@@ -77,27 +77,23 @@ pub fn read_git_object(git_path: &String) -> Result<Vec<u8>, io::Error> {
 /************************************************************************************************************* */
 pub fn write_hash_object(file_data: &Vec<u8>, file_type: &str) -> Result<(Vec<u8>, String), io::Error> {
 
-    #[allow(unsafe_code)]
-    let store = Vec::from(format!("{file_type} {}\x00{}", file_data.len(), unsafe {
-        String::from_utf8_unchecked(file_data.to_vec())
-    })
-    .to_string());
-    println!("store = {:#?}", &store);
+    // #[allow(unsafe_code)]
+    // let store = Vec::from(format!("{file_type} {}\x00{}", file_data.len(), unsafe {
+    //     String::from_utf8_unchecked(file_data.to_vec())
+    // })
+    // .to_string());
+    // println!("store = {:#?}", &store);
     /******************************************** */
-    let file_data = file_data.to_vec();
-    let mut store_vec: Vec<u8> = Vec::new();
-    store_vec.put(file_type[..].as_bytes());
-    println!("store_vec file type = {:#?}", &store_vec);
-    store_vec.put_u8(' ' as u8);
-    println!("store_vec ' ' = {:#?}", &store_vec);
-    store_vec.put(file_data.len().to_string().as_bytes());
-    println!("store_vec len()= {:#?}", &file_data.len());
-    store_vec.put_u8('\x00' as u8);
-    println!("store_vec '\x00'= {:#?}", &store_vec);
-    store_vec.put(file_data.as_slice());
+   // let file_data = file_data.to_vec();
+    let mut store: Vec<u8> = Vec::new();
+    store.put(file_type[..].as_bytes());
+    store.put_u8(' ' as u8);
+    store.put(file_data.len().to_string().as_bytes());
+    store.put_u8('\x00' as u8);
+    store.put(file_data.as_slice());
     /******************************************* */
 
-    println!("store_vec = {:#?}", &store_vec);
+    //println!("store_vec = {:#?}", &store_vec);
 
     let compressed = zlib_encode(&store)?;
 
