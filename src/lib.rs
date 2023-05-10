@@ -87,9 +87,13 @@ pub fn write_hash_object(file_data: &Vec<u8>, file_type: &str) -> Result<(Vec<u8
     let file_data = file_data.to_vec();
     let mut store_vec: Vec<u8> = Vec::new();
     store_vec.put(file_type[..].as_bytes());
+    println!("store_vec file type = {:#?}", &store_vec);
     store_vec.put_u8(' ' as u8);
+    println!("store_vec ' ' = {:#?}", &store_vec);
     store_vec.put(file_data.len().to_ne_bytes().as_slice());
+    println!("store_vec len()= {:#?}", &store_vec);
     store_vec.put_u8('\x00' as u8);
+    println!("store_vec '\x00'= {:#?}", &store_vec);
     store_vec.put(file_data.as_slice());
     /******************************************* */
 
