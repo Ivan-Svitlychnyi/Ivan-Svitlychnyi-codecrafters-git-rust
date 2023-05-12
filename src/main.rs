@@ -35,14 +35,14 @@ fn main() ->Result<()>{
 
     //-------------------------------------------------------------------------------------------------------
     } else if args[1] == "hash-object" && args[2] == "-w" {
-        println!("enter the arguments hash-object: {:?}", &args);
+        //println!("enter the arguments hash-object: {:?}", &args);
         let file_data = fs::read(args[3].to_string())?;
         let sha1_out = write_hash_object(&file_data, "blob")?;
 
         println!("hash-object in: {}", sha1_out);
     //--------------------------------------------------------------------------------------------------------
     } else if args[1] == "ls-tree" && args[2] == "--name-only" {
-        println!("enter the arguments ls-tree: {:?}", &args);
+        //println!("enter the arguments ls-tree: {:?}", &args);
         let result = read_tree(&args[3])?;
 
         for s in result {
