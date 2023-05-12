@@ -1,15 +1,26 @@
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
 use git_starter_rust::*;
+use git_starter_rust::cli::{Commands, Cli};
 use std::env;
 use std::fs;
-
+use clap::Parser;
 
 
 
 
 
 fn main() ->Result<()>{
+    let cli = Cli::parse();  
+    match &cli.command {
+        Commands::Init => {
+            println!("Init--------------------------------");
+            git_init()?;
+        }
+    }
+
+
+
     let args: Vec<String> = env::args().collect();
     if args.is_empty() {
         panic!("enter the arguments!");
@@ -17,12 +28,12 @@ fn main() ->Result<()>{
     
 
     //-----------------------------------------------------------------------------------------------------
-    if args[1] == "init" {
-        //println!("enter the arguments init: {:?}", &args);
-        git_init()?;
+    // if args[1] == "init" {
+    //     //println!("enter the arguments init: {:?}", &args);
+    //     git_init()?;
         // println!("{}", )
     //------------------------------------------------------------------------------------------------------
-    } else if args[1] == "cat-file" && args[2] == "-p" {
+    if args[1] == "cat-file" && args[2] == "-p" {
        // println!("enter the arguments cat-file: {:?}", &args);
         // print!(
         //     "{}",
