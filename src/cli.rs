@@ -69,6 +69,6 @@ pub fn get_args(&self)-> &str{
 #[derive(Args)]
 pub struct ReadTreeOptions {
     //Create a blob object
-    #[arg(long = "name_only")]
+    #[arg(long = "name-only")]
     pub hash: Option<String>,   
 }
