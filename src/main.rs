@@ -50,7 +50,7 @@ fn main() ->Result<()>{
         }
     //--------------------------------------------------------------------------------------------------------
     } else if args[1] == "write-tree" {
-        println!("enter the arguments write-tree: {:?}", &args);
+       // println!("enter the arguments write-tree: {:?}", &args);
         let sha1_out = write_tree(&".".to_string())?;
 
         print!("{}", sha1_out);
