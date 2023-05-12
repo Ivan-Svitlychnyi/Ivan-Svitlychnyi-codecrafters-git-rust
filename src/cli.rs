@@ -20,7 +20,10 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Commands {
 /// git init
+/// ["/tmp/codecrafters-git-target/release/git-starter-rust", "init"]
 Init,
+//cat-file: ["/tmp/codecrafters-git-target/release/git-starter-rust", "cat-file", "-p", "8a68edea4924829fe663c18dfd9b2ffb3b773e65"]
+
 
 
 

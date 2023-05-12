@@ -18,12 +18,12 @@ fn main() ->Result<()>{
 
     //-----------------------------------------------------------------------------------------------------
     if args[1] == "init" {
-        println!("enter the arguments init: {:?}", &args);
+        //println!("enter the arguments init: {:?}", &args);
         git_init()?;
         // println!("{}", )
     //------------------------------------------------------------------------------------------------------
     } else if args[1] == "cat-file" && args[2] == "-p" {
-        println!("enter the arguments cat-file: {:?}", &args);
+       // println!("enter the arguments cat-file: {:?}", &args);
         // print!(
         //     "{}",
         //     String::from_utf8(read_git_object(&args[3])?)?
