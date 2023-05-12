@@ -30,9 +30,6 @@ commit-tree: ["/tmp/codecrafters-git-target/release/git-starter-rust", "commit-t
  "e82b99fbf78f96399ef39c37d87edeebefdd2a0e", "-m", "horsey dumpty monkey vanilla yikes dooby"]
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 clone: ["/tmp/codecrafters-git-target/release/git-starter-rust", "clone", "https://github.com/codecrafters-io/git-sample-1", "test_dir"]
-body = "001e# service=git-upload-pack\n0000015547b37f1a82bfe85f6d8df52b6258b75e4343b7fd HEAD\0multi_ack thin-pack side-band side-band-64k 
-ofs-delta shallow deepen-since deepen-not deepen-relative no-progress include-tag multi_ack_detailed allow-tip-sha1-in-want allow-reachable-sha1-in-want
-no-done symref=HEAD:refs/heads/master filter object-format=sha1 agent=git/github-aebc4fa63a74\n003f47b37f1a82bfe85f6d8df52b6258b75e4343b7fd refs/heads/master\n0000"
 */
 #[derive(Subcommand)]
 pub enum Commands {
@@ -48,6 +45,8 @@ LsTree(ReadTreeOptions),
 WriteTree,
 ///Create a commit
 CommitTree(CommitTreeOptions),
+///Clone a repository
+Clone(CloneRepOptions),
 }
 #[derive(Args)]
 pub struct ReadBlobOptions {
@@ -82,4 +81,11 @@ pub struct CommitTreeOptions{
     pub print: Option<String>,
     #[arg(short = 'm')]
     pub message: Option<String>,
+}
+#[derive(Args)]
+pub struct CloneRepOptions {
+    #[arg(group = "clone")]
+    pub url: Option<String>,
+    #[arg(group = "clone")]
+    pub dir: Option<String>,
 }

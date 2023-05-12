@@ -1,5 +1,6 @@
 
 use bytes::BufMut;
+use cli::CloneRepOptions;
 use cli::CommitTreeOptions;
 //use cli::CreateBlobOptions;
 use cli::ReadBlobOptions;
@@ -322,19 +323,23 @@ fn create_dirs(target_dir: &String) -> Result<(), io::Error> {
     Ok(())
 }
 /************************************************************************************************************************** */
-pub fn clone_repo(args: &[String]) -> Result<()> {
+pub fn clone_repo(CloneRepOptions{
+    url,
+    dir,
+}: &CloneRepOptions) -> Result<()> {
     // ["/tmp/codecrafters-git-target/release/git-starter-rust",
     // "clone",
     // "https://github.com/codecrafters-io/git-sample-2",
     // "test_dir",]
-    let (url, target_dir) = (&args[2], &args[3]);
 
-    create_dirs(&target_dir)?;
+    let (url, target_dir) = (url.as_deref().unwrap(), dir.as_deref().unwrap());
+
+    create_dirs(&target_dir.to_string())?;
     //------------------------------------------------------------------------------------
-    let url_adr = url.clone() + &"/info/refs?service=git-upload-pack".to_string();
+    let url_adr = url.to_owned() + &"/info/refs?service=git-upload-pack".to_string();
     let pack_hash = get_pack_hash(&url_adr)?;
     //----------------------------------------------------------------------------------
-    let post_url = url.clone() + &"/git-upload-pack".to_string();
+    let post_url = url.to_owned() + &"/git-upload-pack".to_string();
 
     let data = format!("0032want {pack_hash}\n00000009done\n");
    

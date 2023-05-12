@@ -46,7 +46,10 @@ fn main() ->Result<()>{
         //  println!("commit tree-------------------------------");
           print!("{}", create_commit(&args)?);
           }
-
+          Commands::Clone(args)=> {
+            //  println!("clone-------------------------------");
+            clone_repo(&args)?;
+              }
     //    _=> {
     //     panic!("enter the arguments!");
     //    }
