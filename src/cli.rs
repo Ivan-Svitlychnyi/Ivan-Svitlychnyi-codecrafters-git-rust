@@ -113,14 +113,14 @@ pub struct CommitTreeOptions {
 
 impl CommitTreeOptions {
     pub fn read(&self) -> Result<(&str, &str, &str), ArgsReadError> {
-        println!("In read");
+       // println!("In read");
 
         if let Some(hash) = self.hash.as_deref() {
-            println!("In read Some 1");
+           // println!("In read Some 1");
             if let Some(print) = self.print.as_deref() {
-                println!("In read Some 2");
+               // println!("In read Some 2");
                 if let Some(message) = self.message.as_deref() {
-                    println!("In read Some 3");
+                  //  println!("In read Some 3");
                     return Ok((hash, print, message));
                 }
                 else {
