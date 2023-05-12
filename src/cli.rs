@@ -44,7 +44,10 @@ CatFile(ReadBlobOptions),
 HashObject(CreateBlobOptions),
 ///Read a tree object
 LsTree(ReadTreeOptions),
-
+///Write a tree object
+WriteTree,
+///Create a commit
+CommitTree(CommitTreeOptions),
 }
 #[derive(Args)]
 pub struct ReadBlobOptions {
@@ -71,4 +74,12 @@ pub struct ReadTreeOptions {
     //Create a blob object
     #[arg(long = "name-only")]
     pub hash: Option<String>,   
+}
+#[derive(Args)]
+pub struct CommitTreeOptions{
+    pub hash: Option<String>,
+    #[arg(short = 'p')]
+    pub print: Option<String>,
+    #[arg(short = 'm')]
+    pub message: Option<String>,
 }

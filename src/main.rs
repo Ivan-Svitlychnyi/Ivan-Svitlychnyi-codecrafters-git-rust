@@ -31,14 +31,22 @@ fn main() ->Result<()>{
         println!("hash-object in: {}", sha1_out);
             }
         Commands::LsTree(hash)=> {
-            println!("read tree-------------------------------");
-
+          //  println!("read tree-------------------------------");
             let result = read_tree(&hash)?;
                 for s in result {
                     println!("{}", String::from_utf8(s)?);
                 }
-
             }
+       Commands::WriteTree =>{
+        
+        let sha1_out = write_tree(&".".to_string())?;
+        print!("{}", sha1_out);
+       }
+       Commands::CommitTree(args)=> {
+        //  println!("commit tree-------------------------------");
+          print!("{}", create_commit(&args)?);
+          }
+
     //    _=> {
     //     panic!("enter the arguments!");
     //    }

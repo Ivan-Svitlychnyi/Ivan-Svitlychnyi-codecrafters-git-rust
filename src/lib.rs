@@ -1,5 +1,6 @@
 
 use bytes::BufMut;
+use cli::CommitTreeOptions;
 //use cli::CreateBlobOptions;
 use cli::ReadBlobOptions;
 use cli::ReadTreeOptions;
@@ -207,8 +208,14 @@ pub fn write_tree(file_path: &String) -> Result<String> {
 }
 
 /************************************************************************************************************* */
-pub fn create_commit(args: &[String]) -> Result<String, io::Error> {
-    let (tree_sha, parent_commit_sha, data) = (&args[2], &args[4], &args[6]);
+pub fn create_commit(CommitTreeOptions {
+    hash,
+    print,
+    message,
+}: &CommitTreeOptions) -> Result<String, io::Error> {
+
+
+    let (tree_sha, parent_commit_sha, data) = (hash.as_deref().unwrap(), print.as_deref().unwrap(), message.as_deref().unwrap());
 
     let user_metadata = "author Admin <admin@example.com> 1652217488 +0300\ncommitter Name <committer@example.com> 1652224514 +0300".to_string();
 
