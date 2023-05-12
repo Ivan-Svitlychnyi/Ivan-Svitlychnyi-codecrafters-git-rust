@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
-use git_starter_rust::cli::{Cli, Commands, CreateBlobOptions};
+use git_starter_rust::cli::{Cli, Commands, CreateBlobOptions, ReadBlobOptions, ReadTreeOptions, CommitTreeOptions};
 use git_starter_rust::*;
 //use std::env;
 use clap::Parser;
@@ -15,18 +15,17 @@ fn main() -> Result<()> {
         }
         Commands::CatFile(read_options) => {
             // println!("read-------------------------------");
-            print!("{}", read_git_object(&read_options)?)
+            print!("{}", read_git_object(ReadBlobOptions::read(&read_options)?)?)
         }
         Commands::HashObject(file) => {
             println!("create-------------------------------");
-            //let file = file
-            let file_data = fs::read(CreateBlobOptions::get_args(file))?;
+            let file_data = fs::read(CreateBlobOptions::read(file)?)?;
             let sha1_out = write_git_object(&file_data, "blob")?;
             println!("hash-object in: {}", sha1_out);
         }
         Commands::LsTree(hash) => {
             //  println!("read tree-------------------------------");
-            let result = read_tree(&hash)?;
+            let result = read_tree(ReadTreeOptions::read(&hash)?)?;
             for s in result {
                 println!("{}", String::from_utf8(s)?);
             }
@@ -36,9 +35,12 @@ fn main() -> Result<()> {
             print!("{}", sha1_out);
         }
         Commands::CommitTree(args) => {
-            //  println!("commit tree-------------------------------");
-            print!("{}", create_commit(&args)?);
+           // println!("commit tree-------------------------------");
+         
+            print!("{}", create_commit(CommitTreeOptions::read(&args)?)?);
+           
         }
+    
         Commands::Clone(args) => {
             //  println!("clone-------------------------------");
             clone_repo(&args)?;
@@ -46,7 +48,6 @@ fn main() -> Result<()> {
           //     panic!("enter the arguments!");
           //    }
     }
-
     Ok(())
 }
 

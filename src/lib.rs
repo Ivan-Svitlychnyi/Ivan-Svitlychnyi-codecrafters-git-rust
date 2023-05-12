@@ -60,12 +60,9 @@ fn make_hash(data: &Vec<u8>) -> Result<String, io::Error> {
 }
 
 //********************************************************************************************************** */
-pub fn read_git_object(ReadBlobOptions {
-    print
-}: &ReadBlobOptions,) -> Result<String, io::Error> {
-let hasn = print.as_deref().unwrap();
+pub fn read_git_object(hash: &str) -> Result<String, io::Error> {
   
-    let (sub_dir, sha_num) = (&hasn[..2], &hasn[2..]);
+    let (sub_dir, sha_num) = (&hash[..2], &hash[2..]);
     
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
     let git_data = fs::read(full_path)?;
@@ -79,22 +76,17 @@ let hasn = print.as_deref().unwrap();
     let git_data =  String::from_utf8_lossy(&git_data[data_pos + 1..]).to_string();
     Ok(git_data)
 }
-
-
 /************************************************************************************************************* */
-
-
 pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, io::Error> {
-
-    /******************************************** */
-   // let file_data = file_data.to_vec();
+/******************************************** */
+   //let file_data = file_data.to_vec();
     let mut store: Vec<u8> = Vec::new();
     store.put(file_type[..].as_bytes());
     store.put_u8(' ' as u8);
     store.put(file_data.len().to_string().as_bytes());
     store.put_u8('\x00' as u8);
     store.put(file_data.as_slice());
-    /******************************************* */
+/******************************************* */
 
     //println!("store_vec = {:#?}", &store_vec);
 
@@ -116,10 +108,8 @@ pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, 
 
 
 /*************************************************************************************************************** */
-pub fn read_tree(ReadTreeOptions {
-    hash
-}: &ReadTreeOptions,) -> Result<Vec<Vec<u8>>, io::Error> {
-    let file_path = hash.as_deref().unwrap();
+pub fn read_tree(file_path:&str) -> Result<Vec<Vec<u8>>, io::Error> {
+   
     const HASH_BYTES: usize = 20;
     
     let (sub_dir, sha_num) = (&file_path[..2], &file_path[2..]);
@@ -209,14 +199,10 @@ pub fn write_tree(file_path: &String) -> Result<String> {
 }
 
 /************************************************************************************************************* */
-pub fn create_commit(CommitTreeOptions {
-    hash,
-    print,
-    message,
-}: &CommitTreeOptions) -> Result<String, io::Error> {
+pub fn create_commit((tree_sha, parent_commit_sha, data):(&str, &str, &str))-> Result<String, io::Error> {
 
 
-    let (tree_sha, parent_commit_sha, data) = (hash.as_deref().unwrap(), print.as_deref().unwrap(), message.as_deref().unwrap());
+   // let (tree_sha, parent_commit_sha, data) = (hash, print, message);
 
     let user_metadata = "author Admin <admin@example.com> 1652217488 +0300\ncommitter Name <committer@example.com> 1652224514 +0300".to_string();
 

@@ -1,10 +1,9 @@
 use clap::{Parser, Subcommand};
+use std::error::Error;
+use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 //use thiserror::Error;
 use clap::{arg, Args};
 //use std::{iter::zip, str::FromStr};
-
-
-
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -12,13 +11,11 @@ use clap::{arg, Args};
 
 pub struct Cli {
     #[command(subcommand)]
-
     pub command: Commands,
-
 }
-//["/tmp/codecrafters-git-target/release/git-starter-rust", "init"]
-
-/*cat-file: ["/tmp/codecrafters-git-target/release/git-starter-rust", "cat-file", "-p", "8a68edea4924829fe663c18dfd9b2ffb3b773e65"]
+/*init ["/tmp/codecrafters-git-target/release/git-starter-rust", "init"]
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+cat-file: ["/tmp/codecrafters-git-target/release/git-starter-rust", "cat-file", "-p", "8a68edea4924829fe663c18dfd9b2ffb3b773e65"]
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 hash-object: ["/tmp/codecrafters-git-target/release/git-starter-rust", "hash-object", "-w", "dooby.txt"]
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -33,59 +30,153 @@ clone: ["/tmp/codecrafters-git-target/release/git-starter-rust", "clone", "https
 */
 #[derive(Subcommand)]
 pub enum Commands {
-/// git init
-Init,
-///Read a blob object
-CatFile(ReadBlobOptions), 
-///Create a blob object
-HashObject(CreateBlobOptions),
-///Read a tree object
-LsTree(ReadTreeOptions),
-///Write a tree object
-WriteTree,
-///Create a commit
-CommitTree(CommitTreeOptions),
-///Clone a repository
-Clone(CloneRepOptions),
+    ///Git init
+    Init,
+    ///Read a blob object
+    CatFile(ReadBlobOptions),
+    ///Create a blob object
+    HashObject(CreateBlobOptions),
+    ///Read a tree object
+    LsTree(ReadTreeOptions),
+    ///Write a tree object
+    WriteTree,
+    ///Create a commit
+    CommitTree(CommitTreeOptions),
+    ///Clone a repository
+    Clone(CloneRepOptions),
 }
+
+//---Read a blob object args handling-----------------------------------------------------------------
 #[derive(Args)]
 pub struct ReadBlobOptions {
     /// print
     #[arg(short = 'p')]
-    pub print: Option<String>,
-    
+    print: Option<String>,
 }
+impl ReadBlobOptions {
+    pub fn read(&self) -> Result<&str, ArgsReadError> {
+        if let Some(file) = self.print.as_deref() {
+            return Ok(&file);
+        }
+        Err(ArgsReadError::ReadBlobCommandError)
+    }
+}
+
+//-------------------------------------------------------------------------------------------------
+//---Create a blob object args handling------------------------------------------------------------
 #[derive(Args)]
 pub struct CreateBlobOptions {
     //Create a blob object
     #[arg(short = 'w')]
-    pub file: Option<String>,   
-}
-impl CreateBlobOptions{
-pub fn get_args(&self)-> &str{
-  let file = self.file.as_deref().unwrap();
-  file  
+    file: Option<String>,
 }
 
+impl CreateBlobOptions {
+    pub fn read(&self) -> Result<&str, ArgsReadError> {
+        if let Some(file) = self.file.as_deref() {
+            return Ok(&file);
+        }
+        Err(ArgsReadError::CreateBlobCommandError)
+    }
 }
+//---------------------------------------------------------------------------------------------
+//---Read a tree object args handling----------------------------------------------------------
 #[derive(Args)]
 pub struct ReadTreeOptions {
     //Create a blob object
     #[arg(long = "name-only")]
-    pub hash: Option<String>,   
+    hash: Option<String>,
 }
+
+impl ReadTreeOptions {
+    pub fn read(&self) -> Result<&str, ArgsReadError> {
+        if let Some(hash) = self.hash.as_deref() {
+            return Ok(&hash);
+        }
+        Err(ArgsReadError::ReadTreeCommandError)
+    }
+}
+//-------------------------------------------------------------------------------------------------
+//---Create a commit-------------------------------------------------------------------------------
 #[derive(Args)]
-pub struct CommitTreeOptions{
+pub struct CommitTreeOptions {
     pub hash: Option<String>,
     #[arg(short = 'p')]
     pub print: Option<String>,
     #[arg(short = 'm')]
     pub message: Option<String>,
 }
+
+impl CommitTreeOptions {
+    pub fn read(&self) -> Result<(&str, &str, &str), ArgsReadError> {
+        if let Some(hash) = self.hash.as_deref() {
+            if let Some(print) = self.print.as_deref() {
+                if let Some(message) = self.message.as_deref() {
+                    return Ok((hash, print, message));
+                }
+                return Err(ArgsReadError::CommitTreeCommandError(
+                    CommitTreeCommandErrors::ArgumentThreeMessageReadError,
+                ));
+            }
+            return Err(ArgsReadError::CommitTreeCommandError(
+                CommitTreeCommandErrors::ArgumentTwoHashReadError,
+            ));
+        }
+        Err(ArgsReadError::CommitTreeCommandError(
+            CommitTreeCommandErrors::ArgumentOneHashReadError,
+        ))
+    }
+}
+//-----------------------------------------------------------------------------------------------
 #[derive(Args)]
 pub struct CloneRepOptions {
-
     pub url: Option<String>,
     pub dir: Option<String>,
-    
 }
+
+//-----------Error handling-----------------------------------------------
+pub enum ArgsReadError {
+    ReadBlobCommandError,
+    CreateBlobCommandError,
+    ReadTreeCommandError,
+    CommitTreeCommandError(CommitTreeCommandErrors),
+    CloneRepCommandError,
+}
+
+pub enum CommitTreeCommandErrors {
+    ArgumentOneHashReadError,
+    ArgumentTwoHashReadError,
+    ArgumentThreeMessageReadError,
+}
+
+impl Display for ArgsReadError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "{}", self.message())
+    }
+}
+impl Debug for ArgsReadError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        write!(f, "{}", self.message())
+    }
+}
+impl Error for ArgsReadError {}
+impl ArgsReadError {
+    fn message(&self) -> &str {
+        match self {
+            Self::ReadBlobCommandError => "Read a blob object args parsing error",
+            Self::CreateBlobCommandError => "Create a blob object args parsing error",
+            Self::ReadTreeCommandError => "Read a tree object args parsing error",
+            Self::CommitTreeCommandError(ArgumentOneHashReadError) => {
+                "Commit a tree object arg one parsing error"
+            }
+            Self::CommitTreeCommandError(ArgumentTwoHashReadError) => {
+                "Commit a tree object arg two parsing error"
+            }
+            Self::CommitTreeCommandError(ArgumentThreeMessageReadError) => {
+                "Commit a tree object arg three parsing error"
+            }
+            Self::CloneRepCommandError => "Commit a tree object args parsing error",
+        }
+    }
+}
+//---------------------------------------------------------------------------------------------------------
