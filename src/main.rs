@@ -56,7 +56,7 @@ fn main() ->Result<()>{
         print!("{}", sha1_out);
     //---------------------------------------------------------------------------------------------------------
     } else if args[1] == "commit-tree" {
-        println!("enter the arguments commit-tree: {:?}", &args);
+       // println!("enter the arguments commit-tree: {:?}", &args);
         print!("{}", create_commit(&args)?);
     //--------------------------------------------------------------------------------------------------------
     } else if args[1] == "clone" {
