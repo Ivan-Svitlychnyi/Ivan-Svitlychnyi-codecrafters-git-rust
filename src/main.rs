@@ -14,6 +14,8 @@ fn main() ->Result<()>{
     if args.is_empty() {
         panic!("enter the arguments!");
     }
+    println!("hash-object in: {:?}", &args);
+
     //-----------------------------------------------------------------------------------------------------
     if args[1] == "init" {
         git_init()?;

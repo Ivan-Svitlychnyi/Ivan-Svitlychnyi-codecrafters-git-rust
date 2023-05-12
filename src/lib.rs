@@ -16,7 +16,7 @@ use std::str;
 use std::str::FromStr;
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
-
+pub mod cli;
 /******************************************************************************************************** */
 pub fn git_init() -> Result<String, io::Error> {
     fs::create_dir(".git")?;
@@ -114,6 +114,8 @@ pub fn write_hash_object(file_data: &Vec<u8>, file_type: &str) -> Result<String,
 /*************************************************************************************************************** */
 pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
     
+    const HASH_BYTES: usize = 20;
+    
     let (sub_dir, sha_num) = (&file_path[..2], &file_path[2..]);
 
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
@@ -131,7 +133,7 @@ pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
         result.push(data_pos.clone().last().unwrap().to_vec()); 
        // println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));     
        // println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
-        start_byte = 20;
+        start_byte = HASH_BYTES;
         }
         file_content = file_content[pos + 1..].to_vec();
 
