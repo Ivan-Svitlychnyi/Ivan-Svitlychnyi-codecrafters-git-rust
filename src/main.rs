@@ -2,7 +2,7 @@
 use anyhow::{Context, Result};
 use git_starter_rust::*;
 use git_starter_rust::cli::{Commands, Cli, CreateBlobOptions};
-use std::env;
+//use std::env;
 use std::fs;
 use clap::Parser;
 
@@ -30,9 +30,18 @@ fn main() ->Result<()>{
         let sha1_out = write_git_object(&file_data, "blob")?;
         println!("hash-object in: {}", sha1_out);
             }
-       _=> {
-        panic!("enter the arguments!");
-       }
+        Commands::LsTree(hash)=> {
+            println!("read tree-------------------------------");
+
+            let result = read_tree(&hash)?;
+                for s in result {
+                    println!("{}", String::from_utf8(s)?);
+                }
+
+            }
+    //    _=> {
+    //     panic!("enter the arguments!");
+    //    }
     }
 
 

@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
-use thiserror::Error;
+//use thiserror::Error;
 use clap::{arg, Args};
-use std::{iter::zip, str::FromStr};
+//use std::{iter::zip, str::FromStr};
 
 
 
@@ -42,6 +42,8 @@ Init,
 CatFile(ReadBlobOptions), 
 ///Create a blob object
 HashObject(CreateBlobOptions),
+///Read a tree object
+LsTree(ReadTreeOptions),
 
 }
 #[derive(Args)]
@@ -63,4 +65,10 @@ pub fn get_args(&self)-> &str{
   file  
 }
 
+}
+#[derive(Args)]
+pub struct ReadTreeOptions {
+    //Create a blob object
+    #[arg(long = "name_only")]
+    pub hash: Option<String>,   
 }

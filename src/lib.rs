@@ -1,7 +1,8 @@
 
 use bytes::BufMut;
-use cli::CreateBlobOptions;
+//use cli::CreateBlobOptions;
 use cli::ReadBlobOptions;
+use cli::ReadTreeOptions;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
@@ -113,8 +114,10 @@ pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, 
 
 
 /*************************************************************************************************************** */
-pub fn read_tree(file_path: &String) -> Result<Vec<Vec<u8>>, io::Error> {
-    
+pub fn read_tree(ReadTreeOptions {
+    hash
+}: &ReadTreeOptions,) -> Result<Vec<Vec<u8>>, io::Error> {
+    let file_path = hash.as_deref().unwrap();
     const HASH_BYTES: usize = 20;
     
     let (sub_dir, sha_num) = (&file_path[..2], &file_path[2..]);
