@@ -1,5 +1,6 @@
 
 use bytes::BufMut;
+use cli::ReadBlobOptions;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
@@ -55,9 +56,12 @@ fn make_hash(data: &Vec<u8>) -> Result<String, io::Error> {
 }
 
 //********************************************************************************************************** */
-pub fn read_git_object(git_path: &String) -> Result<String, io::Error> {
-
-    let (sub_dir, sha_num) = (&git_path[..2], &git_path[2..]);
+pub fn read_git_object(ReadBlobOptions {
+    print: _,
+    hasn,
+}: &ReadBlobOptions,) -> Result<String, io::Error> {
+let hasn = hasn.as_deref().unwrap();
+    let (sub_dir, sha_num) = (&hasn[..2], &hasn[2..]);
     
     let full_path = format!(".git/objects/{}/{}", sub_dir, sha_num);
     let git_data = fs::read(full_path)?;

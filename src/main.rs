@@ -17,6 +17,14 @@ fn main() ->Result<()>{
             println!("Init--------------------------------");
             git_init()?;
         }
+        Commands::Cat_file(read_options)=> {
+        println!("read-------------------------------");
+            print!(
+                 "{}",
+                read_git_object(&read_options)?)  
+
+        }
+
     }
 
 

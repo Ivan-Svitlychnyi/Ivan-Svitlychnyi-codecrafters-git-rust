@@ -19,9 +19,9 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-/// git init
+
 //["/tmp/codecrafters-git-target/release/git-starter-rust", "init"]
-Init,
+
 /*cat-file: ["/tmp/codecrafters-git-target/release/git-starter-rust", "cat-file", "-p", "8a68edea4924829fe663c18dfd9b2ffb3b773e65"]
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 hash-object: ["/tmp/codecrafters-git-target/release/git-starter-rust", "hash-object", "-w", "dooby.txt"]
@@ -38,6 +38,19 @@ body = "001e# service=git-upload-pack\n0000015547b37f1a82bfe85f6d8df52b6258b75e4
 ofs-delta shallow deepen-since deepen-not deepen-relative no-progress include-tag multi_ack_detailed allow-tip-sha1-in-want allow-reachable-sha1-in-want
 no-done symref=HEAD:refs/heads/master filter object-format=sha1 agent=git/github-aebc4fa63a74\n003f47b37f1a82bfe85f6d8df52b6258b75e4343b7fd refs/heads/master\n0000"
 */
+/// git init
+Init,
+///Read a blob object
+Cat_file(ReadBlobOptions), 
 
 }
 
+#[derive(Args)]
+pub struct ReadBlobOptions {
+    /// print
+    #[arg(short = 'p')]
+    pub print: String,
+    /// hash
+    #[arg(long)]
+    pub hasn: Option<String>,
+}
