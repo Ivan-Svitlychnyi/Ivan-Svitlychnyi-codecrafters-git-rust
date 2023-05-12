@@ -84,8 +84,8 @@ pub struct CommitTreeOptions{
 }
 #[derive(Args)]
 pub struct CloneRepOptions {
-    //#[arg(group = "clone")]
+
     pub url: Option<String>,
-   // #[arg(group = "clone")]
     pub dir: Option<String>,
+    
 }
