@@ -39,14 +39,28 @@ pub enum Commands {
 /// git init
 Init,
 ///Read a blob object
-Cat_file(ReadBlobOptions), 
+CatFile(ReadBlobOptions), 
+///Create a blob object
+HashObject(CreateBlobOptions),
 
 }
-
 #[derive(Args)]
 pub struct ReadBlobOptions {
     /// print
     #[arg(short = 'p')]
     pub print: Option<String>,
     
+}
+#[derive(Args)]
+pub struct CreateBlobOptions {
+    //Create a blob object
+    #[arg(short = 'w')]
+    pub file: Option<String>,   
+}
+impl CreateBlobOptions{
+pub fn get_args(&self)-> &str{
+  let file = self.file.as_deref().unwrap();
+  file  
+}
+
 }

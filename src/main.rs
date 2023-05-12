@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
 use git_starter_rust::*;
-use git_starter_rust::cli::{Commands, Cli};
+use git_starter_rust::cli::{Commands, Cli, CreateBlobOptions};
 use std::env;
 use std::fs;
 use clap::Parser;
@@ -17,14 +17,22 @@ fn main() ->Result<()>{
             println!("Init--------------------------------");
             git_init()?;
         }
-        Commands::Cat_file(read_options)=> {
+        Commands::CatFile(read_options)=> {
         println!("read-------------------------------");
             print!(
                  "{}",
                 read_git_object(&read_options)?)  
-
         }
-
+        Commands::HashObject(file)=> {
+            println!("create-------------------------------");
+        //let file = file  
+        let file_data = fs::read(CreateBlobOptions::get_args(file))?;
+        let sha1_out = write_git_object(&file_data, "blob")?;
+        println!("hash-object in: {}", sha1_out);
+            }
+       _=> {
+        panic!("enter the arguments!");
+       }
     }
 
 

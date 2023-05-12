@@ -1,5 +1,6 @@
 
 use bytes::BufMut;
+use cli::CreateBlobOptions;
 use cli::ReadBlobOptions;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
@@ -78,14 +79,10 @@ let hasn = print.as_deref().unwrap();
 
 
 /************************************************************************************************************* */
-pub fn write_hash_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, io::Error> {
 
-    // #[allow(unsafe_code)]
-    // let store = Vec::from(format!("{file_type} {}\x00{}", file_data.len(), unsafe {
-    //     String::from_utf8_unchecked(file_data.to_vec())
-    // })
-    // .to_string());
-    // println!("store = {:#?}", &store);
+
+pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, io::Error> {
+
     /******************************************** */
    // let file_data = file_data.to_vec();
     let mut store: Vec<u8> = Vec::new();
@@ -181,7 +178,7 @@ pub fn write_tree(file_path: &String) -> Result<String> {
         {
             mode = "100644";
             let file_data = fs::read(&path_name)?;
-            sha_file = hex::decode(write_hash_object(&file_data, "blob")?)?;
+            sha_file = hex::decode(write_git_object(&file_data, "blob")?)?;
         }
 
         let mut dir_sha_out: Vec<u8> = Vec::new();
@@ -201,7 +198,7 @@ pub fn write_tree(file_path: &String) -> Result<String> {
 
         sha_out.append(&mut dir_sha_out);
     }
-    let res = write_hash_object(&mut &sha_out, "tree")?;
+    let res = write_git_object(&mut &sha_out, "tree")?;
 
     Ok(res)
 }
@@ -216,7 +213,7 @@ pub fn create_commit(args: &[String]) -> Result<String, io::Error> {
         format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n").to_string();
 
     //println!("content: {:?}", &content);
-    let sha= write_hash_object(&mut content.into_bytes(), "commit")?;
+    let sha= write_git_object(&mut content.into_bytes(), "commit")?;
 
     Ok(sha)
 }
@@ -278,7 +275,7 @@ fn post_to_git_data(url: &String, data: &String) -> Result<bytes::Bytes> {
 }
 
 /********************************************************************************************************************** */
-fn write_git_object(data_type: &str, content: &str, target_dir: &str) -> Result<String, io::Error> {
+fn write_git_object_target_dir(data_type: &str, content: &str, target_dir: &str) -> Result<String, io::Error> {
     let mut obj_write_data = format!("{} {}\0", data_type, content.len()).to_string();
 
     obj_write_data += &content;
@@ -360,6 +357,16 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
         }
         seek += 1;
         // println!("seek : {:?}", seek);
+        let data_type = [
+            "",
+            "commit",
+            "tree",
+            "blob",
+            "",
+            "tag",
+            "ofs_delta",
+            "refs_delta",
+        ];
 
         if obj_type < 7 {
             let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
@@ -368,10 +375,8 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
         
             #[allow(unsafe_code)]
             let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
-
-            let data_type = ["", "commit", "tree", "blob", "", "tag", "ofs_delta"];
      
-            let hex_result = write_git_object(data_type[obj_type], &s_git_data, &target_dir)?;
+            let hex_result = write_git_object_target_dir(data_type[obj_type], &s_git_data, &target_dir)?;
 
             objs.insert(hex_result, (s_git_data, obj_type));
 
@@ -393,17 +398,8 @@ pub fn clone_repo(args: &[String]) -> Result<()> {
             obj_type = elem_num;
             //println!("content else: {:#?}", &content);
             // println!("obj_type else: {:#?}", &obj_type);
-            let data_type = [
-                "",
-                "commit",
-                "tree",
-                "blob",
-                "",
-                "tag",
-                "ofs_delta",
-                "refs_delta",
-            ];
-            let hex_result = write_git_object(data_type[obj_type], &content, &target_dir)?;
+      
+            let hex_result = write_git_object_target_dir(data_type[obj_type], &content, &target_dir)?;
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content.into(), obj_type));
 
