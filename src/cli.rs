@@ -1,3 +1,4 @@
+
 use clap::{Parser, Subcommand};
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
@@ -12,6 +13,7 @@ use clap::{arg, Args};
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
+
 }
 /*init ["/tmp/codecrafters-git-target/release/git-starter-rust", "init"]
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,6 +48,7 @@ pub enum Commands {
     Clone(CloneRepOptions),
 }
 
+
 //---Read a blob object args handling-----------------------------------------------------------------
 #[derive(Args)]
 pub struct ReadBlobOptions {
@@ -60,6 +63,7 @@ impl ReadBlobOptions {
         }
         Err(ArgsReadError::ReadBlobCommandError)
     }
+
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -109,22 +113,27 @@ pub struct CommitTreeOptions {
 
 impl CommitTreeOptions {
     pub fn read(&self) -> Result<(&str, &str, &str), ArgsReadError> {
+        println!("In read");
+
         if let Some(hash) = self.hash.as_deref() {
+            println!("In read Some 1");
             if let Some(print) = self.print.as_deref() {
+                println!("In read Some 2");
                 if let Some(message) = self.message.as_deref() {
+                    println!("In read Some 3");
                     return Ok((hash, print, message));
                 }
-                return Err(ArgsReadError::CommitTreeCommandError(
-                    CommitTreeCommandErrors::ArgumentThreeMessageReadError,
-                ));
+                else {
+                    return Err(ArgsReadError::CommitTreeCommandError);
             }
-            return Err(ArgsReadError::CommitTreeCommandError(
-                CommitTreeCommandErrors::ArgumentTwoHashReadError,
-            ));
+            }
+            else {
+            return Err(ArgsReadError::CommitTreeCommandError);
         }
-        Err(ArgsReadError::CommitTreeCommandError(
-            CommitTreeCommandErrors::ArgumentOneHashReadError,
-        ))
+        }
+        else {
+        Err(ArgsReadError::CommitTreeCommandError)
+    }
     }
 }
 //-----------------------------------------------------------------------------------------------
@@ -139,15 +148,10 @@ pub enum ArgsReadError {
     ReadBlobCommandError,
     CreateBlobCommandError,
     ReadTreeCommandError,
-    CommitTreeCommandError(CommitTreeCommandErrors),
+    CommitTreeCommandError,
     CloneRepCommandError,
 }
 
-pub enum CommitTreeCommandErrors {
-    ArgumentOneHashReadError,
-    ArgumentTwoHashReadError,
-    ArgumentThreeMessageReadError,
-}
 
 impl Display for ArgsReadError {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
@@ -166,15 +170,7 @@ impl ArgsReadError {
             Self::ReadBlobCommandError => "Read a blob object args parsing error",
             Self::CreateBlobCommandError => "Create a blob object args parsing error",
             Self::ReadTreeCommandError => "Read a tree object args parsing error",
-            Self::CommitTreeCommandError(ArgumentOneHashReadError) => {
-                "Commit a tree object arg one parsing error"
-            }
-            Self::CommitTreeCommandError(ArgumentTwoHashReadError) => {
-                "Commit a tree object arg two parsing error"
-            }
-            Self::CommitTreeCommandError(ArgumentThreeMessageReadError) => {
-                "Commit a tree object arg three parsing error"
-            }
+            Self::CommitTreeCommandError=> "Commit a tree object arg one parsing error",
             Self::CloneRepCommandError => "Commit a tree object args parsing error",
         }
     }

@@ -1,10 +1,6 @@
 
 use bytes::BufMut;
 use cli::CloneRepOptions;
-use cli::CommitTreeOptions;
-//use cli::CreateBlobOptions;
-use cli::ReadBlobOptions;
-use cli::ReadTreeOptions;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
