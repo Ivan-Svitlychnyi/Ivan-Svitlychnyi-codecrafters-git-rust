@@ -1,67 +1,56 @@
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
+use git_starter_rust::cli::{Cli, Commands, CreateBlobOptions};
 use git_starter_rust::*;
-use git_starter_rust::cli::{Commands, Cli, CreateBlobOptions};
 //use std::env;
-use std::fs;
 use clap::Parser;
+use std::fs;
 
-
-
-
-
-fn main() ->Result<()>{
-    let cli = Cli::parse();  
+fn main() -> Result<()> {
+    let cli = Cli::parse();
     match &cli.command {
         Commands::Init => {
             println!("Init--------------------------------");
             git_init()?;
         }
-        Commands::CatFile(read_options)=> {
-       // println!("read-------------------------------");
-            print!(
-                 "{}",
-                read_git_object(&read_options)?)  
+        Commands::CatFile(read_options) => {
+            // println!("read-------------------------------");
+            print!("{}", read_git_object(&read_options)?)
         }
-        Commands::HashObject(file)=> {
+        Commands::HashObject(file) => {
             println!("create-------------------------------");
-        //let file = file  
-        let file_data = fs::read(CreateBlobOptions::get_args(file))?;
-        let sha1_out = write_git_object(&file_data, "blob")?;
-        println!("hash-object in: {}", sha1_out);
-            }
-        Commands::LsTree(hash)=> {
-          //  println!("read tree-------------------------------");
+            //let file = file
+            let file_data = fs::read(CreateBlobOptions::get_args(file))?;
+            let sha1_out = write_git_object(&file_data, "blob")?;
+            println!("hash-object in: {}", sha1_out);
+        }
+        Commands::LsTree(hash) => {
+            //  println!("read tree-------------------------------");
             let result = read_tree(&hash)?;
-                for s in result {
-                    println!("{}", String::from_utf8(s)?);
-                }
+            for s in result {
+                println!("{}", String::from_utf8(s)?);
             }
-       Commands::WriteTree =>{
-        
-        let sha1_out = write_tree(&".".to_string())?;
-        print!("{}", sha1_out);
-       }
-       Commands::CommitTree(args)=> {
-        //  println!("commit tree-------------------------------");
-          print!("{}", create_commit(&args)?);
-          }
-          Commands::Clone(args)=> {
+        }
+        Commands::WriteTree => {
+            let sha1_out = write_tree(&".".to_string())?;
+            print!("{}", sha1_out);
+        }
+        Commands::CommitTree(args) => {
+            //  println!("commit tree-------------------------------");
+            print!("{}", create_commit(&args)?);
+        }
+        Commands::Clone(args) => {
             //  println!("clone-------------------------------");
             clone_repo(&args)?;
-              }
-    //    _=> {
-    //     panic!("enter the arguments!");
-    //    }
+        } //    _=> {
+          //     panic!("enter the arguments!");
+          //    }
     }
-
-
 
     // let args: Vec<String> = env::args().collect();
     // if args.is_empty() {
     //     panic!("enter the arguments!");
     // }
-    
 
     // //-----------------------------------------------------------------------------------------------------
     // // if args[1] == "init" {
