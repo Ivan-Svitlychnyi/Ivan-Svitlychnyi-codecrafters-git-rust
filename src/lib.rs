@@ -133,6 +133,7 @@ pub fn write_tree(file_path: &str) -> Result<String> {
     let mut sha_out: Vec<u8> = Vec::new();
     let mut entries = fs::read_dir(file_path)?
         .map(|res| res.map(|e| e.path()))
+        .filter(|path| path.as_ref().unwrap().clone().to_str().unwrap() != "./.git")
         .collect::<Result<Vec<_>, io::Error>>()?;
 
     entries.sort();
@@ -143,9 +144,9 @@ pub fn write_tree(file_path: &str) -> Result<String> {
         let path_name = dir.to_str().unwrap();
         //  println!("dir: {}", path_name);
 
-        if path_name == "./.git" {
-            continue;
-        }
+        // if path_name == "./.git" {
+        //     continue;
+        // }
         let mut sha_file;
         if dir.is_dir() {
             mode = "40000";
