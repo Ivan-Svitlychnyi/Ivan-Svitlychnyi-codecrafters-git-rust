@@ -308,7 +308,7 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
 
     create_dirs(&target_dir.to_string())?;
     //------------------------------------------------------------------------------------
-    let url_adr = url.to_owned() + &"/info/refs?service=git-upload-pack".to_string();
+    let url_adr = url.to_owned() + &"/info/refs?service=git-upload-pack----".to_string();
     let pack_hash = get_pack_hash(&url_adr)?;
     //----------------------------------------------------------------------------------
     let post_url = url.to_owned() + &"/git-upload-pack".to_string();
@@ -414,8 +414,6 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
 
     Ok(())
 }
-
-
 
 //************************************************************************************************************************* */
 fn identify(delta: &[u8], base: &String) -> Result<String, io::Error> {

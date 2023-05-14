@@ -37,13 +37,17 @@ fn main() -> Result<()> {
         Commands::CommitTree(args) => {
            // println!("commit tree-------------------------------");
          
-            print!("{}", create_commit(CommitTreeOptions::read(&args)?)?);
-           
+            print!("{}", create_commit(CommitTreeOptions::read(&args)?)?);           
         }
-    
         Commands::Clone(args) => {
             //  println!("clone-------------------------------");
-            clone_repo(CloneRepOptions::read(&args)?)?;
+
+            if let Err(err) = clone_repo(CloneRepOptions::read(&args)?){
+                eprintln!("ERROR in clone repo: {}", err);
+                err.chain().skip(1).for_each(|cause| eprintln!("because: {}", cause));
+                std::process::exit(1);
+            }
+
         } 
     }
     Ok(())
