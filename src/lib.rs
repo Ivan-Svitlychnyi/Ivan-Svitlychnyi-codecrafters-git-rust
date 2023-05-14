@@ -1,9 +1,10 @@
+#[allow(unused_imports)]
+use anyhow::{Error, anyhow,Result as AnyResult};
 use bytes::BufMut;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 use sha1::{Digest, Sha1};
-
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
 use std::fs;
@@ -98,7 +99,7 @@ pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, 
 }
 
 /*************************************************************************************************************** */
-pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>, io::Error> {
+pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>> {
     const HASH_BYTES: usize = 20;
 
     let (sub_dir, sha_num) = (&file_path[..2], &file_path[2..]);
@@ -108,26 +109,34 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>, io::Error> {
     let mut file_content = zlib_decode(&fs::read(&full_path)?)?;
 
     let mut result: Vec<Vec<u8>> = Vec::new();
-    let mut start_byte = 0;
-    //println!("file_content in = {:#?}", &String::from_utf8_lossy(&file_content[..]));
     
+    //println!("file_content in = {:#?}", &String::from_utf8_lossy(&file_content[..]));
+
+    if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8) {
+        let mut data_pos = file_content[..pos].split(|&r| r == ' ' as u8);
+
+        if data_pos.next().ne(&Some("tree".as_bytes())) {
+
+            return Err(anyhow!("Not tree object"));
+        }
+        file_content = file_content[pos + 1..].to_vec();
+    }
+    else {
+        return Err(anyhow!("Not posible split data")); 
+    }
     loop {
         if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8) {
-            let mut data_pos = file_content[..pos].split(|&r| r == ' ' as u8);
-            if data_pos.next().ne(&Some("tree".as_bytes())) {
+            let data_pos = file_content[..pos].split(|&r| r == ' ' as u8);
                 result.push(data_pos.clone().last().unwrap().to_vec());
-                //println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));
               
-               start_byte = HASH_BYTES;
-            }
-            file_content = file_content[pos + 1+ start_byte..].to_vec();
+            file_content = file_content[pos + 1+ HASH_BYTES..].to_vec();
            // println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
         } else {
             break;
         }
     }
 
-    Ok(result)
+    return Ok(result);
 
 }
 /******************************************************************************************************************* */
