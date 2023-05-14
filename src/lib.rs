@@ -1,18 +1,17 @@
-
 use bytes::BufMut;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
 use sha1::{Digest, Sha1};
 
+#[allow(unused_imports)]
+use anyhow::{Context, Result};
 use std::fs;
 use std::io;
 use std::io::prelude::*;
 use std::io::stdout;
 use std::str;
 use std::str::FromStr;
-#[allow(unused_imports)]
-use anyhow::{Context, Result};
 
 pub mod cli;
 pub mod clone;
@@ -56,30 +55,32 @@ pub fn make_hash(data: &Vec<u8>) -> Result<String, io::Error> {
 
 //********************************************************************************************************** */
 pub fn read_git_object(hash: &str) -> Result<()> {
-  
-    let full_path = format!(".git/objects/{}/{}",&hash[..2], &hash[2..]);
+    let full_path = format!(".git/objects/{}/{}", &hash[..2], &hash[2..]);
     let git_data = zlib_decode(&fs::read(full_path)?)?;
-   // println!("git_data = {:#?}", &git_data);
-    let git_data:Vec<&[u8]> = git_data[..].split(|c|*c == '/' as u8).collect();
-    let git_data =  git_data[git_data.len()-1];
-    let data_pos = git_data.iter().position(|&r| r == '\x00' as u8).unwrap_or(0);
-   // println!("git_data_fin = {:#?}", &git_data);
+    // println!("git_data = {:#?}", &git_data);
+    let git_data: Vec<&[u8]> = git_data[..].split(|c| *c == '/' as u8).collect();
+    let git_data = git_data[git_data.len() - 1];
+    let data_pos = git_data
+        .iter()
+        .position(|&r| r == '\x00' as u8)
+        .unwrap_or(0);
+    // println!("git_data_fin = {:#?}", &git_data);
 
-   let git_data = &git_data[data_pos + 1..];
+    let git_data = &git_data[data_pos + 1..];
     stdout().write_all(git_data)?;
-  
+
     Ok(())
 }
 /************************************************************************************************************* */
 pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, io::Error> {
-/******************************************** */
+    /******************************************** */
     let mut store: Vec<u8> = Vec::new();
     store.put(file_type[..].as_bytes());
     store.put_u8(' ' as u8);
     store.put(file_data.len().to_string().as_bytes());
     store.put_u8('\x00' as u8);
     store.put(file_data.as_slice());
-/******************************************* */
+    /******************************************* */
     //println!("store_vec = {:#?}", &store_vec);
 
     let compressed = zlib_encode(&store)?;
@@ -88,7 +89,7 @@ pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, 
 
     let sub_dir_path = format!(".git/objects/{}/", &hex_result[..2]);
 
-    let full_path = format!("{sub_dir_path}{}",&hex_result[2..]);
+    let full_path = format!("{sub_dir_path}{}", &hex_result[2..]);
 
     fs::create_dir_all(sub_dir_path)?;
     fs::write(full_path, compressed)?;
@@ -96,12 +97,10 @@ pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, 
     Ok(hex_result)
 }
 
-
 /*************************************************************************************************************** */
-pub fn read_tree(file_path:&str) -> Result<Vec<Vec<u8>>, io::Error> {
-   
+pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>, io::Error> {
     const HASH_BYTES: usize = 20;
-    
+
     let (sub_dir, sha_num) = (&file_path[..2], &file_path[2..]);
 
     let full_path = format!(".git/objects/{sub_dir}/{sha_num}");
@@ -110,28 +109,21 @@ pub fn read_tree(file_path:&str) -> Result<Vec<Vec<u8>>, io::Error> {
 
     let mut result: Vec<Vec<u8>> = Vec::new();
     let mut start_byte = 0;
-    //let mut skip_flag = true;
-  loop {   
-     if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8){
-     let mut data_pos = file_content[start_byte..pos].split(|&r| r == ' ' as u8); 
-     let x = data_pos.next();
-       println!("result = {:#?}", String::from_utf8(x.unwrap().to_vec())); 
-        if x.ne(&Some("tree".as_bytes())){
-        result.push(data_pos.clone().last().unwrap().to_vec()); 
-       // println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));     
-       // println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
-        start_byte = HASH_BYTES;
-        
-        }
-        file_content = file_content[pos + 1..].to_vec();
+    loop {
+        if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8) {
+            let mut data_pos = file_content[start_byte..pos].split(|&r| r == ' ' as u8);
+            if data_pos.next().ne(&Some("tree".as_bytes())) {
+                result.push(data_pos.clone().last().unwrap().to_vec());
+                // println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));
+                // println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
+                start_byte = HASH_BYTES;
+            }
+            file_content = file_content[pos + 1..].to_vec();
 
-       // skip_flag = false;
-     }
-     else {
-        break;
-     }
-    
-  } 
+        } else {
+            break;
+        }
+    }
 
     Ok(result)
 }
@@ -139,11 +131,9 @@ pub fn read_tree(file_path:&str) -> Result<Vec<Vec<u8>>, io::Error> {
 pub fn write_tree(file_path: &str) -> Result<String> {
     // let mut sha_out: String = "".to_string();
     let mut sha_out: Vec<u8> = Vec::new();
-    let mut entries = fs::read_dir(file_path)
-        ?
+    let mut entries = fs::read_dir(file_path)?
         .map(|res| res.map(|e| e.path()))
-        .collect::<Result<Vec<_>, io::Error>>()
-       ?;
+        .collect::<Result<Vec<_>, io::Error>>()?;
 
     entries.sort();
 
@@ -191,10 +181,10 @@ pub fn write_tree(file_path: &str) -> Result<String> {
 }
 
 /************************************************************************************************************* */
-pub fn create_commit((tree_sha, parent_commit_sha, data):(&str, &str, &str))-> Result<String, io::Error> {
-
-
-   // let (tree_sha, parent_commit_sha, data) = (hash, print, message);
+pub fn create_commit(
+    (tree_sha, parent_commit_sha, data): (&str, &str, &str),
+) -> Result<String, io::Error> {
+    // let (tree_sha, parent_commit_sha, data) = (hash, print, message);
 
     let user_metadata = "author Admin <admin@example.com> 1652217488 +0300\ncommitter Name <committer@example.com> 1652224514 +0300".to_string();
 
@@ -202,7 +192,7 @@ pub fn create_commit((tree_sha, parent_commit_sha, data):(&str, &str, &str))-> R
         format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n");
 
     //println!("content: {:?}", &content);
-    let sha= write_git_object(&mut content.into_bytes(), "commit")?;
+    let sha = write_git_object(&mut content.into_bytes(), "commit")?;
 
     Ok(sha)
 }
