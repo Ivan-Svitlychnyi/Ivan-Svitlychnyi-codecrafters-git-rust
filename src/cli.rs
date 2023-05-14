@@ -59,8 +59,10 @@ pub struct ReadBlobOptions {
 impl ReadBlobOptions {
     pub fn read(&self) -> Result<&str, ArgsReadError> {
         if let Some(blob_sha) = self.blob_sha.as_deref() {
-            print!("blob_sha.len(): {}", blob_sha.len());  
+            //print!("blob_sha.len(): {}", blob_sha.len());  
+            if blob_sha.len() == 40{
             return Ok(&blob_sha);
+            }
         }
         Err(ArgsReadError::ReadBlobCommandError)
     }
