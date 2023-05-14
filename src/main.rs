@@ -12,8 +12,7 @@ fn main() -> Result<()> {
         Commands::Init => {
             println!("Init--------------------------------");
             if let Err(err) = git_init() {
-                eprintln!("ERROR: {}", err);
-                err.chain().skip(1).for_each(|cause| eprintln!("because: {}", cause));
+                eprintln!("ERROR in Init operation: {}", err);
                 std::process::exit(1);
             }
             
