@@ -107,28 +107,25 @@ pub fn read_tree(file_path:&str) -> Result<Vec<Vec<u8>>, io::Error> {
     let full_path = format!(".git/objects/{sub_dir}/{sha_num}");
 
     let mut file_content = zlib_decode(&fs::read(&full_path)?)?;
-    println!("read_tree  file_content:"); 
-    stdout().write_all(file_content.as_slice())?;
-   
-
 
     let mut result: Vec<Vec<u8>> = Vec::new();
     let mut start_byte = 0;
-    let mut skip_flag = true;
-
+    //let mut skip_flag = true;
   loop {   
      if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8){
-
-   if !skip_flag {
-        let data_pos = &file_content[start_byte..pos].split(|&r| r == ' ' as u8); 
+     let mut data_pos = file_content[start_byte..pos].split(|&r| r == ' ' as u8); 
+     let x = data_pos.next();
+       println!("result = {:#?}", String::from_utf8(x.unwrap().to_vec())); 
+        if x.ne(&Some("tree".as_bytes())){
         result.push(data_pos.clone().last().unwrap().to_vec()); 
        // println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));     
        // println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
         start_byte = HASH_BYTES;
+        
         }
         file_content = file_content[pos + 1..].to_vec();
 
-        skip_flag = false;
+       // skip_flag = false;
      }
      else {
         break;
