@@ -116,7 +116,7 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>, io::Error> {
             let mut data_pos = file_content[start_byte..pos].split(|&r| r == ' ' as u8);
             if data_pos.next().ne(&Some("tree".as_bytes())) {
                 result.push(data_pos.clone().last().unwrap().to_vec());
-                // println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));
+                println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));
               
                start_byte = HASH_BYTES;
             }
