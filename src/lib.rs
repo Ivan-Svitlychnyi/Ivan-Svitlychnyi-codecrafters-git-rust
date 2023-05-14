@@ -109,7 +109,7 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>, io::Error> {
 
     let mut result: Vec<Vec<u8>> = Vec::new();
     let mut start_byte = 0;
-    //println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
+   
     loop {
         if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8) {
             let mut data_pos = file_content[start_byte..pos].split(|&r| r == ' ' as u8);
@@ -123,7 +123,7 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>, io::Error> {
                 start_byte = 0;  
             }
             file_content = file_content[pos + 1..].to_vec();
-
+            println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
         } else {
             break;
         }
