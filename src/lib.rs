@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::io;
 use std::io::prelude::*;
+use std::io::stdout;
 use std::str;
 use std::str::FromStr;
 #[allow(unused_imports)]
@@ -55,7 +56,7 @@ fn make_hash(data: &Vec<u8>) -> Result<String, io::Error> {
 }
 
 //********************************************************************************************************** */
-pub fn read_git_object(hash: &str) -> Result<String, io::Error> {
+pub fn read_git_object(hash: &str) -> Result<(), io::Error> {
   
     let (sub_dir, sha_num) = (&hash[..2], &hash[2..]);
     
@@ -68,8 +69,11 @@ pub fn read_git_object(hash: &str) -> Result<String, io::Error> {
     let git_data =  git_data[git_data.len()-1];
     let data_pos = git_data.iter().position(|&r| r == '\x00' as u8).unwrap_or(0);
    // println!("git_data_fin = {:#?}", &git_data);
-    let git_data =  String::from_utf8_lossy(&git_data[data_pos + 1..]).to_string();
-    Ok(git_data)
+   let git_data = &git_data[data_pos + 1..];
+    stdout().write_all(git_data)?;
+  // stdout().write(&['\n' as u8])?;
+   // let git_data =  String::from_utf8_lossy(&git_data[data_pos + 1..]).to_string();
+    Ok(())
 }
 /************************************************************************************************************* */
 pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, io::Error> {

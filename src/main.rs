@@ -21,7 +21,7 @@ fn main() -> Result<()> {
         }
         Commands::CatFile(read_options) => {
             // println!("read-------------------------------");
-            print!("{}", read_git_object(ReadBlobOptions::read(&read_options)?)?)
+           read_git_object(ReadBlobOptions::read(&read_options)?)?;
         }
         Commands::HashObject(file) => {
             println!("create-------------------------------");
