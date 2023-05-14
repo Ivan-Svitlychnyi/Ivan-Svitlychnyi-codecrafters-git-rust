@@ -11,7 +11,13 @@ fn main() -> Result<()> {
     match &cli.command {
         Commands::Init => {
             println!("Init--------------------------------");
-            git_init()?;
+            if let Err(err) = git_init() {
+                eprintln!("ERROR: {}", err);
+                err.chain().skip(1).for_each(|cause| eprintln!("because: {}", cause));
+                std::process::exit(1);
+            }
+            
+           // git_init()?;
         }
         Commands::CatFile(read_options) => {
             // println!("read-------------------------------");
@@ -42,11 +48,7 @@ fn main() -> Result<()> {
         Commands::Clone(args) => {
             //  println!("clone-------------------------------");
 
-            if let Err(err) = clone_repo(CloneRepOptions::read(&args)?){
-                eprintln!("ERROR in clone repo: {}", err);
-                err.chain().skip(1).for_each(|cause| eprintln!("because: {}", cause));
-                std::process::exit(1);
-            }
+            clone_repo(CloneRepOptions::read(&args)?)?;
 
         } 
     }

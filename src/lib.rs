@@ -18,7 +18,8 @@ use std::str::FromStr;
 use anyhow::{Context, Result};
 pub mod cli;
 /******************************************************************************************************** */
-pub fn git_init() -> Result<String, io::Error> {
+pub fn git_init() -> Result<String> {
+    fs::create_dir(".git")?;
     fs::create_dir(".git")?;
     fs::create_dir(".git/objects")?;
     fs::create_dir(".git/refs")?;
