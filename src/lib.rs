@@ -117,8 +117,9 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>, io::Error> {
                 result.push(data_pos.clone().last().unwrap().to_vec());
                 // println!("result = {:#?}", String::from_utf8(result.last().unwrap().to_vec()));
               
-                start_byte = HASH_BYTES;
+               
             }
+            start_byte = HASH_BYTES;
             file_content = file_content[pos + 1..].to_vec();
 
         } else {
@@ -127,6 +128,7 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>, io::Error> {
     }
 
     Ok(result)
+
 }
 /******************************************************************************************************************* */
 pub fn write_tree(file_path: &str) -> Result<String> {
