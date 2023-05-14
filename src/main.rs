@@ -35,6 +35,7 @@ fn main() -> Result<()> {
             for s in result {
                 //println!("{}", String::from_utf8(s)?);
                 stdout().write_all(s.as_slice())?;
+                stdout().write(&['\n' as u8])?;
             }
         }
         Commands::WriteTree => {
