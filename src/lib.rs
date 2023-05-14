@@ -20,7 +20,6 @@ pub mod cli;
 /******************************************************************************************************** */
 pub fn git_init() -> Result<String> {
     fs::create_dir(".git")?;
-    fs::create_dir(".git")?;
     fs::create_dir(".git/objects")?;
     fs::create_dir(".git/refs")?;
     fs::write(".git/HEAD", "ref: refs/heads/master\n")?;
