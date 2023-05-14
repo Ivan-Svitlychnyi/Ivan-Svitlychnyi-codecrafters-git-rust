@@ -44,9 +44,7 @@ fn main() -> Result<()> {
         Commands::Clone(args) => {
             //  println!("clone-------------------------------");
             clone_repo(CloneRepOptions::read(&args)?)?;
-        } //    _=> {
-          //     panic!("enter the arguments!");
-          //    }
+        } 
     }
     Ok(())
 }

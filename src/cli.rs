@@ -140,9 +140,7 @@ impl CommitTreeOptions {
 //-- Clone repo----------------------------------------------------------------------------------
 #[derive(Args)]
 pub struct CloneRepOptions {
-    #[arg(long = "clone", group = "input")]
     pub url: Option<String>,
-    #[arg(group = "input")]
     pub dir: Option<String>,
 }
 
