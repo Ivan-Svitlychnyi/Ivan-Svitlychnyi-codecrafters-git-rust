@@ -287,7 +287,7 @@ fn write_git_object_target_dir(data_type: &str, content: &str, target_dir: &str)
     Ok(hex_result)
 }
 /************************************************************************************************************************ */
-fn create_dirs(target_dir: &String) -> Result<(), io::Error> {
+fn _create_dirs(target_dir: &String) -> Result<(), io::Error> {
     fs::create_dir(&target_dir)?;
 
     fs::create_dir(target_dir.clone() + "/.git")?;
