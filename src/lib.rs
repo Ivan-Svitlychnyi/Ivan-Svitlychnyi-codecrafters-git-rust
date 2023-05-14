@@ -115,7 +115,7 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>> {
     if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8) {
         let mut data_pos = file_content[..pos].split(|&r| r == ' ' as u8);
 
-        if data_pos.next().ne(&Some("tree".as_bytes())) {
+        if data_pos.next().ne(&Some("ptree".as_bytes())) {
 
             return Err(anyhow!("Not tree object"));
         }
