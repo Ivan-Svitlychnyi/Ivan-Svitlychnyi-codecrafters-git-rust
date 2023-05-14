@@ -124,32 +124,52 @@ impl CommitTreeOptions {
                     return Ok((hash, print, message));
                 }
                 else {
-                    return Err(ArgsReadError::CommitTreeCommandError);
+                    return Err(ArgsReadError::CommitTreeCommandErrorArgThree);
             }
             }
             else {
-            return Err(ArgsReadError::CommitTreeCommandError);
+            return Err(ArgsReadError::CommitTreeCommandErrorArgTwo);
         }
         }
         else {
-        Err(ArgsReadError::CommitTreeCommandError)
+        Err(ArgsReadError::CommitTreeCommandErrorArgOne)
     }
     }
 }
 //-----------------------------------------------------------------------------------------------
+//-- Clone repo----------------------------------------------------------------------------------
 #[derive(Args)]
 pub struct CloneRepOptions {
+    #[arg(long = "clone", group = "input")]
     pub url: Option<String>,
+    #[arg(group = "input")]
     pub dir: Option<String>,
 }
 
-//-----------Error handling-----------------------------------------------
+impl CloneRepOptions{
+    pub fn read(&self) -> Result<(&str, &str), ArgsReadError> {
+        if let Some(url) = self.url.as_deref() {
+            if let Some(dir) = self.dir.as_deref() {
+                return Ok((url,dir));
+            }   
+           return  Err(ArgsReadError::CloneRepCommandErrorArgOne);
+    }
+    Err(ArgsReadError::CloneRepCommandErrorArgOne)
+}
+}
+
+
+//-------------------------------------------------------------------------------------------
+//-----------Error handling------------------------------------------------------------------
 pub enum ArgsReadError {
     ReadBlobCommandError,
     CreateBlobCommandError,
     ReadTreeCommandError,
-    CommitTreeCommandError,
-    CloneRepCommandError,
+    CommitTreeCommandErrorArgOne,
+    CommitTreeCommandErrorArgTwo,
+    CommitTreeCommandErrorArgThree,
+    CloneRepCommandErrorArgOne,
+    CloneRepCommandErrorArgTwo,
 }
 
 
@@ -167,12 +187,16 @@ impl Error for ArgsReadError {}
 impl ArgsReadError {
     fn message(&self) -> &str {
         match self {
-            Self::ReadBlobCommandError => "Read a blob object args parsing error",
-            Self::CreateBlobCommandError => "Create a blob object args parsing error",
-            Self::ReadTreeCommandError => "Read a tree object args parsing error",
-            Self::CommitTreeCommandError=> "Commit a tree object arg one parsing error",
-            Self::CloneRepCommandError => "Commit a tree object args parsing error",
+            Self::ReadBlobCommandError => "ERROR: Read a blob object: blob sha not found",
+            Self::CreateBlobCommandError => "ERROR: Create a blob objec: blob sha not found",
+            Self::ReadTreeCommandError => "ERROR: Read a tree object: tree sha not found",
+            Self::CommitTreeCommandErrorArgOne=> "ERROR: Commit a tree object: tree sha not found",
+            Self::CommitTreeCommandErrorArgTwo=> "ERROR: Commit a tree object: commit sha not found",
+            Self::CommitTreeCommandErrorArgThree=> "ERROR: Commit a tree object: message not found",
+            Self::CloneRepCommandErrorArgOne => "ERROR: Clone a repository: url not found",
+            Self::CloneRepCommandErrorArgTwo => "ERROR: Clone a repository: dir not found",
         }
     }
 }
+//---------------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------

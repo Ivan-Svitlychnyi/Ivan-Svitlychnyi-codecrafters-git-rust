@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
-use git_starter_rust::cli::{Cli, Commands, CreateBlobOptions, ReadBlobOptions, ReadTreeOptions, CommitTreeOptions};
+use git_starter_rust::cli::{Cli, Commands, CreateBlobOptions, ReadBlobOptions, ReadTreeOptions, CommitTreeOptions, CloneRepOptions};
 use git_starter_rust::*;
 //use std::env;
 use clap::Parser;
@@ -43,7 +43,7 @@ fn main() -> Result<()> {
     
         Commands::Clone(args) => {
             //  println!("clone-------------------------------");
-            clone_repo(&args)?;
+            clone_repo(CloneRepOptions::read(&args)?)?;
         } //    _=> {
           //     panic!("enter the arguments!");
           //    }

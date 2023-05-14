@@ -1,6 +1,5 @@
 
 use bytes::BufMut;
-use cli::CloneRepOptions;
 use flate2::read::ZlibDecoder;
 use flate2::write::ZlibEncoder;
 use flate2::Compression;
@@ -305,16 +304,13 @@ fn create_dirs(target_dir: &String) -> Result<(), io::Error> {
     Ok(())
 }
 /************************************************************************************************************************** */
-pub fn clone_repo(CloneRepOptions{
-    url,
-    dir,
-}: &CloneRepOptions) -> Result<()> {
+pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
     // ["/tmp/codecrafters-git-target/release/git-starter-rust",
     // "clone",
     // "https://github.com/codecrafters-io/git-sample-2",
     // "test_dir",]
 
-    let (url, target_dir) = (url.as_deref().unwrap(), dir.as_deref().unwrap());
+    //let (url, target_dir) = (url.as_deref().unwrap(), dir.as_deref().unwrap());
 
     create_dirs(&target_dir.to_string())?;
     //------------------------------------------------------------------------------------
