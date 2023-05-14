@@ -305,12 +305,6 @@ fn create_dirs(target_dir: &String) -> Result<(), io::Error> {
 }
 /************************************************************************************************************************** */
 pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
-    // ["/tmp/codecrafters-git-target/release/git-starter-rust",
-    // "clone",
-    // "https://github.com/codecrafters-io/git-sample-2",
-    // "test_dir",]
-
-    //let (url, target_dir) = (url.as_deref().unwrap(), dir.as_deref().unwrap());
 
     create_dirs(&target_dir.to_string())?;
     //------------------------------------------------------------------------------------

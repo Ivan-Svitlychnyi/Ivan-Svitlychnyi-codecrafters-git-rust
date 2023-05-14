@@ -54,12 +54,12 @@ pub enum Commands {
 pub struct ReadBlobOptions {
     /// print
     #[arg(short = 'p')]
-    print: Option<String>,
+    blob_sha: Option<String>,
 }
 impl ReadBlobOptions {
     pub fn read(&self) -> Result<&str, ArgsReadError> {
-        if let Some(file) = self.print.as_deref() {
-            return Ok(&file);
+        if let Some(blob_sha) = self.blob_sha.as_deref() {
+            return Ok(&blob_sha);
         }
         Err(ArgsReadError::ReadBlobCommandError)
     }
@@ -72,13 +72,13 @@ impl ReadBlobOptions {
 pub struct CreateBlobOptions {
     //Create a blob object
     #[arg(short = 'w')]
-    file: Option<String>,
+    blob_sha: Option<String>,
 }
 
 impl CreateBlobOptions {
     pub fn read(&self) -> Result<&str, ArgsReadError> {
-        if let Some(file) = self.file.as_deref() {
-            return Ok(&file);
+        if let Some(blob_sha) = self.blob_sha.as_deref() {
+            return Ok(&blob_sha);
         }
         Err(ArgsReadError::CreateBlobCommandError)
     }
@@ -89,13 +89,13 @@ impl CreateBlobOptions {
 pub struct ReadTreeOptions {
     //Create a blob object
     #[arg(long = "name-only")]
-    hash: Option<String>,
+    tree_sha: Option<String>,
 }
 
 impl ReadTreeOptions {
     pub fn read(&self) -> Result<&str, ArgsReadError> {
-        if let Some(hash) = self.hash.as_deref() {
-            return Ok(&hash);
+        if let Some(tree_sha) = self.tree_sha.as_deref() {
+            return Ok(&tree_sha);
         }
         Err(ArgsReadError::ReadTreeCommandError)
     }
@@ -104,24 +104,24 @@ impl ReadTreeOptions {
 //---Create a commit-------------------------------------------------------------------------------
 #[derive(Args)]
 pub struct CommitTreeOptions {
-    pub hash: Option<String>,
+    tree_sha: Option<String>,
     #[arg(short = 'p')]
-    pub print: Option<String>,
+    commit_sha: Option<String>,
     #[arg(short = 'm')]
-    pub message: Option<String>,
+    message: Option<String>,
 }
 
 impl CommitTreeOptions {
     pub fn read(&self) -> Result<(&str, &str, &str), ArgsReadError> {
        // println!("In read");
 
-        if let Some(hash) = self.hash.as_deref() {
+        if let Some(tree_sha) = self.tree_sha.as_deref() {
            // println!("In read Some 1");
-            if let Some(print) = self.print.as_deref() {
+            if let Some(commit_sha) = self.commit_sha.as_deref() {
                // println!("In read Some 2");
                 if let Some(message) = self.message.as_deref() {
                   //  println!("In read Some 3");
-                    return Ok((hash, print, message));
+                    return Ok((tree_sha, commit_sha, message));
                 }
                 else {
                     return Err(ArgsReadError::CommitTreeCommandErrorArgThree);
@@ -140,8 +140,8 @@ impl CommitTreeOptions {
 //-- Clone repo----------------------------------------------------------------------------------
 #[derive(Args)]
 pub struct CloneRepOptions {
-    pub url: Option<String>,
-    pub dir: Option<String>,
+    url: Option<String>,
+    dir: Option<String>,
 }
 
 impl CloneRepOptions{
@@ -150,7 +150,7 @@ impl CloneRepOptions{
             if let Some(dir) = self.dir.as_deref() {
                 return Ok((url,dir));
             }   
-           return  Err(ArgsReadError::CloneRepCommandErrorArgOne);
+           return  Err(ArgsReadError::CloneRepCommandErrorArgTwo);
     }
     Err(ArgsReadError::CloneRepCommandErrorArgOne)
 }
