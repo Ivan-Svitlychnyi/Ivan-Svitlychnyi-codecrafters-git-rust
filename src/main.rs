@@ -5,18 +5,19 @@ use git_starter_rust::*;
 //use std::env;
 use clap::Parser;
 use std::fs;
+use std::io::{stdout, Write};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match &cli.command {
         Commands::Init => {
-            println!("Init--------------------------------");
-            if let Err(err) = git_init() {
-                eprintln!("ERROR in Init operation: {}", err);
-                std::process::exit(1);
-            }
+           // println!("Init--------------------------------");
+          //  if let Err(err) = git_init() {
+            //    eprintln!("ERROR in Init operation: {}", err);
+             //   std::process::exit(1);
+           // }
             
-           // git_init()?;
+             git_init()?;
         }
         Commands::CatFile(read_options) => {
             // println!("read-------------------------------");
@@ -32,7 +33,8 @@ fn main() -> Result<()> {
             //  println!("read tree-------------------------------");
             let result = read_tree(ReadTreeOptions::read(&hash)?)?;
             for s in result {
-                println!("{}", String::from_utf8(s)?);
+                //println!("{}", String::from_utf8(s)?);
+                stdout().write_all(s.as_slice())?;
             }
         }
         Commands::WriteTree => {
