@@ -287,7 +287,7 @@ fn write_git_object_target_dir(data_type: &str, content: &str, target_dir: &str)
     Ok(hex_result)
 }
 /************************************************************************************************************************ */
-fn _create_dirs(target_dir: &String) -> Result<(), io::Error> {
+fn create_dirs(target_dir: &String) -> Result<(), io::Error> {
     fs::create_dir(&target_dir)?;
 
     fs::create_dir(target_dir.clone() + "/.git")?;
@@ -306,7 +306,7 @@ fn _create_dirs(target_dir: &String) -> Result<(), io::Error> {
 /************************************************************************************************************************** */
 pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
 
-    //create_dirs(&target_dir.to_string())?;
+    create_dirs(&target_dir.to_string())?;
     //------------------------------------------------------------------------------------
     let url_adr = url.to_owned() + &"/info/refs?service=git-upload-pack".to_string();
     let pack_hash = get_pack_hash(&url_adr)?;
@@ -414,6 +414,8 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
 
     Ok(())
 }
+
+
 
 //************************************************************************************************************************* */
 fn identify(delta: &[u8], base: &String) -> Result<String, io::Error> {
