@@ -102,9 +102,7 @@ pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, 
 pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>> {
     const HASH_BYTES: usize = 20;
 
-    let (sub_dir, sha_num) = (&file_path[..2], &file_path[2..]);
-
-    let full_path = format!(".git/objects/{sub_dir}/{sha_num}");
+    let full_path = format!(".git/objects/{}/{}", &file_path[..2], &file_path[2..]);
 
     let mut file_content = zlib_decode(&fs::read(&full_path)?)?;
 
@@ -113,16 +111,17 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>> {
     //println!("file_content in = {:#?}", &String::from_utf8_lossy(&file_content[..]));
 
     if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8) {
+
         let mut data_pos = file_content[..pos].split(|&r| r == ' ' as u8);
 
-        if data_pos.next().ne(&Some("ptree".as_bytes())) {
+        if data_pos.next().ne(&Some("tree".as_bytes())) {
 
             return Err(anyhow!("Not tree object"));
         }
         file_content = file_content[pos + 1..].to_vec();
     }
     else {
-        return Err(anyhow!("Not posible split data")); 
+        return Err(anyhow!("Do not posible to split data")); 
     }
     loop {
         if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8) {
@@ -130,7 +129,7 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>> {
                 result.push(data_pos.clone().last().unwrap().to_vec());
               
             file_content = file_content[pos + 1+ HASH_BYTES..].to_vec();
-           // println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
+            println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
         } else {
             break;
         }
