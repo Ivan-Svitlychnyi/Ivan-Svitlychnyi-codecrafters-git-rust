@@ -224,7 +224,7 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>> {
     let delta_len = delta.len();
     // println!(" delta_len: {:?}", &delta_len);
     while seek < delta_len {
-        let instr_byte = delta[seek];
+        let instr_byte = *delta.get(seek).ok_or(anyhow!("Data on this index do not exist!"))?;
         seek += 1;
         //  println!(" instr_byte: {:?}", &instr_byte);
 
@@ -260,7 +260,7 @@ for n in 0..8 {
 
     //  println!("b len_key:{}", b);
     if b == 1 {
-        len_bytes[n] = *data.get(*seek).ok_or(anyhow!("Name not found"))?;
+        len_bytes[n] = *data.get(*seek).ok_or(anyhow!("Data on this index do not exist!"))?;
         //  println!("len_bytes delta[seek]{}", delta[seek]);
         *seek += 1
     }
