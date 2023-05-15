@@ -49,7 +49,6 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
     println!("num: {:?}", num);
     let data_bytes: Vec<u8> = res_data[HASH_BYTES..res_data_size].try_into()?;
     // println!("data_bytes: {:?}", data_bytes);
-
     let mut objs = HashMap::new();
     let mut seek = 0;
     for _ in 0..num {
