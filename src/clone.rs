@@ -88,8 +88,8 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
             objs.insert(hex_result, (v_git_data, obj_type));
 
-            //seek += git_data.total_in() as usize;
-            seek +=  total_in;
+            seek += git_data.total_in() as usize;
+           // seek +=  total_in;
         } else {
 
             let k = &data_bytes.get(seek..seek + HASH_BYTES).ok_or(anyhow!("Data in indexing area do not exist!"))?;
@@ -295,7 +295,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
 
     let mut tree = v_git_data.get(pos + 1..).ok_or(anyhow!("Data not found"))?;
 
-    while tree.len() > 0 {
+    for _ in 0..tree.len() {
 
         let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
         // println!("position: {:#?}", &pos);
