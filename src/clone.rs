@@ -260,7 +260,7 @@ for n in 0..8 {
 
     //  println!("b len_key:{}", b);
     if b == 1 {
-        len_bytes[n] = data[*seek];
+        len_bytes[n] = *data.get(*seek).ok_or(anyhow!("Name not found"))?;
         //  println!("len_bytes delta[seek]{}", delta[seek]);
         *seek += 1
     }
@@ -287,7 +287,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
 
     let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
 
-    let mut tree = &v_git_data[pos + 1..];
+    let mut tree = v_git_data.get(pos + 1..).ok_or(anyhow!("Data not found"))?;
 
     while tree.len() > 0 {
 
@@ -297,7 +297,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
         let mut mode_name = mode_name.split(|&num| num == ' ' as u8);
         //println!("mode_name: {:#?}", &mode_name);
         let mode = mode_name.next().ok_or(anyhow!("Mode not found"))?;
-        let name = mode_name.next().ok_or(anyhow!("Element not found"))?;
+        let name = mode_name.next().ok_or(anyhow!("Name not found"))?;
 
         tree = &tree[pos + 1..];
 
