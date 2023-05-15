@@ -115,21 +115,21 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
             seek += delta.total_in() as usize;
         }
     }
-    // let git_path =
-    //     target_dir_git_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
+    let git_path =
+        target_dir_git_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
 
-    // let git_data = fs::read(git_path)?;
-    // let v_delta = zlib_decode(&git_data[..].to_vec())?;
+    let git_data = fs::read(git_path)?;
+    let v_delta = zlib_decode(&git_data[..].to_vec())?;
 
-    // let data = v_delta
-    //     .split(|b| *b == '\n' as u8)
-    //     .next()
-    //     .unwrap()
-    //     .split(|b| *b == ' ' as u8);
-    // let tree_sha = data.clone().last().unwrap();
-    // // println!("tree_sha: {:?}", &tree_sha);
-    // let tree_sha = String::from_utf8_lossy(tree_sha);
-    // checkout_tree(&tree_sha, &target_dir, &target_dir_git_dir)?;
+    let data = v_delta
+        .split(|b| *b == '\n' as u8)
+        .next()
+        .unwrap()
+        .split(|b| *b == ' ' as u8);
+    let tree_sha = data.clone().last().unwrap();
+    // println!("tree_sha: {:?}", &tree_sha);
+    let tree_sha = String::from_utf8_lossy(tree_sha);
+    checkout_tree(&tree_sha, &target_dir, &target_dir_git_dir)?;
 
     Ok(())
 }
