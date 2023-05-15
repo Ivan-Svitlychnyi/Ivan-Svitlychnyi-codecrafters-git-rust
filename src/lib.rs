@@ -1,3 +1,4 @@
+use anyhow::bail;
 #[allow(unused_imports)]
 use anyhow::{anyhow, Error, Result as AnyResult};
 #[allow(unused_imports)]
@@ -60,13 +61,13 @@ pub fn read_git_object(hash: &str) -> Result<()> {
     let full_path = format!(".git/objects/{}/{}", &hash[..2], &hash[2..]);
     let git_data = zlib_decode(&fs::read(full_path)?)?;
     // println!("git_data = {:#?}", &git_data);
+
     let git_data: Vec<&[u8]> = git_data[..].split(|c| *c == '/' as u8).collect();
-    let git_data = git_data.last().unwrap();
-    
+    let git_data = git_data.last().ok_or(anyhow!("Element not found"))?;
     let data_pos = git_data
         .iter()
         .position(|&r| r == '\x00' as u8)
-        .unwrap_or(0);
+        .ok_or(anyhow!("Position not found"))?;
     // println!("git_data_fin = {:#?}", &git_data);
 
     let git_data = &git_data[data_pos + 1..];
@@ -119,14 +120,15 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>> {
         }
         file_content = file_content[pos + 1..].to_vec();
     } else {
-        return Err(anyhow!("Do not posible to split data"));
+        bail!("Do not posible to split data");
     }
     loop {
         if let Some(pos) = file_content[..].iter().position(|&r| r == '\x00' as u8) {
             let data_pos = file_content[..pos].split(|&r| r == ' ' as u8);
             result.push(data_pos.clone().last().unwrap().to_vec());
             // println!("file_content = {:#?}", &String::from_utf8_lossy(&file_content[..]));
-            file_content = file_content[pos + 1 + HASH_BYTES..].to_vec();
+
+            file_content = file_content.get(pos + 1 + HASH_BYTES..).ok_or(anyhow!("Element not found"))?.to_vec();
         } else {
             break;
         }
