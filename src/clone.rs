@@ -201,7 +201,7 @@ fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_dir: &
     let mut obj_write_data: Vec<u8> = Vec::new();
     obj_write_data.put(data_type[..].as_bytes());
     obj_write_data.put_u8(' ' as u8);
-    obj_write_data.put(data_type.len().to_string().as_bytes());
+    obj_write_data.put(content.len().to_string().as_bytes());
     obj_write_data.put_u8('\0' as u8);
     obj_write_data.put(content.as_slice());
 
