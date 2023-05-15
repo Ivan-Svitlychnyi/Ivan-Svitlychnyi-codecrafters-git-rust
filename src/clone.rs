@@ -87,9 +87,11 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
             seek += git_data.total_in() as usize;
         } else {
+
             if data_bytes[seek..].len() < HASH_BYTES{
                 return Err(anyhow!("Data length is to short"));
             }
+
             let k = &data_bytes[seek..seek + HASH_BYTES];
 
             // println!("k data: {:#?}", k);
@@ -201,16 +203,18 @@ fn post_to_git_data(url: &str, data: &str) -> Result<bytes::Bytes> {
 }
 
 //************************************************************************************************************************* */
-fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
+fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>> {
 
     const TYPE_THREE_BITES_EXTRACT: u8 = 0b01110000;
     const  OFFSET_FOUR_BITES_EXTRACT: u8 = 0b00001111;
     let mut seek: usize = 0;
     // println!("delta: {:#?}", delta);
+    //source size
     while delta[seek] > 128 {
         seek += 1;
     }
     seek += 1;
+    //target size
     while delta[seek] > 128 {
         seek += 1;
     }
@@ -228,41 +232,42 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
         if instr_byte >= 128 {
             let offset_key = instr_byte &  OFFSET_FOUR_BITES_EXTRACT;
 
-            let mut offset_bytes: [u8; 8] = [0; 8];
+            let offset = decode_usize(offset_key, &mut seek, delta)?;
+            // let mut offset_bytes: [u8; 8] = [0; 8];
 
-            for n in 0..8 {
-                let b = offset_key >> n & 1;
+            // for n in 0..8 {
+            //     let b = offset_key >> n & 1;
 
-                // println!("b offset_key: {}", b);
-                if b == 1 {
-                    offset_bytes[n] = delta[seek];
-                    //  println!("offset_bytes delta[seek]:{}", delta[seek]);
-                    seek += 1
-                }
-            }
-            // println!("offset_bytes: {:?}", &offset_bytes);
+            //     // println!("b offset_key: {}", b);
+            //     if b == 1 {
+            //         offset_bytes[n] = delta[seek];
+            //         //  println!("offset_bytes delta[seek]:{}", delta[seek]);
+            //         seek += 1
+            //     }
+            // }
+            // // println!("offset_bytes: {:?}", &offset_bytes);
 
-            let offset = usize::from_le_bytes(offset_bytes);
+            // let offset = usize::from_le_bytes(offset_bytes);
             // println!("offset: {:?}", &offset);
 
             let len_key = (instr_byte & TYPE_THREE_BITES_EXTRACT) >> 4;
+            let len_int = decode_usize(len_key, &mut seek, delta)?;
+            // let mut len_bytes: [u8; 8] = [0; 8];
+            // for n in 0..8 {
+            //     let b = len_key >> n & 1;
 
-            let mut len_bytes: [u8; 8] = [0; 8];
-            for n in 0..8 {
-                let b = len_key >> n & 1;
+            //     //  println!("b len_key:{}", b);
+            //     if b == 1 {
+            //         len_bytes[n] = delta[seek];
+            //         //  println!("len_bytes delta[seek]{}", delta[seek]);
+            //         seek += 1
+            //     }
+            // }
 
-                //  println!("b len_key:{}", b);
-                if b == 1 {
-                    len_bytes[n] = delta[seek];
-                    //  println!("len_bytes delta[seek]{}", delta[seek]);
-                    seek += 1
-                }
-            }
-
-            let len_int = usize::from_le_bytes(len_bytes);
+            // let len_int = usize::from_le_bytes(len_bytes);
 
             //  println!("len_int: {:?}", &len_int);
-            content.extend_from_slice(&base[offset..(offset + len_int)]);
+            content.extend_from_slice(&base.get(offset..(offset + len_int)).ok_or(anyhow!("No data in indexing area"))?);
 
             // println!("content : {:?}", &content );
         } else {
@@ -270,7 +275,7 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
             let num_bytes = usize::from(instr_byte);
 
             // println!("seek usize:{}", seek);
-            content.extend_from_slice(&delta[seek..(seek + num_bytes)]);
+            content.extend_from_slice(&delta.get(seek..(seek + num_bytes)).ok_or(anyhow!("No data in indexing area"))?);
 
             seek += num_bytes;
         }
@@ -278,7 +283,29 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
     Ok(content)
 }
 /*************************************************************************************************************************** */
-fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std::io::Error> {
+fn decode_usize(data_key:u8, seek: &mut usize, data:&[u8])-> Result<usize>{
+
+let mut len_bytes: [u8; 8] = [0; 8];
+
+for n in 0..8 {
+    let b = data_key >> n & 1;
+
+    //  println!("b len_key:{}", b);
+    if b == 1 {
+        len_bytes[n] = data[*seek];
+        //  println!("len_bytes delta[seek]{}", delta[seek]);
+        *seek += 1
+    }
+}
+let len_usize = usize::from_le_bytes(len_bytes);
+
+Ok(len_usize)
+
+}
+
+
+/*************************************************************************************************************************** */
+fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
     println!("target_dir: {target_dir}");
     println!("file_path: {file_path}");
     let target_dir = Rc::new(target_dir);
@@ -307,9 +334,9 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
 
         tree = &tree[pos + 1..];
 
-        let sha = &tree[..20];
+        let sha = &tree.get(..20).ok_or(anyhow!("No data in indexing area"))?;
 
-        tree = &tree[20..];
+        tree = &tree.get(20..).ok_or(anyhow!("No data in indexing area"))?;
 
         //println!("tree: {:#?}", &tree);
 
