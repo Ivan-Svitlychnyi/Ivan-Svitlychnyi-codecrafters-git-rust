@@ -300,10 +300,11 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
     println!("target_dir: {target_dir}");
     println!("file_path: {file_path}");
     let target_dir = Rc::new(target_dir);
+
     fs::create_dir_all(&file_path)?;
 
     let git_data =
-        fs::read(target_dir.to_string() + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..]))?;
+        fs::read(target_dir.to_string() + &format!("{}/{}", &sha[..2], &sha[2..]))?;
 
     let v_git_data = zlib_decode(&git_data[..].to_vec())?;
 
