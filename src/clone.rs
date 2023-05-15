@@ -15,6 +15,9 @@ use std::str;
 
 /************************************************************************************************************************** */
 pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
+
+    const HASH_BYTES: usize = 20;
+   // const type: bytes = 000100010010;
     create_dirs(&target_dir)?;
     let target_dir_git_dir = target_dir.to_owned() + "/.git/objects/";
 
@@ -30,7 +33,12 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
     //---------------------------------------------------------------------------------------
 
-    let res_data_size = res_data.len() - 20;
+    let res_data_size = res_data.len();
+
+    if res_data_size <= HASH_BYTES{
+        return Err(anyhow!("Data length is to short. Size: {:?}", res_data_size));
+    }
+    let res_data_size = res_data_size - HASH_BYTES;
 
     println!("res_data_size: {:?}", res_data_size);
 
@@ -39,17 +47,17 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
     //  println!("entries_bytes: {:#?}", entries_bytes);
     let num = u32::from_be_bytes(entries_bytes);
     println!("num: {:?}", num);
-    let data_bytes: Vec<u8> = res_data[20..res_data_size].try_into()?;
+    let data_bytes: Vec<u8> = res_data[HASH_BYTES..res_data_size].try_into()?;
     // println!("data_bytes: {:?}", data_bytes);
 
     let mut objs = HashMap::new();
     let mut seek = 0;
-   // let mut objs_count = 0;
-
     for _ in 0..num {
-       // objs_count += 1;
+   
         let first = data_bytes[seek];
+        println!("first: {:?}", first);
         let mut obj_type: usize = ((first & 112) >> 4).into();
+        println!("obj_type: {:?}", obj_type);
         //  println!("obj_type: {:?}", obj_type);
         while data_bytes[seek] > 128 {
             seek += 1;
@@ -79,13 +87,13 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
             seek += git_data.total_in() as usize;
         } else {
-            let k = &data_bytes[seek..seek + 20];
+            let k = &data_bytes[seek..seek + HASH_BYTES];
             // println!("k data: {:#?}", k);
             let k = hex::encode(k);
             //  println!("k: {:#?}", k);
             let (base, elem_num) = objs[&k].to_owned();
 
-            seek += 20;
+            seek += HASH_BYTES;
 
             let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_delta = Vec::new();
