@@ -103,7 +103,7 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
             let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_delta = Vec::new();
-            let total_in = delta.read_to_end(&mut v_delta)?;
+            delta.read_to_end(&mut v_delta)?;
 
             let content = undeltified(&v_delta, &base)?;
             obj_type = elem_num;
@@ -114,8 +114,8 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content, obj_type));
 
-           // seek += delta.total_in() as usize;
-            seek += total_in;
+            seek += delta.total_in() as usize;
+           
         }
     }
     let git_path =
