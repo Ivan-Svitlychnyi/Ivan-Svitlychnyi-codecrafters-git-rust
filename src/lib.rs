@@ -80,7 +80,7 @@ pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, 
     store.put(file_type[..].as_bytes());
     store.put_u8(' ' as u8);
     store.put(file_data.len().to_string().as_bytes());
-    store.put_u8('\x00' as u8);
+    store.put_u8('\0' as u8);
     store.put(file_data.as_slice());
     /******************************************* */
     //println!("store_vec = {:#?}", &store_vec);
