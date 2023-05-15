@@ -52,7 +52,6 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
     // println!("data_bytes: {:?}", data_bytes);
     let mut objs = HashMap::new();
     let mut seek = 0;
-
     for _ in 0..num {
    
         let first = data_bytes[seek];
@@ -77,11 +76,9 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
         ];
 
         if obj_type < ONE_TO_SIX_GIT_OBJECT_TYPES {
-
             let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_git_data = Vec::new();
-
-            let total_in = git_data.read_to_end(&mut v_git_data)?;
+            git_data.read_to_end(&mut v_git_data)?;
 
             let hex_result =
                 write_git_object_target_dir(data_type[obj_type], &v_git_data, &target_dir_git_dir)?;
@@ -89,22 +86,21 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
             objs.insert(hex_result, (v_git_data, obj_type));
 
             seek += git_data.total_in() as usize;
-           // seek +=  total_in;
         } else {
 
-            let k = &data_bytes.get(seek..seek + HASH_BYTES).ok_or(anyhow!("Data in indexing area do not exist!"))?;
+            if data_bytes[seek..].len() < HASH_BYTES{
+                return Err(anyhow!("Data length is to short"));
+            }
+
+            let k = &data_bytes[seek..seek + HASH_BYTES];
 
             // println!("k data: {:#?}", k);
             let k = hex::encode(k);
             //  println!("k: {:#?}", k);
             let (base, elem_num) = objs[&k].to_owned();
 
-            if data_bytes[seek..].len() < HASH_BYTES{
-                return Err(anyhow!("Data length is to short"));
-            }
             seek += HASH_BYTES;
 
-           
             let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_delta = Vec::new();
             delta.read_to_end(&mut v_delta)?;
@@ -130,9 +126,9 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
     let data = v_delta
         .split(|b| *b == '\n' as u8)
         .next()
-        .ok_or(anyhow!("Data on next index do not exist!"))?
+        .unwrap()
         .split(|b| *b == ' ' as u8);
-    let tree_sha = data.clone().last().ok_or(anyhow!("Data on last position do not exist!"))?;
+    let tree_sha = data.clone().last().unwrap();
     // println!("tree_sha: {:?}", &tree_sha);
     let tree_sha = String::from_utf8_lossy(tree_sha);
     checkout_tree(&tree_sha, &target_dir, &target_dir_git_dir)?;
@@ -167,11 +163,9 @@ fn get_pack_hash(url: &str) -> Result<String> {
         .filter(|c| c.contains("refs/heads/master") && c.contains("003f"))
         .collect::<String>();
     let content = content.split(" ").next().ok_or(anyhow!("Data not found"))?;
-
     if content.len() != 44 {
-        bail!("Data is not a sha");
+        return Err(anyhow!("Data is not a sha"));
     }
-
     let pack_hash = String::from(&content[4..]);
     println!("pack_hash = {}", pack_hash);
     Ok(pack_hash)
@@ -230,7 +224,7 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>> {
     let delta_len = delta.len();
     // println!(" delta_len: {:?}", &delta_len);
     while seek < delta_len {
-        let instr_byte = *delta.get(seek).ok_or(anyhow!("Data on this index do not exist!"))?;
+        let instr_byte = delta[seek];
         seek += 1;
         //  println!(" instr_byte: {:?}", &instr_byte);
 
@@ -266,7 +260,7 @@ for n in 0..8 {
 
     //  println!("b len_key:{}", b);
     if b == 1 {
-        len_bytes[n] = *data.get(*seek).ok_or(anyhow!("Data on this index do not exist!"))?;
+        len_bytes[n] = data[*seek];
         //  println!("len_bytes delta[seek]{}", delta[seek]);
         *seek += 1
     }
@@ -293,9 +287,9 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
 
     let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
 
-    let mut tree = v_git_data.get(pos + 1..).ok_or(anyhow!("Data not found"))?;
+    let mut tree = &v_git_data[pos + 1..];
 
-    for _ in 0..tree.len() {
+    while tree.len() > 0 {
 
         let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
         // println!("position: {:#?}", &pos);
@@ -303,7 +297,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
         let mut mode_name = mode_name.split(|&num| num == ' ' as u8);
         //println!("mode_name: {:#?}", &mode_name);
         let mode = mode_name.next().ok_or(anyhow!("Mode not found"))?;
-        let name = mode_name.next().ok_or(anyhow!("Name not found"))?;
+        let name = mode_name.next().ok_or(anyhow!("Element not found"))?;
 
         tree = &tree[pos + 1..];
 
