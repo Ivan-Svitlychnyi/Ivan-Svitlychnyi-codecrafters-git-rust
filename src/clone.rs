@@ -72,12 +72,12 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
             let mut v_git_data = Vec::new();
             git_data.read_to_end(&mut v_git_data)?;
         
-            #[allow(unsafe_code)]
-            let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
+            //#[allow(unsafe_code)]
+            //let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
      
-            let hex_result = write_git_object_target_dir(data_type[obj_type], &s_git_data, &target_dir)?;
+            let hex_result = write_git_object_target_dir(data_type[obj_type], &v_git_data, &target_dir)?;
 
-            objs.insert(hex_result, (s_git_data, obj_type));
+            objs.insert(hex_result, (v_git_data, obj_type));
 
             seek += git_data.total_in() as usize;
         } else {
@@ -100,7 +100,7 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
       
             let hex_result = write_git_object_target_dir(data_type[obj_type], &content, &target_dir)?;
             // println!("objs k else: {:#?}", hex_result);
-            objs.insert(hex_result, (content.into(), obj_type));
+            objs.insert(hex_result, (content, obj_type));
 
             seek += delta.total_in() as usize;
         }
@@ -185,10 +185,7 @@ fn post_to_git_data(url: &str, data: &str) -> Result<bytes::Bytes> {
     let res_send = res.send()?;
     // println!(" res_send = {:#?}", &res_send);
     if !res_send.status().is_success() {
-        panic!(
-            "Something happened with Response. Status: {:?}",
-            res_send.status()
-        );
+            return Err(anyhow!("Something happened with Response. Status: {:?}", res_send.status()));    
     }
 
     println!("success!");
@@ -199,17 +196,25 @@ fn post_to_git_data(url: &str, data: &str) -> Result<bytes::Bytes> {
 }
 
 /********************************************************************************************************************** */
-fn write_git_object_target_dir(data_type: &str, content: &str, target_dir: &str) -> Result<String, io::Error> {
-    let mut obj_write_data = format!("{} {}\0", data_type, content.len()).to_string();
+fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_dir: &str) -> Result<String, io::Error> {
 
-    obj_write_data += &content;
+    let mut obj_write_data: Vec<u8> = Vec::new();
+    obj_write_data.put(data_type[..].as_bytes());
+    obj_write_data.put_u8(' ' as u8);
+    obj_write_data.put(data_type.len().to_string().as_bytes());
+    obj_write_data.put_u8('\0' as u8);
+    obj_write_data.put(content.as_slice());
+
+   // let mut obj_write_data = format!("{data_type} {}\0", content.len());
+
+   // obj_write_data += &content;
     //-----------------------
-    let hex_result = make_hash(&obj_write_data.as_bytes().to_vec())?;
+    let hex_result = make_hash(&obj_write_data)?;
     // //  println!("hex_result: {:?}", hex_result);
 
     let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
 
-    let compressed = zlib_encode(&obj_write_data.as_bytes().to_vec())?;
+    let compressed = zlib_encode(&obj_write_data)?;
 
     fs::create_dir_all(&f_path)?;
     let f_path = f_path + &hex_result[2..];
@@ -220,7 +225,7 @@ fn write_git_object_target_dir(data_type: &str, content: &str, target_dir: &str)
 }
 
 //************************************************************************************************************************* */
-fn identify(delta: &[u8], base: &str) -> Result<String, io::Error> {
+fn identify(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
     let mut seek: usize = 0;
     // println!("delta: {:#?}", delta);
     while delta[seek] > 128 {
@@ -231,7 +236,7 @@ fn identify(delta: &[u8], base: &str) -> Result<String, io::Error> {
         seek += 1;
     }
     seek += 1;
-    let mut content = String::new();
+    let mut content = Vec::new();
     //content = "".to_string();
   //  println!("content: {:?}", &content);
     let delta_len = delta.len();
@@ -278,7 +283,7 @@ fn identify(delta: &[u8], base: &str) -> Result<String, io::Error> {
             let len_int = usize::from_le_bytes(len_bytes);
 
             //  println!("len_int: {:?}", &len_int);
-            content += &base[offset..(offset + len_int)];
+            content.extend_from_slice(&base[offset..(offset + len_int)]);
 
             // println!("content : {:?}", &content );
         } else {
@@ -288,7 +293,7 @@ fn identify(delta: &[u8], base: &str) -> Result<String, io::Error> {
             let num_bytes = usize::from(num_bytes);
 
            // println!("seek usize:{}", seek);
-            content += &String::from_utf8_lossy(&delta[seek..(seek + num_bytes)]);
+            content.extend_from_slice(&delta[seek..(seek + num_bytes)]);
 
             seek += num_bytes;
         }
