@@ -74,8 +74,11 @@ pub fn read_git_object(hash: &str) -> Result<()> {
     Ok(())
 }
 /************************************************************************************************************* */
-pub fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_dir: &str) -> Result<String, io::Error> {
-
+pub fn write_git_object_target_dir(
+    data_type: &str,
+    content: &Vec<u8>,
+    target_dir: &str,
+) -> Result<String, io::Error> {
     let mut obj_write_data: Vec<u8> = Vec::new();
     obj_write_data.put(data_type[..].as_bytes());
     obj_write_data.put_u8(' ' as u8);
@@ -86,7 +89,7 @@ pub fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_di
     let hex_result = make_hash(&obj_write_data)?;
     // //  println!("hex_result: {:?}", hex_result);
     let compressed = zlib_encode(&obj_write_data)?;
-    
+
     let f_path = target_dir.to_owned() + &format!("{}/", &hex_result[..2]);
 
     fs::create_dir_all(&f_path)?;
@@ -156,7 +159,11 @@ pub fn write_tree(file_path: &PathBuf) -> Result<String> {
         {
             mode = "100644";
             let file_data = fs::read(&dir)?;
-            sha_file = hex::decode(write_git_object_target_dir("blob", &file_data,".git/objects/" )?)?;
+            sha_file = hex::decode(write_git_object_target_dir(
+                "blob",
+                &file_data,
+                ".git/objects/",
+            )?)?;
         } else {
             return Err(anyhow!("This is not relevant path"));
         }
@@ -164,9 +171,13 @@ pub fn write_tree(file_path: &PathBuf) -> Result<String> {
         let mut dir_sha_out: Vec<u8> = Vec::new();
         dir_sha_out.extend_from_slice(&mode.as_bytes());
         dir_sha_out.push(' ' as u8);
-        dir_sha_out.extend_from_slice(&dir.file_name().ok_or(anyhow!("file name is not valid"))?
-        .to_str().ok_or(anyhow!("file name did not convert to str"))?
-        .as_bytes());
+        dir_sha_out.extend_from_slice(
+            &dir.file_name()
+                .ok_or(anyhow!("file name is not valid"))?
+                .to_str()
+                .ok_or(anyhow!("file name did not convert to str"))?
+                .as_bytes(),
+        );
         dir_sha_out.push('\x00' as u8);
         dir_sha_out.extend_from_slice(&sha_file);
         sha_out.extend_from_slice(&dir_sha_out);
@@ -182,9 +193,10 @@ pub fn create_commit(
 ) -> Result<String, io::Error> {
     // let (tree_sha, parent_commit_sha, data) = (hash, print, message);
     let user_metadata = "author Admin <admin@example.com> 1652217488 +0300\ncommitter Name <committer@example.com> 1652224514 +0300".to_string();
-    let content = format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n");
+    let content =
+        format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n");
     //println!("content: {:?}", &content);
-    let sha = write_git_object_target_dir("commit", &mut content.into_bytes(),".git/objects/")?;
+    let sha = write_git_object_target_dir("commit", &mut content.into_bytes(), ".git/objects/")?;
 
     Ok(sha)
 }

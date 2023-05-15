@@ -146,16 +146,14 @@ fn get_pack_hash(url: &str) -> Result<String> {
 
     //println!("body = {:#?}", body);
      
-    let content = body.split("\n").
-    filter(|c| c.contains("refs/heads/master") && c.contains("003f")).collect::<String>();
-    let mut content = content.split(" ");
-    let content = content.nth(0).ok_or(anyhow!("Data not found"))?;
-    println!("content.len() = {:#?}", content.len());
-
+    let content = body.split("\n")
+    .filter(|c| c.contains("refs/heads/master") && c.contains("003f")).collect::<String>();
+    let content = content.split(" ").next().ok_or(anyhow!("Data not found"))?;
+    //let content = content.nth(0).ok_or(anyhow!("Data not found"))?;
+    //println!("content.len() = {:#?}", content.len());
     if content.len() != 44 {
     return Err(anyhow!("Data is not a sha"));
     }
-
     let pack_hash = String::from(&content[4..]);
     println!("pack_hash = {}", pack_hash); 
 
