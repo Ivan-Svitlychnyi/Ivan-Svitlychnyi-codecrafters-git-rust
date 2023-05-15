@@ -2,6 +2,7 @@
 use clap::{Parser, Subcommand};
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
+use std::path::Path;
 //use thiserror::Error;
 use clap::{arg, Args};
 //use std::{iter::zip, str::FromStr};
@@ -74,15 +75,15 @@ impl ReadBlobOptions {
 pub struct CreateBlobOptions {
     //Create a blob object
     #[arg(short = 'w')]
-    blob_sha: Option<String>,
+    file_name: Option<String>,
 }
 
 impl CreateBlobOptions {
     pub fn read(&self) -> Result<&str, ArgsReadError> {
-        if let Some(blob_sha) = self.blob_sha.as_deref() {
-            println!("blob_sha.len(): {}", blob_sha.len());
-            if blob_sha.len() == 40{
-            return Ok(&blob_sha);
+        if let Some(file_name) = self.file_name.as_deref() {
+            let path = Path::new(file_name);
+            if path.is_file(){
+            return Ok(&file_name);
             }
         }
         Err(ArgsReadError::CreateBlobCommandError)
@@ -194,7 +195,7 @@ impl ArgsReadError {
     fn message(&self) -> &str {
         match self {
             Self::ReadBlobCommandError => "ERROR: Read a blob object: blob sha not found",
-            Self::CreateBlobCommandError => "ERROR: Create a blob objec: blob sha not found",
+            Self::CreateBlobCommandError => "ERROR: Create a blob objec: file name not found",
             Self::ReadTreeCommandError => "ERROR: Read a tree object: tree sha not found",
             Self::CommitTreeCommandErrorArgOne=> "ERROR: Commit a tree object: tree sha not found",
             Self::CommitTreeCommandErrorArgTwo=> "ERROR: Commit a tree object: commit sha not found",
