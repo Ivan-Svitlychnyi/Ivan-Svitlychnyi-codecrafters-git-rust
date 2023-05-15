@@ -233,40 +233,8 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>> {
             let offset_key = instr_byte &  OFFSET_FOUR_BITES_EXTRACT;
 
             let offset = decode_usize(offset_key, &mut seek, delta)?;
-            // let mut offset_bytes: [u8; 8] = [0; 8];
-
-            // for n in 0..8 {
-            //     let b = offset_key >> n & 1;
-
-            //     // println!("b offset_key: {}", b);
-            //     if b == 1 {
-            //         offset_bytes[n] = delta[seek];
-            //         //  println!("offset_bytes delta[seek]:{}", delta[seek]);
-            //         seek += 1
-            //     }
-            // }
-            // // println!("offset_bytes: {:?}", &offset_bytes);
-
-            // let offset = usize::from_le_bytes(offset_bytes);
-            // println!("offset: {:?}", &offset);
-
             let len_key = (instr_byte & TYPE_THREE_BITES_EXTRACT) >> 4;
             let len_int = decode_usize(len_key, &mut seek, delta)?;
-            // let mut len_bytes: [u8; 8] = [0; 8];
-            // for n in 0..8 {
-            //     let b = len_key >> n & 1;
-
-            //     //  println!("b len_key:{}", b);
-            //     if b == 1 {
-            //         len_bytes[n] = delta[seek];
-            //         //  println!("len_bytes delta[seek]{}", delta[seek]);
-            //         seek += 1
-            //     }
-            // }
-
-            // let len_int = usize::from_le_bytes(len_bytes);
-
-            //  println!("len_int: {:?}", &len_int);
             content.extend_from_slice(&base.get(offset..(offset + len_int)).ok_or(anyhow!("No data in indexing area"))?);
 
             // println!("content : {:?}", &content );
