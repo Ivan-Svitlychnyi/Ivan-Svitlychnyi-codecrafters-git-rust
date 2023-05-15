@@ -1,25 +1,22 @@
-use reqwest::header::CONTENT_TYPE;
+use flate2::read::ZlibDecoder;
 use reqwest::header::HeaderMap;
 use reqwest::header::HeaderValue;
+use reqwest::header::CONTENT_TYPE;
 use std::collections::HashMap;
 use std::rc::Rc;
-use flate2::read::ZlibDecoder;
 
-use std::fs;
-use std::io;
-use std::io::prelude::*;
-use std::str;
+use crate::*;
 #[allow(unused_imports)]
 use anyhow::{Context, Result};
-use crate::*;
-
-
+use std::fs;
+use std::io;
+//use std::io::prelude::*;
+use std::str;
 
 /************************************************************************************************************************** */
-pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
-    
+pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
     create_dirs(&target_dir)?;
-    let target_dir_git_dir =  target_dir.to_owned() + "/.git/objects/";
+    let target_dir_git_dir = target_dir.to_owned() + "/.git/objects/";
 
     //------------------------------------------------------------------------------------
     let url_adr = url.to_owned() + &"/info/refs?service=git-upload-pack";
@@ -28,10 +25,11 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
     let post_url = url.to_owned() + &"/git-upload-pack";
 
     let data = format!("0032want {pack_hash}\n00000009done\n");
-   
+
     let res_data = post_to_git_data(&post_url, &data)?;
-    
+
     //---------------------------------------------------------------------------------------
+
     let res_data_size = res_data.len() - 20;
 
     println!("res_data_size: {:?}", res_data_size);
@@ -46,10 +44,10 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
 
     let mut objs = HashMap::new();
     let mut seek = 0;
-    let mut objs_count = 0;
+   // let mut objs_count = 0;
 
-    while objs_count != num {
-        objs_count += 1;
+    for _ in 0..num {
+       // objs_count += 1;
         let first = data_bytes[seek];
         let mut obj_type: usize = ((first & 112) >> 4).into();
         //  println!("obj_type: {:?}", obj_type);
@@ -73,9 +71,9 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
             let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_git_data = Vec::new();
             git_data.read_to_end(&mut v_git_data)?;
-    
-            
-            let hex_result = write_git_object_target_dir(data_type[obj_type], &v_git_data, &target_dir_git_dir)?;
+
+            let hex_result =
+                write_git_object_target_dir(data_type[obj_type], &v_git_data, &target_dir_git_dir)?;
 
             objs.insert(hex_result, (v_git_data, obj_type));
 
@@ -88,7 +86,7 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
             let (base, elem_num) = objs[&k].to_owned();
 
             seek += 20;
-           
+
             let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_delta = Vec::new();
             delta.read_to_end(&mut v_delta)?;
@@ -97,32 +95,33 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
             obj_type = elem_num;
             //println!("content else: {:#?}", &content);
             // println!("obj_type else: {:#?}", &obj_type);
-            let hex_result = write_git_object_target_dir(data_type[obj_type], &content, &target_dir_git_dir)?;
+            let hex_result =
+                write_git_object_target_dir(data_type[obj_type], &content, &target_dir_git_dir)?;
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content, obj_type));
 
             seek += delta.total_in() as usize;
         }
     }
-    let git_path = target_dir_git_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
+    let git_path =
+        target_dir_git_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
 
     let git_data = fs::read(git_path)?;
     let v_delta = zlib_decode(&git_data[..].to_vec())?;
 
-   // let s_delta = unsafe { &String::from_utf8_unchecked(v_delta.to_vec()) };
-    let data = v_delta.split(|b| *b == '\n' as u8).next().unwrap().split(|b| *b == ' ' as u8);
+    // let s_delta = unsafe { &String::from_utf8_unchecked(v_delta.to_vec()) };
+    let data = v_delta
+        .split(|b| *b == '\n' as u8)
+        .next()
+        .unwrap()
+        .split(|b| *b == ' ' as u8);
     let tree_sha = data.clone().nth(data.count() - 1).unwrap();
-   // println!("tree_sha: {:?}", &tree_sha);
+    // println!("tree_sha: {:?}", &tree_sha);
     let tree_sha = String::from_utf8_lossy(tree_sha);
-    checkout_tree(
-        &tree_sha,
-        &target_dir,
-        &target_dir_git_dir,
-    )?;
+    checkout_tree(&tree_sha, &target_dir, &target_dir_git_dir)?;
 
     Ok(())
 }
-
 
 /************************************************************************************************************************ */
 fn create_dirs(target_dir: &str) -> Result<(), io::Error> {
@@ -145,20 +144,18 @@ fn get_pack_hash(url: &str) -> Result<String> {
     let body = reqwest::blocking::get(url)?.text()?;
 
     //println!("body = {:#?}", body);
-     
-    let content = body.split("\n")
-    .filter(|c| c.contains("refs/heads/master") && c.contains("003f")).collect::<String>();
+
+    let content = body
+        .split("\n")
+        .filter(|c| c.contains("refs/heads/master") && c.contains("003f"))
+        .collect::<String>();
     let content = content.split(" ").next().ok_or(anyhow!("Data not found"))?;
-    //let content = content.nth(0).ok_or(anyhow!("Data not found"))?;
-    //println!("content.len() = {:#?}", content.len());
     if content.len() != 44 {
-    return Err(anyhow!("Data is not a sha"));
+        return Err(anyhow!("Data is not a sha"));
     }
     let pack_hash = String::from(&content[4..]);
-    println!("pack_hash = {}", pack_hash); 
-
-Ok(pack_hash)   
-   
+    println!("pack_hash = {}", pack_hash);
+    Ok(pack_hash)
 }
 
 /**************************************************************************************************************** */
@@ -169,17 +166,20 @@ fn post_to_git_data(url: &str, data: &str) -> Result<bytes::Bytes> {
         CONTENT_TYPE,
         HeaderValue::from_static("application/x-git-upload-pack-request"),
     );
-   // println!("url = {:#?}", &url);
-   // println!("0032 = {:#?}", &data);
-   // println!("headers = {:#?}", &headers);
+    // println!("url = {:#?}", &url);
+    // println!("0032 = {:#?}", &data);
+    // println!("headers = {:#?}", &headers);
     let client = reqwest::blocking::Client::new();
-   
+
     let res = client.post(url).headers(headers).body(String::from(data));
-   // println!("res = {:#?}", &res);
+    // println!("res = {:#?}", &res);
     let res_send = res.send()?;
     // println!(" res_send = {:#?}", &res_send);
     if !res_send.status().is_success() {
-            return Err(anyhow!("Something happened with Response. Status: {:?}", res_send.status()));    
+        return Err(anyhow!(
+            "Something happened with Response. Status: {:?}",
+            res_send.status()
+        ));
     }
 
     println!("success!");
@@ -203,7 +203,7 @@ fn identify(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
     seek += 1;
     let mut content = Vec::new();
     //content = "".to_string();
-  //  println!("content: {:?}", &content);
+    //  println!("content: {:?}", &content);
     let delta_len = delta.len();
     // println!(" delta_len: {:?}", &delta_len);
     while seek < delta_len {
@@ -252,12 +252,12 @@ fn identify(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
 
             // println!("content : {:?}", &content );
         } else {
-           // println!("instr_byte:{}", instr_byte);
+            // println!("instr_byte:{}", instr_byte);
             let num_bytes = instr_byte & 0b01111111;
-          //  println!("num_bytes u8:{}", num_bytes);
+            //  println!("num_bytes u8:{}", num_bytes);
             let num_bytes = usize::from(num_bytes);
 
-           // println!("seek usize:{}", seek);
+            // println!("seek usize:{}", seek);
             content.extend_from_slice(&delta[seek..(seek + num_bytes)]);
 
             seek += num_bytes;
@@ -273,8 +273,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
 
     fs::create_dir_all(&file_path)?;
 
-    let git_data =
-        fs::read(target_dir.to_string() + &format!("{}/{}", &sha[..2], &sha[2..]))?;
+    let git_data = fs::read(target_dir.to_string() + &format!("{}/{}", &sha[..2], &sha[2..]))?;
 
     let v_git_data = zlib_decode(&git_data[..].to_vec())?;
 
@@ -287,7 +286,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
     while tree.len() > 0 {
         let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
 
-       // println!("position: {:#?}", &pos);
+        // println!("position: {:#?}", &pos);
 
         let mode_name = &tree[..pos];
 
@@ -310,8 +309,8 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
         let mode = String::from_utf8_lossy(mode);
         let name = String::from_utf8_lossy(name);
 
-       // println!("mode: {:#?}", &mode);
-       // println!("name: {:#?}", &name);
+        // println!("mode: {:#?}", &mode);
+        // println!("name: {:#?}", &name);
         //println!("sha: {:#?}", &sha);
 
         enteries.push((mode.clone(), name.clone(), sha.clone()));
@@ -323,15 +322,15 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
             checkout_tree(
                 &entry.2,
                 &(file_path.to_owned() + &format!("/{}", entry.1)),
-                &target_dir
+                &target_dir,
             )?;
         } else {
             let blob_sha = entry.2;
 
             // println!("blob_sha: {}", &blob_sha);
 
-            let curr_dir = target_dir.to_string()
-                + &format!("{}/{}", &blob_sha[..2], &blob_sha[2..]);
+            let curr_dir =
+                target_dir.to_string() + &format!("{}/{}", &blob_sha[..2], &blob_sha[2..]);
 
             // println!("curr_dir: {}", &curr_dir);
 
@@ -347,6 +346,6 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
     }
     Ok(())
 }
-/*************************************************************************************************************** 
+/***************************************************************************************************************
  * **************************************************************************************************************
 */
