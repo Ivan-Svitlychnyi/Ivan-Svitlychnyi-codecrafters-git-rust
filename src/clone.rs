@@ -19,14 +19,14 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
     const HASH_BYTES: usize = 20;
     const TYPE_THREE_BITES_EXTRACT: u8 = 0b01110000;
     const ONE_TO_SIX_GIT_OBJECT_TYPES:usize = 7;
-    create_dirs(&target_dir)?;
+    create_dirs(target_dir)?;
     let target_dir_git_dir = target_dir.to_owned() + "/.git/objects/";
 
     //------------------------------------------------------------------------------------
-    let url_adr = url.to_owned() + &"/info/refs?service=git-upload-pack";
+    let url_adr = url.to_owned() + "/info/refs?service=git-upload-pack";
     let pack_hash = get_pack_hash(&url_adr)?;
     //----------------------------------------------------------------------------------
-    let post_url = url.to_owned() + &"/git-upload-pack";
+    let post_url = url.to_owned() + "/git-upload-pack";
 
     let data = format!("0032want {pack_hash}\n00000009done\n");
 
@@ -43,12 +43,14 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
     println!("res_data_size: {:?}", res_data_size);
 
-    let entries_bytes = res_data[16..20].try_into()?;
+    let entries_bytes = res_data.get(16..20).ok_or(anyhow!("Size data do not exist!"))?.try_into()?;
 
     //  println!("entries_bytes: {:#?}", entries_bytes);
     let num = u32::from_be_bytes(entries_bytes);
     println!("num: {:?}", num);
-    let data_bytes: Vec<u8> = res_data[HASH_BYTES..res_data_size].try_into()?;
+
+    let data_bytes: Vec<u8> = res_data.get(HASH_BYTES..res_data_size).ok_or(anyhow!("Data in indexes range do not exist!"))?.to_vec();
+
     // println!("data_bytes: {:?}", data_bytes);
     let mut objs = HashMap::new();
     let mut seek = 0;
@@ -76,6 +78,7 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
         ];
 
         if obj_type < ONE_TO_SIX_GIT_OBJECT_TYPES {
+
             let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_git_data = Vec::new();
             git_data.read_to_end(&mut v_git_data)?;
@@ -87,10 +90,6 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
             seek += git_data.total_in() as usize;
         } else {
-
-            if data_bytes[seek..].len() < HASH_BYTES{
-                return Err(anyhow!("Data length is to short"));
-            }
 
             let k = &data_bytes.get(seek..seek + HASH_BYTES).ok_or(anyhow!("Data in indexes range do not exist!"))?;
 
@@ -122,26 +121,26 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
         target_dir_git_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
 
     let git_data = fs::read(git_path)?;
-    let v_delta = zlib_decode(&git_data[..].to_vec())?;
+    let v_delta = zlib_decode(&git_data[..])?;
 
     let data = v_delta
-        .split(|b| *b == '\n' as u8)
+        .split(|b| *b == b'\n')
         .next()
         .ok_or(anyhow!("Data on next index do not exist!"))?
-        .split(|b| *b == ' ' as u8);
+        .split(|b| *b == b' ');
     let tree_sha = data.clone().last().ok_or(anyhow!("Data on last index do not exist!"))?;
     // println!("tree_sha: {:?}", &tree_sha);
 
     let tree_sha = String::from_utf8_lossy(tree_sha);
 
-    checkout_tree(&tree_sha, &target_dir, &target_dir_git_dir)?;
+    checkout_tree(&tree_sha, target_dir, &target_dir_git_dir)?;
 
     Ok(())
 }
 
 /************************************************************************************************************************ */
 fn create_dirs(target_dir: &str) -> Result<(), io::Error> {
-    fs::create_dir(&target_dir)?;
+    fs::create_dir(target_dir)?;
 
     fs::create_dir(target_dir.to_owned() + "/.git")?;
 
@@ -162,10 +161,10 @@ fn get_pack_hash(url: &str) -> Result<String> {
     //println!("body = {:#?}", body);
 
     let content = body
-        .split("\n")
+        .split('\n')
         .filter(|c| c.contains("refs/heads/master") && c.contains("003f"))
         .collect::<String>();
-    let content = content.split(" ").next().ok_or(anyhow!("Data not found"))?;
+    let content = content.split(' ').next().ok_or(anyhow!("Data not found"))?;
     if content.len() != 44 {
         return Err(anyhow!("Data is not a sha"));
     }
@@ -238,7 +237,7 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>> {
             let len_key = (instr_byte & TYPE_THREE_BITES_EXTRACT) >> 4;
             let len_int = decode_usize(len_key, &mut seek, delta)?;
 
-            content.extend_from_slice(&base.get(offset..(offset + len_int)).ok_or(anyhow!("No data in indexing area"))?);
+            content.extend_from_slice(base.get(offset..(offset + len_int)).ok_or(anyhow!("No data in indexing area"))?);
 
             // println!("content : {:?}", &content );
         } else {
@@ -246,7 +245,7 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>> {
             let num_bytes = usize::from(instr_byte);
 
             // println!("seek usize:{}", seek);
-            content.extend_from_slice(&delta.get(seek..(seek + num_bytes)).ok_or(anyhow!("No data in indexing area"))?);
+            content.extend_from_slice(delta.get(seek..(seek + num_bytes)).ok_or(anyhow!("No data in indexing area"))?);
 
             seek += num_bytes;
         }
@@ -280,24 +279,24 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
     println!("file_path: {file_path}");
     let target_dir = Rc::new(target_dir);
 
-    fs::create_dir_all(&file_path)?;
+    fs::create_dir_all(file_path)?;
 
     let git_data = fs::read(target_dir.to_string() + &format!("{}/{}", &sha[..2], &sha[2..]))?;
 
-    let v_git_data = zlib_decode(&git_data[..].to_vec())?;
+    let v_git_data = zlib_decode(&git_data[..])?;
 
     let mut enteries = Vec::new();
 
-    let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).unwrap();
+    let pos = v_git_data.iter().position(|&r| r == b'\x00').unwrap();
 
     let mut tree = v_git_data.get(pos + 1..).ok_or(anyhow!("Data not found"))?;
 
-    while tree.len() > 0 {
+    while !tree.is_empty(){
 
-        let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
+        let pos = tree.iter().position(|&r| r == b'\x00').unwrap();
         // println!("position: {:#?}", &pos);
         let mode_name = &tree[..pos];
-        let mut mode_name = mode_name.split(|&num| num == ' ' as u8);
+        let mut mode_name = mode_name.split(|&num| num == b' ');
         //println!("mode_name: {:#?}", &mode_name);
         let mode = mode_name.next().ok_or(anyhow!("Mode not found"))?;
         let name = mode_name.next().ok_or(anyhow!("Name not found"))?;
@@ -306,7 +305,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
 
         let sha = &tree.get(..HASH_BYTES).ok_or(anyhow!("No data in sha area"))?;
 
-        tree = &tree.get(HASH_BYTES..).ok_or(anyhow!("No data in data area"))?;
+        tree = tree.get(HASH_BYTES..).ok_or(anyhow!("No data in data area"))?;
 
         //println!("tree: {:#?}", &tree);
 
@@ -342,7 +341,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<()> {
             let git_data = fs::read(curr_dir)?;
             let v_git_data = zlib_decode(&git_data)?;
 
-            let pos = v_git_data.iter().position(|&r| r == '\x00' as u8).ok_or(anyhow!("Position not found"))?;
+            let pos = v_git_data.iter().position(|&r| r == b'\x00').ok_or(anyhow!("Position not found"))?;
 
             let content = &v_git_data.get(pos + 1..).ok_or(anyhow!("Elements not found"))?;
 

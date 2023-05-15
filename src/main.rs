@@ -23,7 +23,7 @@ fn main() -> Result<()> {
         }
         Commands::CatFile(read_options) => {
             // println!("read-------------------------------");
-           read_git_object(ReadBlobOptions::read(&read_options)?)?;
+           read_git_object(ReadBlobOptions::read(read_options)?)?;
         }
         Commands::HashObject(file) => {
             println!("create-------------------------------");
@@ -34,11 +34,11 @@ fn main() -> Result<()> {
         }
         Commands::LsTree(hash) => {
             //  println!("read tree-------------------------------");
-            let result = read_tree(ReadTreeOptions::read(&hash)?)?;
+            let result = read_tree(ReadTreeOptions::read(hash)?)?;
             for s in result {
                 //println!("{}", String::from_utf8(s)?);
                 stdout().write_all(s.as_slice())?;
-                stdout().write(&['\n' as u8])?;
+                stdout().write_all(&[b'\n'])?;
             }
         }
         Commands::WriteTree => {
@@ -48,12 +48,12 @@ fn main() -> Result<()> {
         Commands::CommitTree(args) => {
            // println!("commit tree-------------------------------");
          
-            print!("{}", create_commit(CommitTreeOptions::read(&args)?)?);           
+            print!("{}", create_commit(CommitTreeOptions::read(args)?)?);           
         }
         Commands::Clone(args) => {
             //  println!("clone-------------------------------");
 
-            clone_repo(CloneRepOptions::read(&args)?)?;
+            clone_repo(CloneRepOptions::read(args)?)?;
 
         } 
     }
