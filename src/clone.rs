@@ -109,13 +109,11 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
     let git_data = fs::read(git_path)?;
     let v_delta = zlib_decode(&git_data[..].to_vec())?;
 
-    let s_delta = unsafe { &String::from_utf8_unchecked(v_delta.to_vec()) };
-
-    let data = s_delta.split("\n").next().unwrap().split(" ");
-
+   // let s_delta = unsafe { &String::from_utf8_unchecked(v_delta.to_vec()) };
+    let data = v_delta.split(|b| *b == '\n' as u8).next().unwrap().split(|b| *b == ' ' as u8);
     let tree_sha = data.clone().nth(data.count() - 1).unwrap();
    // println!("tree_sha: {:?}", &tree_sha);
-
+    let tree_sha = String::from_utf8_lossy(tree_sha);
     checkout_tree(
         &tree_sha,
         &target_dir,
@@ -191,32 +189,6 @@ fn post_to_git_data(url: &str, data: &str) -> Result<bytes::Bytes> {
     let res_data = res_send.bytes()?;
 
     Ok(res_data)
-}
-
-/********************************************************************************************************************** */
-pub fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_dir: &str) -> Result<String, io::Error> {
-
-    let mut obj_write_data: Vec<u8> = Vec::new();
-    obj_write_data.put(data_type[..].as_bytes());
-    obj_write_data.put_u8(' ' as u8);
-    obj_write_data.put(content.len().to_string().as_bytes());
-    obj_write_data.put_u8('\0' as u8);
-    obj_write_data.put(content.as_slice());
-    //-----------------------
-    let hex_result = make_hash(&obj_write_data)?;
-    // //  println!("hex_result: {:?}", hex_result);
-    let compressed = zlib_encode(&obj_write_data)?;
-    
-    let f_path = target_dir.to_owned() + &format!("{}/", &hex_result[..2]);
-
-    
-
-    fs::create_dir_all(&f_path)?;
-    let f_path = f_path + &hex_result[2..];
-    //println!(" f_path: {:?}", &f_path);
-    fs::write(f_path, &compressed)?;
-
-    Ok(hex_result)
 }
 
 //************************************************************************************************************************* */

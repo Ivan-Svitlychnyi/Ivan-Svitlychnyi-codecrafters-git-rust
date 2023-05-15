@@ -4,7 +4,7 @@ use git_starter_rust::cli::{Cli, Commands, CreateBlobOptions, ReadBlobOptions, R
 use git_starter_rust::*;
 //use std::env;
 use clap::Parser;
-use git_starter_rust::clone::{clone_repo, write_git_object_target_dir};
+use git_starter_rust::clone::{clone_repo};
 use std::fs;
 use std::io::{stdout, Write};
 use std::path::PathBuf;

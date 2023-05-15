@@ -74,27 +74,25 @@ pub fn read_git_object(hash: &str) -> Result<()> {
     Ok(())
 }
 /************************************************************************************************************* */
-pub fn write_git_object(file_data: &Vec<u8>, file_type: &str) -> Result<String, io::Error> {
-    /******************************************** */
-    let mut store: Vec<u8> = Vec::new();
-    store.put(file_type[..].as_bytes());
-    store.put_u8(' ' as u8);
-    store.put(file_data.len().to_string().as_bytes());
-    store.put_u8('\0' as u8);
-    store.put(file_data.as_slice());
-    /******************************************* */
-    //println!("store_vec = {:#?}", &store_vec);
+pub fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_dir: &str) -> Result<String, io::Error> {
 
-    let compressed = zlib_encode(&store)?;
+    let mut obj_write_data: Vec<u8> = Vec::new();
+    obj_write_data.put(data_type[..].as_bytes());
+    obj_write_data.put_u8(' ' as u8);
+    obj_write_data.put(content.len().to_string().as_bytes());
+    obj_write_data.put_u8('\0' as u8);
+    obj_write_data.put(content.as_slice());
+    //-----------------------
+    let hex_result = make_hash(&obj_write_data)?;
+    // //  println!("hex_result: {:?}", hex_result);
+    let compressed = zlib_encode(&obj_write_data)?;
+    
+    let f_path = target_dir.to_owned() + &format!("{}/", &hex_result[..2]);
 
-    let hex_result = make_hash(&store)?;
-
-    let sub_dir_path = format!(".git/objects/{}/", &hex_result[..2]);
-
-    let full_path = format!("{sub_dir_path}{}", &hex_result[2..]);
-
-    fs::create_dir_all(sub_dir_path)?;
-    fs::write(full_path, compressed)?;
+    fs::create_dir_all(&f_path)?;
+    let f_path = f_path + &hex_result[2..];
+    //println!(" f_path: {:?}", &f_path);
+    fs::write(f_path, &compressed)?;
 
     Ok(hex_result)
 }
@@ -158,7 +156,7 @@ pub fn write_tree(file_path: &PathBuf) -> Result<String> {
         {
             mode = "100644";
             let file_data = fs::read(&dir)?;
-            sha_file = hex::decode(write_git_object(&file_data, "blob")?)?;
+            sha_file = hex::decode(write_git_object_target_dir("blob", &file_data,".git/objects/" )?)?;
         } else {
             return Err(anyhow!("This is not relevant path"));
         }
@@ -173,7 +171,7 @@ pub fn write_tree(file_path: &PathBuf) -> Result<String> {
         dir_sha_out.extend_from_slice(&sha_file);
         sha_out.extend_from_slice(&dir_sha_out);
     }
-    let res = write_git_object(&sha_out, "tree")?;
+    let res = write_git_object_target_dir("tree", &sha_out, ".git/objects/")?;
 
     Ok(res)
 }
@@ -184,10 +182,9 @@ pub fn create_commit(
 ) -> Result<String, io::Error> {
     // let (tree_sha, parent_commit_sha, data) = (hash, print, message);
     let user_metadata = "author Admin <admin@example.com> 1652217488 +0300\ncommitter Name <committer@example.com> 1652224514 +0300".to_string();
-    let content =
-        format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n");
+    let content = format!("tree {tree_sha}\nparent {parent_commit_sha}\n{user_metadata}\n\n{data}\n");
     //println!("content: {:?}", &content);
-    let sha = write_git_object(&mut content.into_bytes(), "commit")?;
+    let sha = write_git_object_target_dir("commit", &mut content.into_bytes(),".git/objects/")?;
 
     Ok(sha)
 }
