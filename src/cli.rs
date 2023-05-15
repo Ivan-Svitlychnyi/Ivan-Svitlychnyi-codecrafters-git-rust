@@ -82,6 +82,7 @@ impl CreateBlobOptions {
     pub fn read(&self) -> Result<&str, ArgsReadError> {
         if let Some(file_name) = self.file_name.as_deref() {
             let path = Path::new(file_name);
+            println!("path: {:?}", path);
             if path.is_file(){
             return Ok(&file_name);
             }
@@ -100,8 +101,7 @@ pub struct ReadTreeOptions {
 
 impl ReadTreeOptions {
     pub fn read(&self) -> Result<&str, ArgsReadError> {
-        if let Some(tree_sha) = self.tree_sha.as_deref() {
-            
+        if let Some(tree_sha) = self.tree_sha.as_deref() {          
             if tree_sha.len() == 40{
             return Ok(&tree_sha);
             }
