@@ -185,18 +185,14 @@ impl Error for ArgsReadError {}
 impl ArgsReadError {
     fn message(&self) -> &str {
         match self {
-            Self::ReadBlobCommandError => "ERROR: Read a blob object: blob sha not found",
-            Self::CreateBlobCommandError => "ERROR: Create a blob objec: file name not found",
-            Self::ReadTreeCommandError => "ERROR: Read a tree object: tree sha not found",
-            Self::CommitTreeCommandErrorArgOne => "ERROR: Commit a tree object: tree sha not found",
-            Self::CommitTreeCommandErrorArgTwo => {
-                "ERROR: Commit a tree object: commit sha not found"
-            }
-            Self::CommitTreeCommandErrorArgThree => {
-                "ERROR: Commit a tree object: message not found"
-            }
-            Self::CloneRepCommandErrorArgOne => "ERROR: Clone a repository: url not found",
-            Self::CloneRepCommandErrorArgTwo => "ERROR: Clone a repository: dir not found",
+            Self::ReadBlobCommandError => "Read a blob object: blob sha not found",
+            Self::CreateBlobCommandError => "Create a blob objec: file name not found",
+            Self::ReadTreeCommandError => "Read a tree object: tree sha not found",
+            Self::CommitTreeCommandErrorArgOne => "Commit a tree object: tree sha not found",
+            Self::CommitTreeCommandErrorArgTwo => "Commit a tree object: commit sha not found",
+            Self::CommitTreeCommandErrorArgThree => "Commit a tree object: message not found",
+            Self::CloneRepCommandErrorArgOne => "Clone a repository: url not found",
+            Self::CloneRepCommandErrorArgTwo => "Clone a repository: dir not found",
         }
     }
 }

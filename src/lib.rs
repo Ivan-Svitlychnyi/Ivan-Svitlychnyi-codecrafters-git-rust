@@ -11,8 +11,9 @@ use std::fs;
 use std::io;
 use std::io::prelude::*;
 use std::io::stdout;
+use std::path::PathBuf;
 use std::str;
-use std::str::FromStr;
+//use std::str::FromStr;
 
 pub mod cli;
 pub mod clone;
@@ -134,7 +135,7 @@ pub fn read_tree(file_path: &str) -> Result<Vec<Vec<u8>>> {
     return Ok(result);
 }
 /******************************************************************************************************************* */
-pub fn write_tree(file_path: &str) -> Result<String> {
+pub fn write_tree(file_path: &PathBuf) -> Result<String> {
     // let mut sha_out: String = "".to_string();
     let mut sha_out: Vec<u8> = Vec::new();
     let mut entries = fs::read_dir(file_path)?
@@ -147,17 +148,16 @@ pub fn write_tree(file_path: &str) -> Result<String> {
     for dir in entries {
         #[allow(unused_assignments)]
         let mut mode = "";
-        let path_name = dir.to_str().unwrap();
         #[allow(unused_assignments)]
         let mut sha_file = Vec::new();
         if dir.is_dir() {
             mode = "40000";
-            sha_file = hex::decode(write_tree(&String::from_str(path_name)?)?)?;
+            sha_file = hex::decode(write_tree(&dir)?)?;
         } else if dir.is_file()
         /*if dir.is_file()*/
         {
             mode = "100644";
-            let file_data = fs::read(&path_name)?;
+            let file_data = fs::read(&dir)?;
             sha_file = hex::decode(write_git_object(&file_data, "blob")?)?;
         } else {
             return Err(anyhow!("This is not relevant path"));
@@ -166,7 +166,9 @@ pub fn write_tree(file_path: &str) -> Result<String> {
         let mut dir_sha_out: Vec<u8> = Vec::new();
         dir_sha_out.extend_from_slice(&mode.as_bytes());
         dir_sha_out.push(' ' as u8);
-        dir_sha_out.extend_from_slice(&dir.file_name().unwrap().to_str().unwrap().as_bytes());
+        dir_sha_out.extend_from_slice(&dir.file_name().ok_or(anyhow!("file name is not valid"))?
+        .to_str().ok_or(anyhow!("file name did not convert to str"))?
+        .as_bytes());
         dir_sha_out.push('\x00' as u8);
         dir_sha_out.extend_from_slice(&sha_file);
         sha_out.extend_from_slice(&dir_sha_out);

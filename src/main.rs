@@ -7,6 +7,7 @@ use clap::Parser;
 use git_starter_rust::clone::clone_repo;
 use std::fs;
 use std::io::{stdout, Write};
+use std::path::PathBuf;
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
@@ -40,7 +41,7 @@ fn main() -> Result<()> {
             }
         }
         Commands::WriteTree => {
-            let sha1_out = write_tree(&".".to_string())?;
+            let sha1_out = write_tree(&PathBuf::from("."))?;
             print!("{}", sha1_out);
         }
         Commands::CommitTree(args) => {
