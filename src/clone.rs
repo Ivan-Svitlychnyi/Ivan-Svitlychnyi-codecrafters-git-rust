@@ -126,11 +126,13 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
     let data = v_delta
         .split(|b| *b == '\n' as u8)
         .next()
-        .unwrap()
+        .ok_or(anyhow!("Data on next index do not exist!"))?
         .split(|b| *b == ' ' as u8);
-    let tree_sha = data.clone().last().unwrap();
+    let tree_sha = data.clone().last().ok_or(anyhow!("Data on last index do not exist!"))?;
     // println!("tree_sha: {:?}", &tree_sha);
+
     let tree_sha = String::from_utf8_lossy(tree_sha);
+
     checkout_tree(&tree_sha, &target_dir, &target_dir_git_dir)?;
 
     Ok(())
