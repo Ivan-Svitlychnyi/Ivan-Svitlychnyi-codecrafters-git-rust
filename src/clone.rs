@@ -196,7 +196,7 @@ fn post_to_git_data(url: &str, data: &str) -> Result<bytes::Bytes> {
 }
 
 /********************************************************************************************************************** */
-fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_dir: &str) -> Result<String, io::Error> {
+pub fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_dir: &str) -> Result<String, io::Error> {
 
     let mut obj_write_data: Vec<u8> = Vec::new();
     obj_write_data.put(data_type[..].as_bytes());
@@ -204,10 +204,6 @@ fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_dir: &
     obj_write_data.put(content.len().to_string().as_bytes());
     obj_write_data.put_u8('\0' as u8);
     obj_write_data.put(content.as_slice());
-
-   // let mut obj_write_data = format!("{data_type} {}\0", content.len());
-
-   // obj_write_data += &content;
     //-----------------------
     let hex_result = make_hash(&obj_write_data)?;
     // //  println!("hex_result: {:?}", hex_result);

@@ -4,7 +4,7 @@ use git_starter_rust::cli::{Cli, Commands, CreateBlobOptions, ReadBlobOptions, R
 use git_starter_rust::*;
 //use std::env;
 use clap::Parser;
-use git_starter_rust::clone::clone_repo;
+use git_starter_rust::clone::{clone_repo, write_git_object_target_dir};
 use std::fs;
 use std::io::{stdout, Write};
 use std::path::PathBuf;
@@ -28,7 +28,8 @@ fn main() -> Result<()> {
         Commands::HashObject(file) => {
             println!("create-------------------------------");
             let file_data = fs::read(CreateBlobOptions::read(file)?)?;
-            let sha1_out = write_git_object(&file_data, "blob")?;
+            let sha1_out = write_git_object_target_dir("blob", &file_data,"")?;
+           // let sha1_out = write_git_object(&file_data, "blob")?;
             println!("hash-object in: {}", sha1_out);
         }
         Commands::LsTree(hash) => {
