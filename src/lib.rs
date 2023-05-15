@@ -61,7 +61,7 @@ pub fn read_git_object(hash: &str) -> Result<()> {
     let git_data = zlib_decode(&fs::read(full_path)?)?;
     // println!("git_data = {:#?}", &git_data);
     let git_data: Vec<&[u8]> = git_data[..].split(|c| *c == '/' as u8).collect();
-    let git_data = git_data[git_data.len() - 1];
+    let git_data = git_data.last().unwrap();
     let data_pos = git_data
         .iter()
         .position(|&r| r == '\x00' as u8)

@@ -17,7 +17,8 @@ use std::str;
 pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
     const HASH_BYTES: usize = 20;
-   // const type: bytes = 000100010010;
+    const TYPE_THREE_BITES_EXTRACT: u8 = 0b01110000;
+    const ONE_TO_SIX_GIT_OBJECT_TYPES:usize = 7;
     create_dirs(&target_dir)?;
     let target_dir_git_dir = target_dir.to_owned() + "/.git/objects/";
 
@@ -35,7 +36,7 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
     let res_data_size = res_data.len();
 
-    if res_data_size <= HASH_BYTES{
+    if res_data_size < HASH_BYTES {
         return Err(anyhow!("Data length is to short. Size: {:?}", res_data_size));
     }
     let res_data_size = res_data_size - HASH_BYTES;
@@ -54,9 +55,9 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
     for _ in 0..num {
    
         let first = data_bytes[seek];
-        println!("first: {:?}", first);
-        let mut obj_type: usize = ((first & 112) >> 4).into();
-        println!("obj_type: {:?}", obj_type);
+       // println!("first: {:?}", first);
+        let mut obj_type: usize = ((first & TYPE_THREE_BITES_EXTRACT) >> 4).into();
+       // println!("obj_type: {:?}", obj_type);
         //  println!("obj_type: {:?}", obj_type);
         while data_bytes[seek] > 128 {
             seek += 1;
@@ -74,7 +75,7 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
             "refs_delta",
         ];
 
-        if obj_type < 7 {
+        if obj_type < ONE_TO_SIX_GIT_OBJECT_TYPES {
             let mut git_data = ZlibDecoder::new(&data_bytes[seek..]);
             let mut v_git_data = Vec::new();
             git_data.read_to_end(&mut v_git_data)?;
@@ -86,7 +87,11 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
 
             seek += git_data.total_in() as usize;
         } else {
+            if data_bytes[seek..].len() < HASH_BYTES{
+                return Err(anyhow!("Data length is to short"));
+            }
             let k = &data_bytes[seek..seek + HASH_BYTES];
+
             // println!("k data: {:#?}", k);
             let k = hex::encode(k);
             //  println!("k: {:#?}", k);
@@ -98,7 +103,7 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
             let mut v_delta = Vec::new();
             delta.read_to_end(&mut v_delta)?;
 
-            let content = identify(&v_delta, &base)?;
+            let content = undeltified(&v_delta, &base)?;
             obj_type = elem_num;
             //println!("content else: {:#?}", &content);
             // println!("obj_type else: {:#?}", &obj_type);
@@ -110,22 +115,21 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
             seek += delta.total_in() as usize;
         }
     }
-    let git_path =
-        target_dir_git_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
+    // let git_path =
+    //     target_dir_git_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
 
-    let git_data = fs::read(git_path)?;
-    let v_delta = zlib_decode(&git_data[..].to_vec())?;
+    // let git_data = fs::read(git_path)?;
+    // let v_delta = zlib_decode(&git_data[..].to_vec())?;
 
-    // let s_delta = unsafe { &String::from_utf8_unchecked(v_delta.to_vec()) };
-    let data = v_delta
-        .split(|b| *b == '\n' as u8)
-        .next()
-        .unwrap()
-        .split(|b| *b == ' ' as u8);
-    let tree_sha = data.clone().nth(data.count() - 1).unwrap();
-    // println!("tree_sha: {:?}", &tree_sha);
-    let tree_sha = String::from_utf8_lossy(tree_sha);
-    checkout_tree(&tree_sha, &target_dir, &target_dir_git_dir)?;
+    // let data = v_delta
+    //     .split(|b| *b == '\n' as u8)
+    //     .next()
+    //     .unwrap()
+    //     .split(|b| *b == ' ' as u8);
+    // let tree_sha = data.clone().last().unwrap();
+    // // println!("tree_sha: {:?}", &tree_sha);
+    // let tree_sha = String::from_utf8_lossy(tree_sha);
+    // checkout_tree(&tree_sha, &target_dir, &target_dir_git_dir)?;
 
     Ok(())
 }
@@ -197,7 +201,11 @@ fn post_to_git_data(url: &str, data: &str) -> Result<bytes::Bytes> {
 }
 
 //************************************************************************************************************************* */
-fn identify(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
+fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
+
+    const TYPE_THREE_BITES_EXTRACT: u8 = 0b01110000;
+    const  OFFSET_FOUR_BITES_EXTRACT: u8 = 0b00001111;
+    const  SIZE_SEVEN_BITES_EXTRACT: u8 = 0b01111111;
     let mut seek: usize = 0;
     // println!("delta: {:#?}", delta);
     while delta[seek] > 128 {
@@ -219,7 +227,7 @@ fn identify(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
         //  println!(" instr_byte: {:?}", &instr_byte);
 
         if instr_byte >= 128 {
-            let offset_key = instr_byte & 0b00001111;
+            let offset_key = instr_byte &  OFFSET_FOUR_BITES_EXTRACT;
 
             let mut offset_bytes: [u8; 8] = [0; 8];
 
@@ -238,7 +246,7 @@ fn identify(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
             let offset = usize::from_le_bytes(offset_bytes);
             // println!("offset: {:?}", &offset);
 
-            let len_key = (instr_byte & 0b01110000) >> 4;
+            let len_key = (instr_byte & TYPE_THREE_BITES_EXTRACT) >> 4;
 
             let mut len_bytes: [u8; 8] = [0; 8];
             for n in 0..8 {
@@ -260,7 +268,7 @@ fn identify(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
             // println!("content : {:?}", &content );
         } else {
             // println!("instr_byte:{}", instr_byte);
-            let num_bytes = instr_byte & 0b01111111;
+            let num_bytes = instr_byte & SIZE_SEVEN_BITES_EXTRACT;
             //  println!("num_bytes u8:{}", num_bytes);
             let num_bytes = usize::from(num_bytes);
 
@@ -291,16 +299,12 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
     let mut tree = &v_git_data[pos + 1..];
 
     while tree.len() > 0 {
+
         let pos = tree.iter().position(|&r| r == '\x00' as u8).unwrap();
-
         // println!("position: {:#?}", &pos);
-
         let mode_name = &tree[..pos];
-
         let mut mode_name = mode_name.split(|&num| num == ' ' as u8);
-
         //println!("mode_name: {:#?}", &mode_name);
-
         let mode = mode_name.next().unwrap();
         let name = mode_name.next().unwrap();
 
