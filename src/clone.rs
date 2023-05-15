@@ -149,21 +149,12 @@ fn get_pack_hash(url: &str) -> Result<String> {
     let body = reqwest::blocking::get(url)?.text()?;
 
     println!("body = {:#?}", body);
-    let content = body.split("\n");
-
-    let mut pack_hash = String::new();
-
-    for c in content.clone() {
-        if c.contains("refs/heads/master") && c.contains("003f") {
-            let tup = c.split(" ").enumerate();
-
-            for (num, value) in tup {
-                if num == 0 {
-                    pack_hash = value[4..].to_string();
-                }
-            }
-        }
-    }
+     
+    let content = body.split("\n").
+    filter(|c| c.contains("refs/heads/master") && c.contains("003f")).collect::<String>();
+    let mut content = content.split(" ");
+    let content = content.nth(0).ok_or(anyhow!("Data not found"))?;
+    let pack_hash = String::from(&content[4..]);
 
     println!("pack_hash = {}", pack_hash);
     Ok(pack_hash)
