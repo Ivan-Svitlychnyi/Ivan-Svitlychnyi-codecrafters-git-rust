@@ -92,7 +92,7 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
                 return Err(anyhow!("Data length is to short"));
             }
 
-            let k = &data_bytes[seek..seek + HASH_BYTES];
+            let k = &data_bytes.get(seek..seek + HASH_BYTES).ok_or(anyhow!("Data in indexes range do not exist!"))?;
 
             // println!("k data: {:#?}", k);
             let k = hex::encode(k);
@@ -102,6 +102,7 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
             seek += HASH_BYTES;
 
             let mut delta = ZlibDecoder::new(&data_bytes[seek..]);
+
             let mut v_delta = Vec::new();
             delta.read_to_end(&mut v_delta)?;
 
@@ -113,7 +114,6 @@ pub fn clone_repo((url, target_dir): (&str, &str)) -> Result<()> {
                 write_git_object_target_dir(data_type[obj_type], &content, &target_dir_git_dir)?;
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content, obj_type));
-
             seek += delta.total_in() as usize;
            
         }
