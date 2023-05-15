@@ -28,7 +28,7 @@ fn main() -> Result<()> {
         Commands::HashObject(file) => {
             println!("create-------------------------------");
             let file_data = fs::read(CreateBlobOptions::read(file)?)?;
-            let sha1_out = write_git_object_target_dir("blob", &file_data,"")?;
+            let sha1_out = write_git_object_target_dir("blob", &file_data,".git/objects/")?;
            // let sha1_out = write_git_object(&file_data, "blob")?;
             println!("hash-object in: {}", sha1_out);
         }

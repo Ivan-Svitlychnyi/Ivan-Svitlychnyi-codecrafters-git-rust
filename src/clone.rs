@@ -74,8 +74,8 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
         
             //#[allow(unsafe_code)]
             //let s_git_data = unsafe { String::from_utf8_unchecked(v_git_data) };
-     
-            let hex_result = write_git_object_target_dir(data_type[obj_type], &v_git_data, &target_dir)?;
+            let dir =  target_dir.to_owned() + "/.git/objects/";
+            let hex_result = write_git_object_target_dir(data_type[obj_type], &v_git_data, &dir)?;
 
             objs.insert(hex_result, (v_git_data, obj_type));
 
@@ -97,8 +97,8 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
             obj_type = elem_num;
             //println!("content else: {:#?}", &content);
             // println!("obj_type else: {:#?}", &obj_type);
-      
-            let hex_result = write_git_object_target_dir(data_type[obj_type], &content, &target_dir)?;
+            let dir =  target_dir.to_owned() + "/.git/objects/";
+            let hex_result = write_git_object_target_dir(data_type[obj_type], &content, &dir)?;
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content, obj_type));
 
@@ -207,10 +207,11 @@ pub fn write_git_object_target_dir(data_type: &str, content: &Vec<u8>, target_di
     //-----------------------
     let hex_result = make_hash(&obj_write_data)?;
     // //  println!("hex_result: {:?}", hex_result);
-
-    let f_path = target_dir.to_owned() + &format!("/.git/objects/{}/", &hex_result[..2]);
-
     let compressed = zlib_encode(&obj_write_data)?;
+    
+    let f_path = target_dir.to_owned() + &format!("{}/", &hex_result[..2]);
+
+    
 
     fs::create_dir_all(&f_path)?;
     let f_path = f_path + &hex_result[2..];
