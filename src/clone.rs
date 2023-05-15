@@ -19,7 +19,7 @@ use crate::*;
 pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
     
     create_dirs(&target_dir)?;
-    let target_dir =  target_dir.to_owned() + "/.git/objects/";
+    let target_dir_git_dir =  target_dir.to_owned() + "/.git/objects/";
 
     //------------------------------------------------------------------------------------
     let url_adr = url.to_owned() + &"/info/refs?service=git-upload-pack";
@@ -75,7 +75,7 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
             git_data.read_to_end(&mut v_git_data)?;
     
             
-            let hex_result = write_git_object_target_dir(data_type[obj_type], &v_git_data, &target_dir)?;
+            let hex_result = write_git_object_target_dir(data_type[obj_type], &v_git_data, &target_dir_git_dir)?;
 
             objs.insert(hex_result, (v_git_data, obj_type));
 
@@ -97,14 +97,14 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
             obj_type = elem_num;
             //println!("content else: {:#?}", &content);
             // println!("obj_type else: {:#?}", &obj_type);
-            let hex_result = write_git_object_target_dir(data_type[obj_type], &content, &target_dir)?;
+            let hex_result = write_git_object_target_dir(data_type[obj_type], &content, &target_dir_git_dir)?;
             // println!("objs k else: {:#?}", hex_result);
             objs.insert(hex_result, (content, obj_type));
 
             seek += delta.total_in() as usize;
         }
     }
-    let git_path = target_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
+    let git_path = target_dir_git_dir.to_owned() + &format!("{}/{}", &pack_hash[..2], &pack_hash[2..]);
 
     let git_data = fs::read(git_path)?;
     let v_delta = zlib_decode(&git_data[..].to_vec())?;
@@ -119,7 +119,7 @@ pub fn clone_repo((url, target_dir):(&str, &str)) -> Result<()> {
     checkout_tree(
         &tree_sha,
         &target_dir,
-        &target_dir,
+        &target_dir_git_dir,
     )?;
 
     Ok(())
@@ -303,7 +303,7 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
     fs::create_dir_all(&file_path)?;
 
     let git_data =
-        fs::read(target_dir.to_string() + &format!("{}/{}", &sha[..2], &sha[2..]))?;
+        fs::read(target_dir.to_string() + &format!("/.git/objects/{}/{}", &sha[..2], &sha[2..]))?;
 
     let v_git_data = zlib_decode(&git_data[..].to_vec())?;
 
@@ -359,7 +359,8 @@ fn checkout_tree(sha: &str, file_path: &str, target_dir: &str) -> Result<(), std
 
             // println!("blob_sha: {}", &blob_sha);
 
-            let curr_dir = target_dir.to_string() + &format!("{}/{}", &blob_sha[..2], &blob_sha[2..]);
+            let curr_dir = target_dir.to_string()
+                + &format!("{}/{}", &blob_sha[..2], &blob_sha[2..]);
 
             // println!("curr_dir: {}", &curr_dir);
 
