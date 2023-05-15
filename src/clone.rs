@@ -205,7 +205,6 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
 
     const TYPE_THREE_BITES_EXTRACT: u8 = 0b01110000;
     const  OFFSET_FOUR_BITES_EXTRACT: u8 = 0b00001111;
-    const  SIZE_SEVEN_BITES_EXTRACT: u8 = 0b01111111;
     let mut seek: usize = 0;
     // println!("delta: {:#?}", delta);
     while delta[seek] > 128 {
@@ -267,10 +266,8 @@ fn undeltified(delta: &[u8], base: &[u8]) -> Result<Vec<u8>, io::Error> {
 
             // println!("content : {:?}", &content );
         } else {
-            // println!("instr_byte:{}", instr_byte);
-            let num_bytes = instr_byte & SIZE_SEVEN_BITES_EXTRACT;
             //  println!("num_bytes u8:{}", num_bytes);
-            let num_bytes = usize::from(num_bytes);
+            let num_bytes = usize::from(instr_byte);
 
             // println!("seek usize:{}", seek);
             content.extend_from_slice(&delta[seek..(seek + num_bytes)]);
